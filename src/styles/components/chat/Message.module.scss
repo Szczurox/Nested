@@ -1,0 +1,40 @@
+.message {
+  display: block;
+  flex: 0.9;
+  align-items: center;
+  padding: 10px;
+  margin: 12px;
+  padding-left: 10px;
+  color: white;
+  background-color: #363a3f;
+  &:hover {
+    background-color: #32363b;
+  }
+
+  .message_profilePicture {
+    float: left;
+    margin-right: 15px;
+  }
+
+  .message_info {
+    margin-left: 20px;
+    margin-right: 20px;
+    p {
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      word-break: break-word;
+      -ms-hyphens: auto;
+      -moz-hyphens: auto;
+      -webkit-hyphens: auto;
+      hyphens: auto;
+      margin-left: 60px;
+    }
+  }
+
+  .message_timestamp {
+    color: gray;
+    font-size: 12px;
+    margin-left: 10px;
+  }
+}
