@@ -1,0 +1,37 @@
+$connected: #4fb185;
+
+.voice {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: grey;
+  padding: 10px;
+  border-top: 1px solid grey;
+
+  .info {
+    flex: 1;
+    padding: 10px;
+    h3 {
+      color: $connected;
+    }
+    p {
+      font-size: smaller;
+    }
+  }
+
+  .connection_icon {
+    color: $connected;
+  }
+
+  .icons {
+    .icon {
+      margin: 10px;
+      cursor: pointer;
+      &:hover {
+        color: white;
+        background-color: #3c3f42;
+        border-radius: 8px;
+      }
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import React from "react";
-import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import styles from "../../../styles/components/chat/navbar/NavbarHeader.module.scss";
 
 export type NavbarHeaderVariant = "server" | "dms";
 
@@ -16,8 +16,8 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
   if (variant === "server") {
     body = (
       <>
-        <ExpandMoreIcon />
         <h4>Text Channels</h4>
+        <ExpandMoreIcon />
       </>
     );
   } else {
@@ -27,5 +27,5 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
       </div>
     );
   }
-  return <div className="sidebar__header">{body}</div>;
+  return <div className={styles.sidebar_header}>{body}</div>;
 };

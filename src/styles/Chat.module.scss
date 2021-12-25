@@ -1,77 +1,80 @@
-.chat {
+.app {
   display: flex;
-  flex-direction: column;
-  flex: 1;
-  background-color: #363a3f;
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-
-  .chat_inputButton {
-    display: none;
-  }
-
-  .chat_input {
-    color: lightgrey;
+  .chat {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-left: 15px;
-    padding-right: 15px;
-    border-radius: 5px;
-    padding-bottom: 6px;
-    margin: 20px;
-    margin-bottom: 30px;
-    margin-top: 0px;
-    border-top: 1px solid gray;
-    background-color: #474b53;
-
-    form {
-      overflow-y: auto;
-      overflow-x: hidden;
-      flex: 1;
-
-      ::-webkit-scrollbar-track {
-        background: none;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: #2f3135;
-      }
-
-      textarea {
-        white-space: pre-wrap;
-        width: 95%;
-        resize: none;
-        padding: 15px;
-        padding-top: 10px;
-        padding-bottom: 4px;
-        border: none;
-        outline-width: 0;
-        color: white;
-        background: transparent;
-        font-size: large;
-        line-height: 20px;
-        overflow-y: auto;
-        overflow-x: hidden;
-      }
-    }
-  }
-
-  .chat_inputIcons {
-    margin-top: 5px;
-  }
-
-  svg:hover {
-    color: white;
-  }
-
-  .chat_messages {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    flex-direction: column;
     flex: 1;
     background-color: #363a3f;
+    height: 100vh;
     overflow-y: auto;
     overflow-x: hidden;
+
+    .chat_inputButton {
+      display: none;
+    }
+
+    .chat_input {
+      color: lightgrey;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-left: 15px;
+      padding-right: 15px;
+      border-radius: 5px;
+      padding-bottom: 6px;
+      margin: 20px;
+      margin-bottom: 30px;
+      margin-top: 0px;
+      border-top: 1px solid gray;
+      background-color: #474b53;
+
+      form {
+        overflow-y: auto;
+        overflow-x: hidden;
+        flex: 1;
+
+        ::-webkit-scrollbar-track {
+          background: none;
+        }
+
+        ::-webkit-scrollbar-thumb {
+          background: #2f3135;
+        }
+
+        textarea {
+          white-space: pre-wrap;
+          width: 95%;
+          resize: none;
+          padding: 15px;
+          padding-top: 10px;
+          padding-bottom: 4px;
+          border: none;
+          outline-width: 0;
+          color: white;
+          background: transparent;
+          font-size: large;
+          line-height: 20px;
+          overflow-y: auto;
+          overflow-x: hidden;
+        }
+      }
+    }
+
+    .chat_inputIcons {
+      margin-top: 5px;
+    }
+
+    svg:hover {
+      color: white;
+    }
+
+    .chat_messages {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      flex: 1;
+      background-color: #363a3f;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
   }
 }

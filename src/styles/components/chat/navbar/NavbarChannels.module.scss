@@ -1,0 +1,13 @@
+.navbar_channels {
+  padding: 0px;
+  margin: 0px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  flex: 1;
+  overflow-y: none;
+  overflow-x: auto;
+
+  ::-webkit-scrollbar {
+    display: none;
+  }
+}

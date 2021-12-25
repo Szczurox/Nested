@@ -2,6 +2,8 @@ import React from "react";
 import { NavbarHeader } from "./navbar/NavbarHeader";
 import { NavbarVoice } from "./navbar/NavbarVoice";
 import { NavbarProfile } from "./navbar/NavbarProfile";
+import styles from "../../styles/components/chat/Navbar.module.scss";
+import { NavbarChannels } from "./navbar/NavbarChannels";
 
 export type NavbarVariant = "server" | "dms";
 
@@ -14,8 +16,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   variant = "server",
 }) => {
   return (
-    <div className="sidebar">
+    <div className={styles.navbar}>
       <NavbarHeader variant={variant === "server" ? "server" : "dms"} />
+      <NavbarChannels />
       <NavbarVoice />
       <NavbarProfile />
     </div>

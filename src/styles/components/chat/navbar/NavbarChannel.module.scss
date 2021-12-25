@@ -1,0 +1,48 @@
+.channel {
+  h4 {
+    display: flex;
+    padding-left: 15px;
+    align-items: center;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+
+  .channel_name {
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+    width: 80%;
+  }
+
+  .hash {
+    font-size: 25px;
+    padding: 8px;
+  }
+}
+
+.inactive {
+  &:hover {
+    h4 {
+      color: white;
+      background-color: #35373b;
+    }
+  }
+
+  h4 {
+    background-color: #2f3135;
+    color: gray;
+    cursor: pointer;
+  }
+}
+
+.active {
+  h4 {
+    color: white;
+    background-color: #3c3e42;
+    cursor: pointer;
+  }
+}

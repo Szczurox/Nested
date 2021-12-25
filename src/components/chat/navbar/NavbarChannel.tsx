@@ -1,22 +1,30 @@
 import React, { useState } from "react";
+import styles from "../../../styles/components/chat/navbar/NavbarChannel.module.scss";
 
-interface NavbarChannelProps {}
+interface NavbarChannelProps {
+  name: String;
+}
 
-export const NavbarChannel: React.FC<NavbarChannelProps> = ({}) => {
+export const NavbarChannel: React.FC<NavbarChannelProps> = ({ name }) => {
   const [isActive, setActive] = useState(true);
 
   const handleToggle = () => {
-    isActive == !isActive;
+    setActive(!isActive);
+    console.log(isActive);
   };
   return (
     <div
-      className={!isActive ? "sidebarChannel" : "sidebarChannel-active"}
+      className={
+        isActive
+          ? `${styles.channel} ${styles.active}`
+          : `${styles.channel} ${styles.inactive}`
+      }
       id="ass"
       onClick={handleToggle}
     >
       <h4>
-        <span className="sidebarChannel__hash">#</span>
-        <div className="sidebarChannel__channelName">dupa123</div>
+        <span className={styles.hash}>#</span>
+        <div className={styles.channel_name}>{name}</div>
       </h4>
     </div>
   );
