@@ -31,7 +31,6 @@ export const Login: React.FC<{}> = ({}) => {
     >
       <motion.div className={styles.center} variants={fadeInUp}>
         <h1>Login</h1>
-        <p>yori://mum.Tartle.cum</p>
         <Formik
           initialValues={{ usernameOrEmail: "", password: "" }}
           onSubmit={async (values) => {
