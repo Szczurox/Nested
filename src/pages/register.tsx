@@ -3,8 +3,34 @@ import Link from "next/link";
 import { Formik, Field, Form } from "formik";
 import styles from "../styles/Auth.module.scss";
 import { motion, Variants } from "framer-motion";
+import { useUser } from "context/userContext";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import * as Yup from "yup";
+
+const SignupSchema = Yup.object().shape({
+  username: Yup.string()
+    .min(2, "Must be between 2 and 32 in length")
+    .max(32, "Must be between 2 and 32 in length")
+    .required("This field is required"),
+  email: Yup.string().required("This field is required"),
+  password: Yup.string()
+    .min(8, "Must be between 8 and 50 in length")
+    .max(50, "Must be between 8 and 50 in length")
+    .required("This field is required"),
+});
 
 export const Register: React.FC<{}> = ({}) => {
+  const user = useUser();
+
+  const createUser = async (username: string) => {
+    const db = getFirestore();
+    console.log(user.uid);
+    await setDoc(doc(db, "profile", user.uid), { username: username });
+
+    alert("User created!!");
+  };
+
   const easing = [0.06, -0.5, 0.01, 0.99];
 
   const fadeInUp: Variants = {
@@ -32,38 +58,111 @@ export const Register: React.FC<{}> = ({}) => {
       <motion.div className={styles.center} variants={fadeInUp}>
         <h1>Register</h1>
         <Formik
-          initialValues={{ usernameOrEmail: "", password: "" }}
-          onSubmit={async (values) => {
-            console.log(
-              "dupa123: " + values.password + ", " + values.usernameOrEmail
-            );
+          initialValues={{
+            username: "",
+            email: "",
+            password: "",
+          }}
+          validationSchema={SignupSchema}
+          validateOnChange={false}
+          validateOnBlur={false}
+          onSubmit={async (values, { setFieldError }) => {
+            const auth = getAuth();
+            createUserWithEmailAndPassword(auth, values.email, values.password)
+              .catch((error) => {
+                console.log("ERROR " + error.code + ": " + error.message);
+                switch (error.code) {
+                  case "auth/email-already-in-use":
+                    setFieldError(
+                      "email",
+                      "Account with this email already exists"
+                    );
+                    console.log("Invalid email");
+                    break;
+                  case "auth/invalid-email":
+                    setFieldError("email", "Invalid email");
+                    console.log("Invalid email");
+                    break;
+                  case "auth/weak-password":
+                    setFieldError("password", "Password is too weak");
+                    console.log("Password is too weak");
+                    break;
+                  default:
+                    console.log(error.message);
+                    break;
+                }
+              })
+              .then((userCredential) => {
+                if (userCredential) {
+                  user.uid = userCredential.user.uid;
+                  createUser(values.username);
+                }
+              });
           }}
         >
-          {({ isSubmitting }) => (
+          {({ isSubmitting, errors, touched }) => (
             <Form>
-              <p className={styles.data_text}>USERNAME</p>
-              <Field
-                className={styles.auth_field}
-                name="username"
-                placeholder="username"
-                label="Username"
-                type="username"
-              />
-              <p className={styles.data_text}>EMAIL</p>
-              <Field
-                class={styles.auth_field}
-                name="Email"
-                placeholder="email"
-                label="Email"
-              />
-              <p className={styles.data_text}>PASSWORD</p>
-              <Field
-                className={styles.auth_field}
-                name="password"
-                placeholder="password"
-                label="Password"
-                type="password"
-              />
+              <div
+                className={
+                  errors.username && touched.username
+                    ? styles.auth_element_error
+                    : "auth_element"
+                }
+              >
+                <p className={styles.data_text}>
+                  USERNAME
+                  {errors.username && touched.username
+                    ? " - " + errors.username
+                    : null}
+                </p>
+                <Field
+                  className={styles.auth_field}
+                  name="username"
+                  placeholder="username"
+                  label="Username"
+                  type="username"
+                />
+              </div>
+              <div
+                className={
+                  errors.email && touched.email
+                    ? styles.auth_element_error
+                    : "auth_element"
+                }
+              >
+                <p className={styles.data_text}>
+                  EMAIL{" "}
+                  {errors.email && touched.email ? " - " + errors.email : null}
+                </p>
+                <Field
+                  class={styles.auth_field}
+                  name="email"
+                  placeholder="email"
+                  label="Email"
+                  type="email"
+                />
+              </div>
+              <div
+                className={
+                  errors.password && touched.password
+                    ? styles.auth_element_error
+                    : "auth_element"
+                }
+              >
+                <p className={styles.data_text}>
+                  PASSWORD{" "}
+                  {errors.password && touched.password
+                    ? " - " + errors.password
+                    : null}
+                </p>
+                <Field
+                  className={styles.auth_field}
+                  name="password"
+                  placeholder="password"
+                  label="Password"
+                  type="password"
+                />
+              </div>
               <button
                 className={styles.auth_button}
                 disabled={isSubmitting}

@@ -37,13 +37,6 @@ $darkerlight: #86aab5;
       margin-bottom: 15px;
     }
 
-    .data_text {
-      color: darkgray;
-      text-align: left;
-      padding: 0px;
-      margin: 16px 0px 8px 0px;
-    }
-
     .forgot_password {
       text-align: left;
       margin: 0px;
@@ -53,6 +46,20 @@ $darkerlight: #86aab5;
       color: #696969;
       margin-top: 15px;
       margin-bottom: 30px;
+    }
+
+    .auth_element_error {
+      .auth_field {
+        border: 2px solid #ff3b3b;
+        &:focus {
+          outline: none !important;
+          border: 2px solid #ff3b3b;
+        }
+      }
+
+      .data_text {
+        color: #ff3b3b;
+      }
     }
 
     .auth_field {
@@ -68,6 +75,13 @@ $darkerlight: #86aab5;
         outline: none !important;
         border: 2px solid lightblue;
       }
+    }
+
+    .data_text {
+      color: darkgray;
+      text-align: left;
+      padding: 0px;
+      margin: 16px 0px 8px 0px;
     }
 
     .auth_button {

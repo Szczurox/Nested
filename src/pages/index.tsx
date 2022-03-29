@@ -13,7 +13,6 @@ const Home: NextPage = () => {
       <Link href="/chat">
         <button>CHAT</button>
       </Link>
-      <p>dwefw</p>
     </div>
   );
 };

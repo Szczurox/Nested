@@ -3,8 +3,12 @@ import Link from "next/link";
 import { Formik, Field, Form } from "formik";
 import styles from "../styles/Auth.module.scss";
 import { motion, Variants } from "framer-motion";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useUser } from "context/userContext";
 
 export const Login: React.FC<{}> = ({}) => {
+  const user = useUser();
+
   const easing = [0.06, -0.5, 0.01, 0.99];
 
   const fadeInUp: Variants = {
@@ -32,30 +36,56 @@ export const Login: React.FC<{}> = ({}) => {
       <motion.div className={styles.center} variants={fadeInUp}>
         <h1>Login</h1>
         <Formik
-          initialValues={{ usernameOrEmail: "", password: "" }}
-          onSubmit={async (values) => {
-            console.log(
-              "dupa123: " + values.password + ", " + values.usernameOrEmail
-            );
+          initialValues={{ email: "", password: "" }}
+          onSubmit={async (values, { setFieldError }) => {
+            const auth = getAuth();
+            signInWithEmailAndPassword(auth, values.email, values.password)
+              .catch((error) => {
+                setFieldError("email", "Invalid email or password");
+                console.log("ERROR: " + error.code + ": " + error.message);
+              })
+              .then((userCredential) => {
+                if (userCredential) {
+                  user.uid = userCredential.user.uid;
+                }
+              });
           }}
         >
-          {({ isSubmitting }) => (
+          {({ isSubmitting, errors }) => (
             <Form>
-              <p className={styles.data_text}>EMAIL</p>
-              <Field
-                class={styles.auth_field}
-                name="Email"
-                placeholder="email"
-                label="Email"
-              />
-              <p className={styles.data_text}>PASSWORD</p>
-              <Field
-                className={styles.auth_field}
-                name="password"
-                placeholder="password"
-                label="Password"
-                type="password"
-              />
+              <div
+                className={
+                  errors.email ? styles.auth_element_error : "auth_element"
+                }
+              >
+                <p className={styles.data_text}>
+                  EMAIL {errors.email ? " - " + errors.email : null}
+                </p>
+                <Field
+                  class={styles.auth_field}
+                  name="email"
+                  placeholder="email"
+                  label="Email"
+                  type="email"
+                />
+              </div>
+              <div
+                className={
+                  errors.email ? styles.auth_element_error : "auth_element"
+                }
+              >
+                <p className={styles.data_text}>
+                  PASSWORD
+                  {errors.email ? " - " + errors.email : null}
+                </p>
+                <Field
+                  className={styles.auth_field}
+                  name="password"
+                  placeholder="password"
+                  label="Password"
+                  type="password"
+                />
+              </div>
               <div className={styles.forgot_password}>
                 <Link href="/login">
                   <a>Forgot password?</a>
