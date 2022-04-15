@@ -16,7 +16,7 @@ const Chat = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) router.push("/");
+    if (!loading && !user.uid) router.push("/");
   }, [user, loading]);
 
   return (
