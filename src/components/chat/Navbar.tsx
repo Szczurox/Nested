@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavbarHeader } from "./navbar/NavbarHeader";
 import { NavbarVoice } from "./navbar/NavbarVoice";
 import { NavbarProfile } from "./navbar/NavbarProfile";
 import styles from "../../styles/components/chat/Navbar.module.scss";
-import { NavbarChannels } from "./navbar/NavbarChannels";
+import { NavbarCategories } from "./navbar/NavbarCategories";
 
 export type NavbarVariant = "server" | "dms";
 
@@ -11,15 +11,13 @@ interface NavbarProps {
   variant?: NavbarVariant;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-  children,
-  variant = "server",
-}) => {
+export const Navbar: React.FC<NavbarProps> = ({ variant = "server" }) => {
+  const [isVoiceConnected, setIsVoiceConnected] = useState(false);
   return (
     <div className={styles.navbar}>
       <NavbarHeader variant={variant === "server" ? "server" : "dms"} />
-      <NavbarChannels />
-      <NavbarVoice />
+      <NavbarCategories />
+      {isVoiceConnected ? <NavbarVoice /> : null}
       <NavbarProfile />
     </div>
   );

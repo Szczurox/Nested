@@ -7,6 +7,7 @@ import { useUser } from "context/userContext";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import * as Yup from "yup";
+import { useRouter } from "next/router";
 
 const SignupSchema = Yup.object().shape({
   username: Yup.string()
@@ -22,13 +23,11 @@ const SignupSchema = Yup.object().shape({
 
 export const Register: React.FC<{}> = ({}) => {
   const user = useUser();
+  const router = useRouter();
 
   const createUser = async (username: string) => {
     const db = getFirestore();
-    console.log(user.uid);
     await setDoc(doc(db, "profile", user.uid), { username: username });
-
-    alert("User created!!");
   };
 
   const easing = [0.06, -0.5, 0.01, 0.99];
@@ -77,18 +76,14 @@ export const Register: React.FC<{}> = ({}) => {
                       "email",
                       "Account with this email already exists"
                     );
-                    console.log("Invalid email");
                     break;
                   case "auth/invalid-email":
                     setFieldError("email", "Invalid email");
-                    console.log("Invalid email");
                     break;
                   case "auth/weak-password":
                     setFieldError("password", "Password is too weak");
-                    console.log("Password is too weak");
                     break;
                   default:
-                    console.log(error.message);
                     break;
                 }
               })
@@ -96,6 +91,7 @@ export const Register: React.FC<{}> = ({}) => {
                 if (userCredential) {
                   user.uid = userCredential.user.uid;
                   createUser(values.username);
+                  router.push("/chat");
                 }
               });
           }}

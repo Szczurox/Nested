@@ -3,10 +3,11 @@ import styles from "../../../styles/components/chat/navbar/NavbarChannel.module.
 
 interface NavbarChannelProps {
   name: String;
+  id: string;
 }
 
-export const NavbarChannel: React.FC<NavbarChannelProps> = ({ name }) => {
-  const [isActive, setActive] = useState(true);
+export const NavbarChannel: React.FC<NavbarChannelProps> = ({ name, id }) => {
+  const [isActive, setActive] = useState(false);
 
   const handleToggle = () => {
     setActive(!isActive);
@@ -19,7 +20,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({ name }) => {
           ? `${styles.channel} ${styles.active}`
           : `${styles.channel} ${styles.inactive}`
       }
-      id="ass"
+      id={id}
       onClick={handleToggle}
     >
       <h4>

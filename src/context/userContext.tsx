@@ -6,7 +6,7 @@ export const UserContext = createContext(undefined as any);
 
 export default function UserContextComp({ children }: any) {
   const [user, setUser] = useState({ uid: "" });
-  const [loadingUser, setLoadingUser] = useState(true); // Helpful, to update the UI accordingly.
+  const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
     const app = createFirebaseApp();
@@ -15,8 +15,7 @@ export default function UserContextComp({ children }: any) {
       try {
         if (user) {
           const uid = user.uid;
-          setUser({ uid });
-          console.log(user.uid);
+          setUser({ uid: uid });
         } else setUser({ uid: "" });
       } catch (error) {
         console.log("ERROR: unable to get user");
@@ -25,7 +24,6 @@ export default function UserContextComp({ children }: any) {
       }
     });
 
-    // Unsubscribe auth listener on unmount
     return () => unsubscriber();
   }, []);
 
@@ -36,5 +34,4 @@ export default function UserContextComp({ children }: any) {
   );
 }
 
-// Custom hook that shorthands the context!
 export const useUser = () => useContext(UserContext);

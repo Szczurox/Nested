@@ -1,37 +1,55 @@
-import React from "react";
+import React, { useState } from "react";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
+import styles from "../../../styles/components/chat/navbar/NavbarCategory.module.scss";
+import { NavbarChannel } from "./NavbarChannel";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 
 export type NavbarCategoryVariant = "server" | "dms";
 
 interface NavbarCategoryProps {
   variant?: NavbarCategoryVariant;
+  name: String;
 }
 
 export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
+  name,
   variant = "server",
 }) => {
   let body = null;
+  const [showChannels, setShowChannels] = useState(true);
 
   if (variant === "server") {
     body = (
-      <div className="sidebar__header">
-        <ExpandMoreIcon />
-        <h4>Text Channels</h4>
+      <div
+        className={styles.navbar_header}
+        onClick={() => setShowChannels(!showChannels)}
+      >
+        {showChannels ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        <h4>{name}</h4>
       </div>
     );
   } else {
     body = (
-      <div className="sidebar__header">
+      <div className={styles.navbar_header}>
         <h4>DIRECT MESSAGES</h4>
       </div>
     );
   }
 
   return (
-    <div className="sidebar_channelsHeader">
-      {body}
-      <AddIcon className="sidebar_addChannel" />
+    <div className="navbar_category">
+      <div className={styles.navbar_channelsHeader}>
+        {body}
+        <AddIcon className={styles.navbar_addChannel} />
+      </div>
+      <div
+        className="navbar_channels"
+        style={{ visibility: showChannels ? "visible" : "hidden" }}
+      >
+        <NavbarChannel name="ass" id="1"></NavbarChannel>
+        <NavbarChannel name="test" id="2"></NavbarChannel>
+      </div>
     </div>
   );
 };

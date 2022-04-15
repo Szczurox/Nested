@@ -5,9 +5,11 @@ import styles from "../styles/Auth.module.scss";
 import { motion, Variants } from "framer-motion";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useUser } from "context/userContext";
+import { useRouter } from "next/router";
 
 export const Login: React.FC<{}> = ({}) => {
   const user = useUser();
+  const router = useRouter();
 
   const easing = [0.06, -0.5, 0.01, 0.99];
 
@@ -47,6 +49,8 @@ export const Login: React.FC<{}> = ({}) => {
               .then((userCredential) => {
                 if (userCredential) {
                   user.uid = userCredential.user.uid;
+                  console.log(user.uid);
+                  router.push("/chat");
                 }
               });
           }}

@@ -1,0 +1,27 @@
+.contextmenu {
+  color: white;
+  z-index: 10;
+  font-size: 14px;
+  background-color: #2f3136;
+  border-radius: 2px;
+  padding: 5px 0 5px 0;
+  width: 150px;
+  height: auto;
+  margin: 0;
+  position: absolute;
+  list-style: none;
+  opacity: 1;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  li {
+    cursor: pointer;
+    padding: 10px;
+    &:hover {
+      background-color: #292c30;
+    }
+  }
+}

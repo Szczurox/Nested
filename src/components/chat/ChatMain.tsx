@@ -8,8 +8,6 @@ import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
 import GifIcon from "@material-ui/icons/Gif";
 
 export const ChatMain: React.FC = ({}) => {
-  const [renderViewScroll, setRenderViewScroll] = useState(0);
-  const [renderView, setRenderView] = useState(50);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
 

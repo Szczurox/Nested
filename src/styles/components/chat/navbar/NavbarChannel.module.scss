@@ -1,6 +1,13 @@
 .channel {
+  padding: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
   h4 {
+    border-radius: 10px;
+    border: 2px;
     display: flex;
+    padding: 0px;
+    margin: 0px;
     padding-left: 15px;
     align-items: center;
     -webkit-touch-callout: none;
@@ -21,6 +28,8 @@
   .hash {
     font-size: 25px;
     padding: 8px;
+    padding-top: 3px;
+    padding-bottom: 3px;
   }
 }
 

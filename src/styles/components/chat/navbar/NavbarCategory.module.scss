@@ -1,0 +1,29 @@
+.navbar_channelsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  padding-top: 20px;
+  padding-bottom: 0px;
+  background-color: #2f3135;
+  color: gray;
+
+  .navbar_header {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    &:hover {
+      color: #d4d4d4;
+    }
+    padding-bottom: 10px;
+  }
+
+  .navbar_addChannel {
+    cursor: pointer;
+    display: flex;
+    &:hover {
+      color: #d4d4d4;
+    }
+    margin-bottom: 8px;
+  }
+}
