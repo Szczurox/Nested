@@ -8,11 +8,13 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 export type NavbarCategoryVariant = "server" | "dms";
 
 interface NavbarCategoryProps {
+  id: string;
   variant?: NavbarCategoryVariant;
   name: String;
 }
 
 export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
+  id,
   name,
   variant = "server",
 }) => {
@@ -25,7 +27,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
         className={styles.navbar_header}
         onClick={() => setShowChannels(!showChannels)}
       >
-        {showChannels ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+        {showChannels ? <ExpandMoreIcon /> : <ExpandLessIcon />}
         <h4>{name}</h4>
       </div>
     );
@@ -38,14 +40,17 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
   }
 
   return (
-    <div className="navbar_category">
+    <div className="navbar_category" id={id}>
       <div className={styles.navbar_channelsHeader}>
         {body}
         <AddIcon className={styles.navbar_addChannel} />
       </div>
       <div
         className="navbar_channels"
-        style={{ visibility: showChannels ? "visible" : "hidden" }}
+        style={{
+          height: showChannels ? "auto" : "0px",
+          visibility: showChannels ? "visible" : "hidden",
+        }}
       >
         <NavbarChannel name="ass" id="1"></NavbarChannel>
         <NavbarChannel name="test" id="2"></NavbarChannel>

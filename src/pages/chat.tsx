@@ -12,14 +12,16 @@ import { useRouter } from "next/router";
 
 const Chat = () => {
   const [input, setInput] = useState("");
-  const { user, loading } = useUser();
+  const { user, loadingUser } = useUser();
   const router = useRouter();
 
+  // Push back to index if user not authenticated
   useEffect(() => {
-    if (!loading && !user.uid) router.push("/");
-  }, [user, loading]);
+    if (!loadingUser && !user.uid) router.push("/");
+  }, [user, loadingUser]);
 
-  return (
+  // Render only if user is authenticated
+  return user.uid ? (
     <div className={styles.app}>
       <Navbar />
       <div className={styles.chat}>
@@ -58,7 +60,7 @@ const Chat = () => {
         </div>
       </div>
     </div>
-  );
+  ) : null;
 };
 
 export default Chat;

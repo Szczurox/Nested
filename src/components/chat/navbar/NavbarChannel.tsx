@@ -11,7 +11,6 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({ name, id }) => {
 
   const handleToggle = () => {
     setActive(!isActive);
-    console.log(isActive);
   };
   return (
     <div
