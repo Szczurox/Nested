@@ -1,8 +1,14 @@
 import { createFirebaseApp } from "../../../firebase/clientApp";
-import { collection, getDocs, getFirestore, query } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  getFirestore,
+  onSnapshot,
+  query,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarCategories.module.scss";
-import { NavbarCategory } from "./NavbarCategory";
+import { ChannelData, NavbarCategory } from "./NavbarCategory";
 import { NavbarChannel } from "./NavbarChannel";
 
 export type NavbarCategoriesVariant = "server" | "dms";
@@ -16,17 +22,12 @@ export interface CategoryData {
   name: string;
 }
 
-export interface ChannelData {
-  id: string;
-  name: string;
-}
-
 export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
   variant = "server",
 }) => {
   const [categories, setCategories] = useState<CategoryData[]>([]);
   const [noneCategoryChannels, setNoneCategoryChannels] = useState<
-    CategoryData[]
+    ChannelData[]
   >([]);
 
   useEffect(() => {
@@ -46,13 +47,14 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
           "channels"
         )
       );
-      const querySnapshot = await getDocs(qCha);
-      setNoneCategoryChannels(
-        querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          name: doc.data().name,
-        }))
-      );
+      onSnapshot(qCha, (querySnapshot) => {
+        setNoneCategoryChannels(
+          querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            name: doc.data().name,
+          }))
+        );
+      });
     }
 
     async function getCategories() {
@@ -60,19 +62,20 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
       const qCat = query(
         collection(db, "groups", "H8cO2zBjCyJYsmM4g5fv", "categories")
       );
-      const querySnapshot = await getDocs(qCat);
-      setCategories(
-        // Filtering categories so that "none" category is handled differently
-        querySnapshot.docs.reduce(function (filtered: CategoryData[], doc) {
-          if (doc.id != "none") {
-            return filtered.concat({
-              id: doc.id,
-              name: doc.data().name,
-            });
-          }
-          return filtered;
-        }, [])
-      );
+      onSnapshot(qCat, (querySnapshot) => {
+        setCategories(
+          // Filtering categories so that "none" category is handled differently
+          querySnapshot.docs.reduce(function (filtered: CategoryData[], doc) {
+            if (doc.id != "none") {
+              return filtered.concat({
+                id: doc.id,
+                name: doc.data().name,
+              });
+            }
+            return filtered;
+          }, [])
+        );
+      });
     }
 
     getCategories();
