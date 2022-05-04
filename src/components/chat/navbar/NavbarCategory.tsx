@@ -79,7 +79,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
     }
 
     getChannel();
-  }, []);
+  }, [idC]);
 
   return (
     <div className="navbar_category" id={idC}>

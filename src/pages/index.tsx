@@ -16,13 +16,13 @@ const Home: NextPage = () => {
 
   return (
     <div className="container">
-      <Link href="/login">
+      <Link href="/login" passHref>
         <button>LOGIN</button>
       </Link>
-      <Link href="/register">
+      <Link href="/register" passHref>
         <button>REGISTER</button>
       </Link>
-      <Link href="/chat">
+      <Link href="/chat" passHref>
         <button>CHAT</button>
       </Link>
       <button onClick={logOut}>SIGN OUT</button>

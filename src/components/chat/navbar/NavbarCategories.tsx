@@ -89,7 +89,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
 
     categoriesGet();
     getChannel();
-  }, []);
+  }, [db]);
 
   return (
     <div className={styles.navbar_channels}>

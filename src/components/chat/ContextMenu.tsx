@@ -19,14 +19,11 @@ export const ContextMenu: React.FC<ContextMenu> = ({ content, xPos, yPos }) => {
     [showMenu]
   );
 
-  const keyPress = useCallback(
-    (e: any) => {
-      if (e.keyCode === 27) {
-        setShowMenu(false);
-      }
-    },
-    [showMenu]
-  );
+  const keyPress = useCallback((e: any) => {
+    if (e.keyCode === 27) {
+      setShowMenu(false);
+    }
+  }, []);
 
   useEffect(() => {
     document.addEventListener("keydown", keyPress);

@@ -128,7 +128,7 @@ export const ChatMain: React.FC = ({}) => {
   useEffect(() => {
     const unsub = getMessagesFirstBatch();
     return () => unsub();
-  }, [channel.id]);
+  }, [channel.id, getMessagesFirstBatch]);
 
   async function sendMessage(e: any) {
     // Send Message

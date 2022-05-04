@@ -20,7 +20,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     router.events.on("routeChangeStart", handleStart);
     router.events.on("routeChangeComplete", handleComplete);
     router.events.on("routeChangeError", handleComplete);
-  }, [router]);
+  }, [router, loading]);
 
   return (
     <UserProvider>

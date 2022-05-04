@@ -13,7 +13,7 @@ const Chat = () => {
   // Push back to index if user not authenticated
   useEffect(() => {
     if (!loadingUser && !user.uid) router.push("/");
-  }, [user, loadingUser]);
+  }, [user, loadingUser, router]);
 
   // Render only if user is authenticated
   return user.uid ? (

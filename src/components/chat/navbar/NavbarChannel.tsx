@@ -19,7 +19,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   useEffect(() => {
     if (channel.id == id) setActive(true);
     else setActive(false);
-  }, [channel.id]);
+  }, [channel.id, id]);
 
   const handleToggle = () => {
     setActive(true);
