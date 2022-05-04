@@ -2,9 +2,21 @@ import React from "react";
 import { Avatar, TextareaAutosize } from "@material-ui/core";
 import style from "../../styles/components/chat/Message.module.scss";
 
-export const Message: React.FC = () => {
+interface MessageProps {
+  id: string;
+  content: string;
+  username?: string;
+  timestamp?: string;
+}
+
+export const Message: React.FC<MessageProps> = ({
+  id,
+  content,
+  timestamp,
+  username = "Username",
+}) => {
   return (
-    <div className={style.message}>
+    <div className={style.message} id={id}>
       <div className={style.message_info}>
         <div className={style.message_profilePicture}>
           <Avatar
@@ -13,11 +25,11 @@ export const Message: React.FC = () => {
           />
         </div>
         <h4>
-          Name
-          <span className={style.message_timestamp}>2342342342342</span>
+          {username}
+          <span className={style.message_timestamp}>{timestamp}</span>
         </h4>
         <div className="message_content">
-          <p>ass</p>
+          <p>{content}</p>
         </div>
       </div>
     </div>

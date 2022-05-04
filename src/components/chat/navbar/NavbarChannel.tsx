@@ -1,17 +1,31 @@
-import React, { useState } from "react";
+import { useChannel } from "context/channelContext";
+import React, { useEffect, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarChannel.module.scss";
 
 interface NavbarChannelProps {
   name: String;
   id: string;
+  idC: string;
 }
 
-export const NavbarChannel: React.FC<NavbarChannelProps> = ({ name, id }) => {
+export const NavbarChannel: React.FC<NavbarChannelProps> = ({
+  name,
+  id,
+  idC,
+}) => {
   const [isActive, setActive] = useState(false);
+  const { channel, setChannel } = useChannel();
+
+  useEffect(() => {
+    if (channel.id == id) setActive(true);
+    else setActive(false);
+  }, [channel.id]);
 
   const handleToggle = () => {
-    setActive(!isActive);
+    setActive(true);
+    setChannel({ id: id, name: name, idC: idC });
   };
+
   return (
     <div
       className={

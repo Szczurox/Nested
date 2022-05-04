@@ -1,20 +1,24 @@
-import { createFirebaseApp } from "../../../firebase/clientApp";
-import {
-  collection,
-  getDocs,
-  getFirestore,
-  onSnapshot,
-  query,
-} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarCategories.module.scss";
-import { ChannelData, NavbarCategory } from "./NavbarCategory";
+import { NavbarCategory } from "./NavbarCategory";
 import { NavbarChannel } from "./NavbarChannel";
+import {
+  query,
+  collection,
+  onSnapshot,
+  getFirestore,
+} from "firebase/firestore";
+import { createFirebaseApp } from "../../../firebase/clientApp";
 
 export type NavbarCategoriesVariant = "server" | "dms";
 
 export interface NavbarCategoriesProps {
   variant?: NavbarCategoriesVariant;
+}
+
+export interface ChannelData {
+  id: string;
+  name: string;
 }
 
 export interface CategoryData {
@@ -30,39 +34,17 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
     ChannelData[]
   >([]);
 
+  const app = createFirebaseApp();
+  const db = getFirestore(app);
+
   useEffect(() => {
-    const app = createFirebaseApp();
-    const db = getFirestore(app);
-
-    // None category
-    async function getNoneChannel() {
-      // Channels query
-      const qCha = query(
-        collection(
-          db,
-          "groups",
-          "H8cO2zBjCyJYsmM4g5fv",
-          "categories",
-          "none",
-          "channels"
-        )
-      );
-      onSnapshot(qCha, (querySnapshot) => {
-        setNoneCategoryChannels(
-          querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            name: doc.data().name,
-          }))
-        );
-      });
-    }
-
-    async function getCategories() {
+    function categoriesGet() {
       // Categories query
       const qCat = query(
         collection(db, "groups", "H8cO2zBjCyJYsmM4g5fv", "categories")
       );
-      onSnapshot(qCat, (querySnapshot) => {
+
+      const unsub = onSnapshot(qCat, (querySnapshot) => {
         setCategories(
           // Filtering categories so that "none" category is handled differently
           querySnapshot.docs.reduce(function (filtered: CategoryData[], doc) {
@@ -76,10 +58,37 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
           }, [])
         );
       });
+
+      return unsub;
     }
 
-    getCategories();
-    getNoneChannel();
+    // None category
+    async function getChannel() {
+      // Channels query
+      const qCha = query(
+        collection(
+          db,
+          "groups",
+          "H8cO2zBjCyJYsmM4g5fv",
+          "categories",
+          "none",
+          "channels"
+        )
+      );
+      const unsub = onSnapshot(qCha, (querySnapshot) => {
+        setNoneCategoryChannels(
+          querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            name: doc.data().name,
+          }))
+        );
+      });
+
+      return unsub;
+    }
+
+    categoriesGet();
+    getChannel();
   }, []);
 
   return (
@@ -87,14 +96,14 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
       {variant == "server" ? (
         <>
           {noneCategoryChannels.map(({ id, name }) => (
-            <NavbarChannel id={id} name={name} />
+            <NavbarChannel key={id} id={id} idC="none" name={name} />
           ))}
           {categories.map(({ id, name }) => (
-            <NavbarCategory id={id} name={name} />
+            <NavbarCategory key={id} idC={id} name={name} />
           ))}
         </>
       ) : (
-        <NavbarCategory name="DIRECT MESSAGES" id="1" />
+        <NavbarCategory name="DIRECT MESSAGES" idC="1" />
       )}
     </div>
   );

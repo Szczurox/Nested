@@ -7,7 +7,6 @@ import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { createFirebaseApp } from "../../../firebase/clientApp";
 import {
   collection,
-  getDocs,
   getFirestore,
   onSnapshot,
   query,
@@ -16,7 +15,7 @@ import {
 export type NavbarCategoryVariant = "server" | "dms";
 
 interface NavbarCategoryProps {
-  id: string;
+  idC: string;
   variant?: NavbarCategoryVariant;
   name: String;
 }
@@ -27,7 +26,7 @@ export interface ChannelData {
 }
 
 export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
-  id,
+  idC,
   name,
   variant = "server",
 }) => {
@@ -57,7 +56,6 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
     const app = createFirebaseApp();
     const db = getFirestore(app);
 
-    // None category
     async function getChannel() {
       // Channels query
       const qCha = query(
@@ -66,7 +64,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
           "groups",
           "H8cO2zBjCyJYsmM4g5fv",
           "categories",
-          id,
+          idC,
           "channels"
         )
       );
@@ -84,7 +82,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
   }, []);
 
   return (
-    <div className="navbar_category" id={id}>
+    <div className="navbar_category" id={idC}>
       <div className={styles.navbar_channelsHeader}>
         {body}
         <AddIcon className={styles.navbar_addChannel} />
@@ -97,7 +95,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
         }}
       >
         {channels.map(({ id, name }) => (
-          <NavbarChannel id={id} name={name} />
+          <NavbarChannel key={id} id={id} idC={idC} name={name} />
         ))}
       </div>
     </div>
