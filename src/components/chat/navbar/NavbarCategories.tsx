@@ -35,7 +35,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
   >([]);
 
   const app = createFirebaseApp();
-  const db = getFirestore(app);
+  const db = getFirestore(app!);
 
   useEffect(() => {
     function categoriesGet() {

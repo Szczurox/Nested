@@ -54,7 +54,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 
   useEffect(() => {
     const app = createFirebaseApp();
-    const db = getFirestore(app);
+    const db = getFirestore(app!);
 
     async function getChannel() {
       // Channels query

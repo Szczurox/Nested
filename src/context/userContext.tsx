@@ -11,7 +11,7 @@ export default function UserContextComp({ children }: any) {
 
   useEffect(() => {
     const app = createFirebaseApp();
-    const auth = getAuth(app);
+    const auth = getAuth(app!);
     const db = getFirestore(app!);
     const unsubscriber = onAuthStateChanged(auth, async (user) => {
       try {
