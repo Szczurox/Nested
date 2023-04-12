@@ -13,7 +13,7 @@ export const ContextMenu: React.FC<ContextMenu> = ({ content, xPos, yPos }) => {
   const [showMenu, setShowMenu] = useState(false);
 
   const handleClick = useCallback(
-    (e) => {
+    (_) => {
       if (showMenu) setShowMenu(false);
     },
     [showMenu]

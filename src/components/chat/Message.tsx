@@ -9,6 +9,7 @@ interface MessageProps {
   id: string;
   content: string;
   userid: string;
+  uname?: string;
   time?: string;
 }
 
@@ -16,17 +17,21 @@ export const Message: React.FC<MessageProps> = ({
   id,
   content,
   time,
+  uname,
   userid = "Username",
 }) => {
   const [username, setUsername] = useState("");
 
   const app = createFirebaseApp();
-  const db = getFirestore(app);
+  const db = getFirestore(app!);
 
   useEffect(() => {
     async function getUserData() {
-      const docSnap = await getDoc(doc(db, "profile", userid));
-      if (docSnap.exists()) setUsername(docSnap.data().username);
+      if (uname) setUsername(uname);
+      else {
+        const docSnap = await getDoc(doc(db, "profile", userid));
+        if (docSnap.exists()) setUsername(docSnap.data().username);
+      }
     }
     getUserData();
   });
@@ -37,13 +42,13 @@ export const Message: React.FC<MessageProps> = ({
         <div className={style.message_profilePicture}>
           <Avatar
             style={{ height: "45px", width: "45px" }}
-            src="https://avatars.githubusercontent.com/u/58273015?s=48"
+            src="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
           />
         </div>
         <h4>
           {username}
           <span className={style.message_timestamp}>
-            {moment(time).local().format("MMMM Do YYYY [at] hh:mm:ss a")}
+            {moment(time).local().format("MMMM Do YYYY [at] hh:mm a")}
           </span>
         </h4>
         <div className="message_content">

@@ -6,7 +6,6 @@ import { useRouter } from "next/router";
 import { ChatMain } from "components/chat/ChatMain";
 
 const Chat = () => {
-  const [input, setInput] = useState("");
   const { user, loadingUser } = useUser();
   const router = useRouter();
 

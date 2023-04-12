@@ -1,10 +1,10 @@
 import "../styles/globals.scss";
-import type { AppProps } from "next/app";
 import UserProvider from "../context/userContext";
 import ChannelProvider from "../context/channelContext";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Loading from "components/Loading";
+import { AppProps } from "next/dist/shared/lib/router/router";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -14,7 +14,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     const handleStart = (url: any) => {
       url !== router.pathname ? setLoading(true) : setLoading(false);
     };
-    const handleComplete = (url: any) => setLoading(false);
+    const handleComplete = (_: any) => setLoading(false);
 
     console.log(loading);
     router.events.on("routeChangeStart", handleStart);

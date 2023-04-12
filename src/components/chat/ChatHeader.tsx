@@ -6,14 +6,17 @@ import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
 import MarkunreadMailboxRoundedIcon from "@material-ui/icons/MarkunreadMailboxRounded";
 import HelpRoundedIcon from "@material-ui/icons/HelpRounded";
 import styles from "../../styles/components/chat/ChatHeader.module.scss";
+import { useChannel } from "context/channelContext";
 
 export const ChatHeader: React.FC = ({}) => {
+  const { channel } = useChannel();
+
   return (
     <div className={styles.chatHeader}>
       <div className={styles.chatHeader_left}>
         <h3>
           <span className={styles.chatHeader_hash}>#</span>
-          channelName
+          {channel.name}
         </h3>
       </div>
       <div className={styles.chatHeader_right}>

@@ -10,7 +10,6 @@ import { createFirebaseApp } from "../../firebase/clientApp";
 import {
   addDoc,
   collection,
-  getDocs,
   getFirestore,
   limit,
   onSnapshot,
@@ -35,7 +34,6 @@ export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0));
-  const [scrollAfterLoad, setScrollAfterLoad] = useState(false);
   const [messagesEnd, setMessagesEnd] = useState(false);
   const listInnerRef = useRef<HTMLHeadingElement>(null);
 
@@ -43,14 +41,15 @@ export const ChatMain: React.FC = ({}) => {
   const { user } = useUser();
 
   const app = createFirebaseApp();
-  const db = getFirestore(app);
+  const db = getFirestore(app!);
 
   const handleScroll = (e: any) => {
+    console.log(listInnerRef.current?.scrollHeight);
     if (listInnerRef.current) {
-      const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current;
-      console.log(scrollHeight, scrollTop, clientHeight);
-      if (scrollTop < 100 && !messagesEnd) {
-        getMessages();
+      const { scrollTop } = listInnerRef.current;
+      if (scrollTop < 300 && !messagesEnd) {
+        const unsub = getMessages();
+        listInnerRef.current.scrollTop += 300;
       }
     }
   };
@@ -61,6 +60,36 @@ export const ChatMain: React.FC = ({}) => {
         listInnerRef.current.scrollHeight - listInnerRef.current.clientHeight;
     }
   };
+
+  function callback(qMes: any) {
+    return onSnapshot(qMes, (querySnapshot: any) => {
+      querySnapshot.docChanges().forEach((change: any) => {
+        if (change.type === "added") {
+          setMessages((messages) => [
+            {
+              id: change.doc.id,
+              content: change.doc.data().content,
+              timestamp: change.doc.data().time,
+              uid: change.doc.data().userid,
+            },
+            ...messages.filter((el) => el.id !== change.doc.id),
+          ]);
+        }
+        if (change.type === "modified") {
+          console.log("Modified: ", change.doc.data());
+        }
+        if (change.type === "removed") {
+          console.log("Removed: ", change.doc.data());
+        }
+      });
+      if (querySnapshot.docs.length > 0) {
+        setLastKey(
+          querySnapshot.docs[querySnapshot.docs.length - 1].data().createdAt
+        );
+        setMessagesEnd(false);
+      } else setMessagesEnd(true);
+    });
+  }
 
   function getMessages() {
     // Channels query
@@ -80,26 +109,7 @@ export const ChatMain: React.FC = ({}) => {
       startAfter(lastKey)
     );
 
-    const unsub = onSnapshot(qMes, (querySnapshot) => {
-      setMessages([
-        ...querySnapshot.docs.reverse().map((doc) => ({
-          id: doc.id,
-          content: doc.data().content,
-          timestamp: doc.data().time,
-          uid: doc.data().userid,
-        })),
-        ...messages,
-      ]);
-      if (querySnapshot.docs.length > 0) {
-        setLastKey(
-          querySnapshot.docs[querySnapshot.docs.length - 1].data().createdAt
-        );
-        setMessagesEnd(false);
-      } else setMessagesEnd(true);
-      console.log(querySnapshot.docs.length, messagesEnd);
-    });
-
-    return unsub;
+    return callback(qMes);
   }
 
   useEffect(() => {
@@ -121,14 +131,30 @@ export const ChatMain: React.FC = ({}) => {
       );
 
       const unsub = onSnapshot(qMes, (querySnapshot) => {
-        setMessages(
-          querySnapshot.docs.reverse().map((doc) => ({
-            id: doc.id,
-            content: doc.data().content,
-            timestamp: doc.data().time,
-            uid: doc.data().userid,
-          }))
-        );
+        const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
+        let scroll = scrollTop >= scrollHeight - clientHeight - 100;
+
+        querySnapshot.docChanges().forEach((change) => {
+          if (change.type === "added" || change.type === "modified") {
+            if (!messages.map((el) => el.id).includes(change.doc.id)) {
+              setMessages((messages) => [
+                ...messages.filter((el) => el.id !== change.doc.id),
+                {
+                  id: change.doc.id,
+                  content: change.doc.data().content,
+                  timestamp: change.doc.data().time,
+                  uid: change.doc.data().userid,
+                },
+              ]);
+            }
+          }
+          if (change.type === "removed") {
+            setMessages((messages) => [
+              ...messages.filter((el) => el.id !== change.doc.id),
+            ]);
+          }
+        });
+
         if (querySnapshot.docs.length > 0) {
           setLastKey(
             querySnapshot.docs[querySnapshot.docs.length - 1].data().createdAt
@@ -136,8 +162,7 @@ export const ChatMain: React.FC = ({}) => {
           setMessagesEnd(false);
         } else setMessagesEnd(true);
 
-        if (listInnerRef.current) {
-          console.log("U MAD?");
+        if (listInnerRef.current && scroll) {
           listInnerRef.current.focus();
           scrollToBottom();
         }
@@ -146,8 +171,9 @@ export const ChatMain: React.FC = ({}) => {
       return unsub;
     }
 
+    setMessages([]);
     const unsub = getMessagesFirstBatch();
-    return () => unsub();
+    return unsub;
   }, [channel.id]);
 
   async function sendMessage(e: any) {
@@ -171,6 +197,7 @@ export const ChatMain: React.FC = ({}) => {
             time: moment().utcOffset("+00:00").format(),
             content: input,
             userid: user.uid,
+            username: user.username,
           }
         );
       }
@@ -197,20 +224,20 @@ export const ChatMain: React.FC = ({}) => {
         ))}
       </div>
       <div className={styles.chat_input}>
-        <UploadFile />
+        <UploadFile disabled={channel.id == ""} chatInput={input} />
         <form>
           <TextareaAutosize
             value={input}
             wrap="soft"
             maxLength={2000}
             maxRows={10}
-            disabled={false}
+            disabled={channel.id == ""}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={sendMessage}
             placeholder={`Message #${channel.name}`}
           />
           <button
-            disabled={false}
+            disabled={channel.id == ""}
             className={styles.chat_inputButton}
             type="submit"
           >
