@@ -54,9 +54,9 @@ export const Message: React.FC<MessageProps> = ({
           </div>
         )}
         {file && (
-          <div className="message_embed">
+          <div className={style.message_embed}>
             <a href={file} target="_blank" rel="noreferrer">
-              <img className="message_image" src={file} alt="image" />
+              <img className={style.message_image} src={file} alt="image" />
             </a>
           </div>
         )}
