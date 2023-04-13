@@ -76,5 +76,22 @@
       overflow-y: auto;
       overflow-x: hidden;
     }
+
+    .chat_jump {
+      position: fixed;
+      transform: translate(10%, -365%);
+      bottom: 0;
+      right: 0;
+      height: 25px;
+      margin-left: 85%;
+      margin-right: 5%;
+      width: 15%;
+      text-align: center;
+      border-color: cyan;
+      background-color: lightblue;
+      border: 10px;
+      border-top-right-radius: 10px;
+      border-top-left-radius: 10px;
+    }
   }
 }

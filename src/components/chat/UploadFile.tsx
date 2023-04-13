@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import styles from "../../styles/components/chat/UploadFile.module.scss";
+import { v4 } from "uuid";
 import {
   getStorage,
   ref,
@@ -42,13 +43,41 @@ export const UploadFile: React.FC<{
       setFileName(e.name);
       setFileUrl(URL.createObjectURL(e));
       setIsOpen(true);
+      const file = e;
+      const fileRef = ref(storage, `images/${v4()}/${file!.name}`);
+      const uploadTask = uploadBytesResumable(fileRef, file!);
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log("Upload is " + progress + "% done");
+          switch (snapshot.state) {
+            case "paused":
+              console.log("Upload is paused");
+              break;
+            case "running":
+              console.log("Upload is running");
+              break;
+          }
+        },
+        (error) => {
+          console.log(error);
+        },
+        () => {
+          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+            console.log("File uploaded! ", downloadURL);
+            fileSubmit(downloadURL);
+          });
+        }
+      );
     }
   }
 
   const uploadFile = () => {
     const file = fileG;
     setIsOpen(false);
-    const fileRef = ref(storage, file!.name);
+    const fileRef = ref(storage, v4());
     const uploadTask = uploadBytesResumable(fileRef, file!);
     uploadTask.on(
       "state_changed",
@@ -81,29 +110,26 @@ export const UploadFile: React.FC<{
     console.log(fileName);
     input.replace(/\s/g, "");
     console.log(channel.idC, channel.id, url, input);
-    if (input.replace(/\s/g, "").length) {
-      await addDoc(
-        collection(
-          db,
-          "groups",
-          "H8cO2zBjCyJYsmM4g5fv",
-          "categories",
-          channel.idC,
-          "channels",
-          channel.id,
-          "messages"
-        ),
-        {
-          createdAt: serverTimestamp(),
-          time: moment().utcOffset("+00:00").format(),
-          content: input,
-          userid: user.uid,
-          username: user.username,
-          file: url,
-        }
-      );
-      setInput("");
-    }
+    await addDoc(
+      collection(
+        db,
+        "groups",
+        "H8cO2zBjCyJYsmM4g5fv",
+        "categories",
+        channel.idC,
+        "channels",
+        channel.id,
+        "messages"
+      ),
+      {
+        createdAt: serverTimestamp(),
+        time: moment().utcOffset("+00:00").format(),
+        content: input,
+        userid: user.uid,
+        file: url,
+      }
+    );
+    setInput("");
   }
 
   return (

@@ -892,6 +892,11 @@
     "@types/mime" "^1"
     "@types/node" "*"
 
+"@types/uuid@^9.0.1":
+  "integrity" "sha512-rFT3ak0/2trgvp4yYZo5iKFEPsET7vKydKF+VRCxlQ9bpheehyAJH89dAkaLEq/j/RZXJIqcgsmPJKUP1Z28HA=="
+  "resolved" "https://registry.npmjs.org/@types/uuid/-/uuid-9.0.1.tgz"
+  "version" "9.0.1"
+
 "@types/yup@^0.29.13":
   "integrity" "sha512-qRyuv+P/1t1JK1rA+elmK1MmCL1BapEzKKfbEhDBV/LMMse4lmhZ/XbgETI39JveDJRpLjmToOI6uFtMW/WR2g=="
   "resolved" "https://registry.npmjs.org/@types/yup/-/yup-0.29.13.tgz"

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Avatar, TextareaAutosize } from "@material-ui/core";
+import { Avatar } from "@material-ui/core";
 import style from "../../styles/components/chat/Message.module.scss";
 import moment from "moment";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
@@ -9,7 +9,7 @@ interface MessageProps {
   id: string;
   content: string;
   userid: string;
-  uname?: string;
+  file?: string;
   time?: string;
 }
 
@@ -17,8 +17,8 @@ export const Message: React.FC<MessageProps> = ({
   id,
   content,
   time,
-  uname,
-  userid = "Username",
+  file,
+  userid = "uid",
 }) => {
   const [username, setUsername] = useState("");
 
@@ -27,11 +27,8 @@ export const Message: React.FC<MessageProps> = ({
 
   useEffect(() => {
     async function getUserData() {
-      if (uname) setUsername(uname);
-      else {
-        const docSnap = await getDoc(doc(db, "profile", userid));
-        if (docSnap.exists()) setUsername(docSnap.data().username);
-      }
+      const docSnap = await getDoc(doc(db, "profile", userid));
+      if (docSnap.exists()) setUsername(docSnap.data().username);
     }
     getUserData();
   });
@@ -51,9 +48,18 @@ export const Message: React.FC<MessageProps> = ({
             {moment(time).local().format("MMMM Do YYYY [at] hh:mm a")}
           </span>
         </h4>
-        <div className="message_content">
-          <p>{content}</p>
-        </div>
+        {content && (
+          <div className="message_content">
+            <p>{content}</p>
+          </div>
+        )}
+        {file && (
+          <div className="message_embed">
+            <a href={file} target="_blank">
+              <img className="message_image" src={file} />
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );

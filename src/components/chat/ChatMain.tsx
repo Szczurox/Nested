@@ -28,13 +28,17 @@ export interface MessageData {
   content: string;
   timestamp: string;
   uid: string;
+  file?: string;
 }
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0));
+  const [unsubs, setUnsubs] = useState<(() => void)[]>([]);
   const [messagesEnd, setMessagesEnd] = useState(false);
+  const [canScrollToBottom, setCanScrollToBottom] = useState(false);
+
   const listInnerRef = useRef<HTMLHeadingElement>(null);
 
   const { channel } = useChannel();
@@ -46,11 +50,13 @@ export const ChatMain: React.FC = ({}) => {
   const handleScroll = (e: any) => {
     console.log(listInnerRef.current?.scrollHeight);
     if (listInnerRef.current) {
-      const { scrollTop } = listInnerRef.current;
-      if (scrollTop < 300 && !messagesEnd) {
+      const { scrollTop, scrollHeight } = listInnerRef.current;
+      if (scrollTop < scrollHeight / 4 && !messagesEnd) {
         const unsub = getMessages();
-        listInnerRef.current.scrollTop += 300;
+        setUnsubs([...unsubs, unsub]);
+        listInnerRef.current.scrollTop += scrollHeight / 10;
       }
+      if (scrollTop < scrollHeight / 2) setCanScrollToBottom(true);
     }
   };
 
@@ -71,6 +77,7 @@ export const ChatMain: React.FC = ({}) => {
               content: change.doc.data().content,
               timestamp: change.doc.data().time,
               uid: change.doc.data().userid,
+              file: change.doc.data().file,
             },
             ...messages.filter((el) => el.id !== change.doc.id),
           ]);
@@ -144,6 +151,7 @@ export const ChatMain: React.FC = ({}) => {
                   content: change.doc.data().content,
                   timestamp: change.doc.data().time,
                   uid: change.doc.data().userid,
+                  file: change.doc.data().file,
                 },
               ]);
             }
@@ -162,9 +170,23 @@ export const ChatMain: React.FC = ({}) => {
           setMessagesEnd(false);
         } else setMessagesEnd(true);
 
-        if (listInnerRef.current && scroll) {
-          listInnerRef.current.focus();
-          scrollToBottom();
+        if (scroll) {
+          // Scroll after all images are loaded
+          Promise.all(
+            Array.from(document.images)
+              .filter((img) => !img.complete)
+              .map(
+                (img) =>
+                  new Promise((resolve) => {
+                    img.onload = img.onerror = resolve;
+                  })
+              )
+          ).then(() => {
+            if (listInnerRef.current) {
+              listInnerRef.current.focus();
+              scrollToBottom();
+            }
+          });
         }
       });
 
@@ -173,7 +195,14 @@ export const ChatMain: React.FC = ({}) => {
 
     setMessages([]);
     const unsub = getMessagesFirstBatch();
-    return unsub;
+    return () => {
+      if (unsubs.length > 0) {
+        for (let i = 0; i < unsubs.length; i++) {
+          unsubs[i]();
+        }
+      }
+      unsub();
+    };
   }, [channel.id]);
 
   async function sendMessage(e: any) {
@@ -197,7 +226,6 @@ export const ChatMain: React.FC = ({}) => {
             time: moment().utcOffset("+00:00").format(),
             content: input,
             userid: user.uid,
-            username: user.username,
           }
         );
       }
@@ -213,16 +241,22 @@ export const ChatMain: React.FC = ({}) => {
         onScroll={(e) => handleScroll(e)}
         ref={listInnerRef}
       >
-        {messages.map(({ id, content, timestamp, uid }) => (
-          <Message
-            key={id}
-            id={id}
-            content={content}
-            time={timestamp}
-            userid={uid}
-          />
-        ))}
+        {messages
+          .sort((x, y) => {
+            return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
+          })
+          .map(({ id, content, timestamp, uid, file }) => (
+            <Message
+              key={id}
+              id={id}
+              content={content}
+              time={timestamp}
+              userid={uid}
+              file={file}
+            />
+          ))}
       </div>
+
       <div className={styles.chat_input}>
         <UploadFile disabled={channel.id == ""} chatInput={input} />
         <form>
@@ -249,6 +283,17 @@ export const ChatMain: React.FC = ({}) => {
           <EmojiEmotionsIcon fontSize="large" />
         </div>
       </div>
+      {messages.length > 60 && canScrollToBottom && (
+        <div
+          className={styles.chat_jump}
+          onClick={(_) => {
+            setCanScrollToBottom(false);
+            scrollToBottom();
+          }}
+        >
+          Jump To Present
+        </div>
+      )}
     </div>
   );
 };
