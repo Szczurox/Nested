@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { Formik, Field, Form } from "formik";
 import styles from "../styles/Auth.module.scss";
@@ -22,7 +22,7 @@ const SignupSchema = Yup.object().shape({
 });
 
 export const Register: React.FC<{}> = ({}) => {
-  const user = useUser();
+  const { user, setUser, loadingUser } = useUser();
   const router = useRouter();
 
   const createUser = async (username: string) => {
@@ -46,6 +46,11 @@ export const Register: React.FC<{}> = ({}) => {
       },
     },
   };
+
+  useEffect(() => {
+    // Route to chat if user is already authenticated
+    if (user.uid != "" && !loadingUser) router.push("/chat");
+  });
 
   return (
     <motion.div
@@ -89,7 +94,7 @@ export const Register: React.FC<{}> = ({}) => {
               })
               .then((userCredential) => {
                 if (userCredential) {
-                  user.uid = userCredential.user.uid;
+                  setUser({ uid: userCredential.user.uid, username: "" });
                   createUser(values.username);
                   router.push("/chat");
                 }

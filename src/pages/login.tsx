@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
 import { Formik, Field, Form } from "formik";
 import styles from "../styles/Auth.module.scss";
@@ -8,7 +8,7 @@ import { useUser } from "context/userContext";
 import { useRouter } from "next/router";
 
 export const Login: React.FC<{}> = ({}) => {
-  const user = useUser();
+  const { user, setUser, loadingUser } = useUser();
   const router = useRouter();
 
   const easing = [0.06, -0.5, 0.01, 0.99];
@@ -27,6 +27,11 @@ export const Login: React.FC<{}> = ({}) => {
       },
     },
   };
+
+  useEffect(() => {
+    // Route to chat if user is already authenticated
+    if (user.uid != "" && !loadingUser) router.push("/chat");
+  });
 
   return (
     <motion.div
@@ -48,7 +53,7 @@ export const Login: React.FC<{}> = ({}) => {
               })
               .then((userCredential) => {
                 if (userCredential) {
-                  user.uid = userCredential.user.uid;
+                  setUser({ uid: userCredential.user.uid, username: "" });
                   console.log(user.uid);
                   router.push("/chat");
                 }

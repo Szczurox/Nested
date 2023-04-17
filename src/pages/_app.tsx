@@ -1,31 +1,35 @@
 import "../styles/globals.scss";
 import UserProvider from "../context/userContext";
 import ChannelProvider from "../context/channelContext";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import Loading from "components/Loading";
+import { useEffect } from "react";
 import { AppProps } from "next/dist/shared/lib/router/router";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-
   useEffect(() => {
-    const handleStart = (url: any) => {
-      url !== router.pathname ? setLoading(true) : setLoading(false);
-    };
-    const handleComplete = (_: any) => setLoading(false);
-
-    console.log(loading);
-    router.events.on("routeChangeStart", handleStart);
-    router.events.on("routeChangeComplete", handleComplete);
-    router.events.on("routeChangeError", handleComplete);
-  }, [router, loading]);
+    async function loading() {
+      if (typeof window !== "undefined") {
+        const loader = document.getElementById("globalLoader");
+        if (loader) {
+          await new Promise((resolve) => setTimeout(resolve, 1500));
+          loader.remove();
+        }
+      }
+    }
+    loading();
+  });
 
   return (
     <UserProvider>
       <ChannelProvider>
-        {loading ? <Loading loading={loading} /> : <Component {...pageProps} />}
+        <div id="globalLoader">
+          <img
+            src="https://upload.wikimedia.org/wikipedia/commons/a/ad/YouTube_loading_symbol_3_%28transparent%29.gif"
+            alt="loading"
+            width="50vw"
+            height="50vh"
+          />
+        </div>
+        <Component {...pageProps} />
       </ChannelProvider>
     </UserProvider>
   );

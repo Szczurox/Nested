@@ -47,7 +47,7 @@ export const ChatMain: React.FC = ({}) => {
   const app = createFirebaseApp();
   const db = getFirestore(app!);
 
-  const handleScroll = (e: any) => {
+  const handleScroll = (_: any) => {
     console.log(listInnerRef.current?.scrollHeight);
     if (listInnerRef.current) {
       const { scrollTop, scrollHeight } = listInnerRef.current;
@@ -56,7 +56,8 @@ export const ChatMain: React.FC = ({}) => {
         setUnsubs([...unsubs, unsub]);
         listInnerRef.current.scrollTop += scrollHeight / 10;
       }
-      if (scrollTop < scrollHeight / 2) setCanScrollToBottom(true);
+      if (scrollTop < scrollHeight / 1.2) setCanScrollToBottom(true);
+      else setCanScrollToBottom(false);
     }
   };
 

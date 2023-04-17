@@ -1,33 +1,21 @@
 import type { NextPage } from "next";
-import Link from "next/link";
-import { getAuth, signOut } from "firebase/auth";
+import { useEffect } from "react";
+import { useUser } from "context/userContext";
+import { useRouter } from "next/router";
+import Loading from "components/Loading";
 
 const Home: NextPage = () => {
-  const logOut = async () => {
-    const auth = getAuth();
-    signOut(auth)
-      .then(() => {
-        alert("signed out");
-      })
-      .catch((error) => {
-        console.log("SIGN OUT ERROR: " + error.message);
-      });
-  };
+  const { user, loadingUser } = useUser();
+  const router = useRouter();
 
-  return (
-    <div className="container">
-      <Link href="/login" passHref>
-        <button>LOGIN</button>
-      </Link>
-      <Link href="/register" passHref>
-        <button>REGISTER</button>
-      </Link>
-      <Link href="/chat" passHref>
-        <button>CHAT</button>
-      </Link>
-      <button onClick={logOut}>SIGN OUT</button>
-    </div>
-  );
+  useEffect(() => {
+    // Route to login if user is not authenticated
+    if (user.uid == "" && !loadingUser) router.push("/login");
+    // Else route to chat
+    else router.push("/chat");
+  });
+
+  return <div></div>;
 };
 
 export default Home;
