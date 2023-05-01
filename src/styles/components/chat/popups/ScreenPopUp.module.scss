@@ -1,0 +1,27 @@
+.screen_popup {
+  pointer-events: all;
+  z-index: 20;
+  position: fixed;
+  background-color: #00000050;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  left: 0;
+
+  .screen_popup_box {
+    position: relative;
+    max-width: 70ch;
+    margin: 0 auto;
+    height: auto;
+    width: auto;
+    max-height: 100vh;
+    margin-top: calc(120vh - 85vh - 20px);
+    background-color: #363a3f;
+    border-radius: 4px;
+    padding: 20px;
+    border: 1px solid #999;
+    overflow: auto;
+  }
+}

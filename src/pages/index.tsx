@@ -2,7 +2,6 @@ import type { NextPage } from "next";
 import { useEffect } from "react";
 import { useUser } from "context/userContext";
 import { useRouter } from "next/router";
-import Loading from "components/Loading";
 
 const Home: NextPage = () => {
   const { user, loadingUser } = useUser();

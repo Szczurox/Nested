@@ -48,15 +48,14 @@ export const ChatMain: React.FC = ({}) => {
   const db = getFirestore(app!);
 
   const handleScroll = (_: any) => {
-    console.log(listInnerRef.current?.scrollHeight);
     if (listInnerRef.current) {
       const { scrollTop, scrollHeight } = listInnerRef.current;
       if (scrollTop < scrollHeight / 4 && !messagesEnd) {
+        listInnerRef.current.scrollTop += scrollHeight / 4;
         const unsub = getMessages();
         setUnsubs([...unsubs, unsub]);
-        listInnerRef.current.scrollTop += scrollHeight / 10;
       }
-      if (scrollTop < scrollHeight / 1.2) setCanScrollToBottom(true);
+      if (scrollTop < scrollHeight / 1.9) setCanScrollToBottom(true);
       else setCanScrollToBottom(false);
     }
   };
@@ -71,24 +70,16 @@ export const ChatMain: React.FC = ({}) => {
   function callback(qMes: any) {
     return onSnapshot(qMes, (querySnapshot: any) => {
       querySnapshot.docChanges().forEach((change: any) => {
-        if (change.type === "added") {
-          setMessages((messages) => [
-            {
-              id: change.doc.id,
-              content: change.doc.data().content,
-              timestamp: change.doc.data().time,
-              uid: change.doc.data().userid,
-              file: change.doc.data().file,
-            },
-            ...messages.filter((el) => el.id !== change.doc.id),
-          ]);
-        }
-        if (change.type === "modified") {
-          console.log("Modified: ", change.doc.data());
-        }
-        if (change.type === "removed") {
-          console.log("Removed: ", change.doc.data());
-        }
+        setMessages((messages) => [
+          {
+            id: change.doc.id,
+            content: change.doc.data().content,
+            timestamp: change.doc.data().time,
+            uid: change.doc.data().userid,
+            file: change.doc.data().file,
+          },
+          ...messages.filter((el) => el.id !== change.doc.id),
+        ]);
       });
       if (querySnapshot.docs.length > 0) {
         setLastKey(
@@ -206,9 +197,9 @@ export const ChatMain: React.FC = ({}) => {
     };
   }, [channel.id]);
 
-  async function sendMessage(e: any) {
+  async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     // Send Message
-    if (e.keyCode == 13 && e.shiftKey == false && channel.id != "") {
+    if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
       e.preventDefault();
       if (input.replace(/\s/g, "").length) {
         await addDoc(
@@ -279,7 +270,7 @@ export const ChatMain: React.FC = ({}) => {
             Send Message
           </button>
         </form>
-        <div className={styles.chat_inputIcons}>
+        <div className={styles.chat_input_icons}>
           <GifIcon fontSize="large" />
           <EmojiEmotionsIcon fontSize="large" />
         </div>

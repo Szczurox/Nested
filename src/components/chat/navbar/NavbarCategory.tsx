@@ -83,9 +83,9 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 
   return (
     <div className="navbar_category" id={idC}>
-      <div className={styles.navbar_channelsHeader}>
+      <div className={styles.navbar_channels_header}>
         {body}
-        <AddIcon className={styles.navbar_addChannel} />
+        <AddIcon className={styles.navbar_add_channel} />
       </div>
       <div
         className="navbar_channels"

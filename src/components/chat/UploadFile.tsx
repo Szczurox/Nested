@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import styles from "../../styles/components/chat/UploadFile.module.scss";
 import { v4 } from "uuid";
 import {
@@ -18,6 +19,8 @@ import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import moment from "moment";
 import { createFirebaseApp } from "../../firebase/clientApp";
+import ScreenPopUp from "./popup/ScreenPopUp";
+import { TextareaAutosize } from "@material-ui/core";
 
 export const UploadFile: React.FC<{
   chatInput?: string;
@@ -43,42 +46,20 @@ export const UploadFile: React.FC<{
       setFileName(e.name);
       setFileUrl(URL.createObjectURL(e));
       setIsOpen(true);
-      const file = e;
-      const fileRef = ref(storage, `images/${v4()}/${file!.name}`);
-      const uploadTask = uploadBytesResumable(fileRef, file!);
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log("Upload is " + progress + "% done");
-          switch (snapshot.state) {
-            case "paused":
-              console.log("Upload is paused");
-              break;
-            case "running":
-              console.log("Upload is running");
-              break;
-          }
-        },
-        (error) => {
-          console.log(error);
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log("File uploaded! ", downloadURL);
-            fileSubmit(downloadURL);
-          });
-        }
-      );
     }
   }
 
+  const uploadFileKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
+      e.preventDefault();
+      uploadFile();
+    }
+  };
+
   const uploadFile = () => {
-    const file = fileG;
     setIsOpen(false);
-    const fileRef = ref(storage, v4());
-    const uploadTask = uploadBytesResumable(fileRef, file!);
+    const fileRef = ref(storage, `images/${v4()}/${fileG!.name}`);
+    const uploadTask = uploadBytesResumable(fileRef, fileG!);
     uploadTask.on(
       "state_changed",
       (snapshot) => {
@@ -133,14 +114,59 @@ export const UploadFile: React.FC<{
   }
 
   return (
-    <div className={styles.uploadFile}>
+    <div className={styles.upload_file}>
+      {isOpen && (
+        <ScreenPopUp>
+          <div>
+            <img
+              className={styles.upload_file_image}
+              src={fileUrl}
+              alt="Image couldn't load"
+            />
+            <p>
+              Upload to <b>#{channel.name}</b>
+            </p>
+            <div className={styles.popup_input}>
+              <form>
+                <TextareaAutosize
+                  value={input}
+                  maxRows={10}
+                  wrap="soft"
+                  maxLength={2000}
+                  disabled={channel.id == ""}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => uploadFileKey(e)}
+                  placeholder={`Message #${channel.name}`}
+                />
+              </form>
+            </div>
+            <div className={styles.popup_buttons}>
+              <div
+                className={styles.popup_cancel}
+                onClick={(_) => {
+                  setIsOpen(!isOpen);
+                  setInput("");
+                }}
+              >
+                Cancel
+              </div>
+              <button
+                className={styles.popup_upload}
+                onClick={(_) => uploadFile()}
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+        </ScreenPopUp>
+      )}
       <form>
-        <div className={styles.uploadFile_file}>
+        <div className={styles.upload_file_file}>
           <AddCircleIcon fontSize="large" />
           <input
             type="file"
             value=""
-            className={styles.uploadFile_uploadFile}
+            className={styles.upload_file_upload_file}
             onChange={(e) => {
               if (e.target.files) checkFile(e.target.files[0]);
             }}

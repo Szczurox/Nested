@@ -24,6 +24,7 @@
   .navbar_profileIcons {
     svg {
       margin: 10px;
+      cursor: pointer;
       &:hover {
         color: white;
         background-color: #3c3f42;

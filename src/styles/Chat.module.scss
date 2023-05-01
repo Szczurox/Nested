@@ -43,7 +43,7 @@
 
         textarea {
           white-space: pre-wrap;
-          width: 95%;
+          width: 100%;
           resize: none;
           padding: 15px;
           padding-top: 10px;
@@ -60,12 +60,16 @@
       }
     }
 
-    .chat_inputIcons {
+    .chat_input_icons {
       margin-top: 5px;
-    }
-
-    svg:hover {
-      color: white;
+      cursor: pointer;
+      margin-left: 10px;
+      svg {
+        margin-left: 10px;
+        &:hover {
+          color: white;
+        }
+      }
     }
 
     .chat_messages {
@@ -98,6 +102,10 @@
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
+
+      &:hover {
+        cursor: pointer;
+      }
     }
   }
 }
