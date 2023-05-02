@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { Avatar } from "@material-ui/core";
 import style from "../../styles/components/chat/Message.module.scss";
 import moment from "moment";
@@ -11,6 +11,7 @@ interface MessageProps {
   userid: string;
   file?: string;
   time?: string;
+  children?: ReactNode;
 }
 
 export const Message: React.FC<MessageProps> = ({
@@ -19,6 +20,7 @@ export const Message: React.FC<MessageProps> = ({
   time,
   file,
   userid = "uid",
+  children,
 }) => {
   const [username, setUsername] = useState("");
 
@@ -60,6 +62,7 @@ export const Message: React.FC<MessageProps> = ({
             </a>
           </div>
         )}
+        {children}
       </div>
     </div>
   );

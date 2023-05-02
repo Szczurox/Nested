@@ -3,12 +3,13 @@
   justify-content: space-between;
   align-items: center;
   color: grey;
-  padding: 10px;
+  padding: 10px 20px 10px 20px;
   border-top: 1px solid grey;
 
   .navbar_profileInfo {
     flex: 1;
     padding: 10px;
+    padding-bottom: 0px;
     -webkit-touch-callout: all;
     -webkit-user-select: all;
     -khtml-user-select: all;
@@ -18,6 +19,8 @@
 
     h3 {
       color: white;
+      margin-bottom: 0px;
+      font-size: large;
     }
   }
 
@@ -25,6 +28,7 @@
     svg {
       margin: 10px;
       cursor: pointer;
+
       &:hover {
         color: white;
         background-color: #3c3f42;

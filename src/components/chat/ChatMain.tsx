@@ -1,10 +1,13 @@
 import { TextareaAutosize } from "@material-ui/core";
+import { ProgressBar } from "react-bootstrap";
 import React, { useEffect, useRef, useState } from "react";
 import ChatHeader from "./ChatHeader";
 import Message from "./Message";
-import UploadFile from "./UploadFile";
+import UploadFile, { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/Chat.module.scss";
+import "bootstrap/dist/css/bootstrap.min.css";
 import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
+import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import GifIcon from "@material-ui/icons/Gif";
 import { createFirebaseApp } from "../../firebase/clientApp";
 import {
@@ -38,8 +41,10 @@ export const ChatMain: React.FC = ({}) => {
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]);
   const [messagesEnd, setMessagesEnd] = useState(false);
   const [canScrollToBottom, setCanScrollToBottom] = useState(false);
+  const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]);
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const { channel } = useChannel();
   const { user } = useUser();
@@ -110,6 +115,20 @@ export const ChatMain: React.FC = ({}) => {
 
     return callback(qMes);
   }
+
+  useEffect(() => {
+    document.addEventListener(
+      "keydown",
+      () => textAreaRef.current!.focus(),
+      false
+    );
+    return () =>
+      document.removeEventListener(
+        "keydown",
+        () => textAreaRef.current!.focus(),
+        false
+      );
+  });
 
   useEffect(() => {
     function getMessagesFirstBatch() {
@@ -186,6 +205,7 @@ export const ChatMain: React.FC = ({}) => {
     }
 
     setMessages([]);
+    textAreaRef.current!.focus();
     const unsub = getMessagesFirstBatch();
     return () => {
       if (unsubs.length > 0) {
@@ -225,9 +245,23 @@ export const ChatMain: React.FC = ({}) => {
     }
   }
 
+  const fileUploading = (fileData: FileUploadingData) => {
+    console.log(filesUploading);
+    if (fileData.percent != 101)
+      setFilesUploading((files) => [
+        ...files.filter((el) => el.id != fileData.id),
+        fileData,
+      ]);
+    else
+      setFilesUploading((files) => files.filter((el) => el.id != fileData.id));
+    scrollToBottom();
+  };
+
   return (
     <div className={styles.chat}>
-      <ChatHeader />
+      <div className={styles.chat_shadow}>
+        <ChatHeader />
+      </div>
       <div
         className={styles.chat_messages}
         onScroll={(e) => handleScroll(e)}
@@ -247,10 +281,36 @@ export const ChatMain: React.FC = ({}) => {
               file={file}
             />
           ))}
+        {filesUploading.map(({ name, percent, id }) => {
+          return (
+            <Message
+              key={id}
+              id={id}
+              content={""}
+              time={moment().utcOffset("+00:00").format()}
+              userid={user.id}
+            >
+              <div className={styles.chat_file_uploading}>
+                <InsertDriveFileIcon className={styles.chat_upload_icon} />
+                <div className={styles.chat_upload_info}>
+                  <div className={styles.chat_upload_name}>{name}</div>
+                  <ProgressBar
+                    now={percent}
+                    className={styles.chat_upload_progressbar}
+                  />
+                </div>
+              </div>
+            </Message>
+          );
+        })}
+        <div></div>
       </div>
-
       <div className={styles.chat_input}>
-        <UploadFile disabled={channel.id == ""} chatInput={input} />
+        <UploadFile
+          disabled={channel.id == ""}
+          chatInput={input}
+          uploadCallback={fileUploading}
+        />
         <form>
           <TextareaAutosize
             value={input}
@@ -261,6 +321,8 @@ export const ChatMain: React.FC = ({}) => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={sendMessage}
             placeholder={`Message #${channel.name}`}
+            autoFocus
+            ref={textAreaRef}
           />
           <button
             disabled={channel.id == ""}

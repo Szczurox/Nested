@@ -1,6 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
-import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import styles from "../../styles/components/chat/UploadFile.module.scss";
 import { v4 } from "uuid";
 import {
@@ -22,17 +21,32 @@ import { createFirebaseApp } from "../../firebase/clientApp";
 import ScreenPopUp from "./popup/ScreenPopUp";
 import { TextareaAutosize } from "@material-ui/core";
 
-export const UploadFile: React.FC<{
+export interface FileUploadingData {
+  id: string;
+  name: string;
+  percent: number;
+}
+
+export interface UploadFileProps {
   chatInput?: string;
   disabled?: boolean;
-}> = ({ chatInput, disabled = false }) => {
+  uploadCallback: (fileData: FileUploadingData) => void;
+}
+
+export const UploadFile: React.FC<UploadFileProps> = ({
+  chatInput,
+  disabled = false,
+  uploadCallback,
+}) => {
   const [input, setInput] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
   const [fileUrl, setFileUrl] = useState<string>("");
   const [fileG, setFileG] = useState<File>();
   const [isOpen, setIsOpen] = useState(false);
+
   const { channel } = useChannel();
   const { user } = useUser();
+
   const storage = getStorage();
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -58,13 +72,16 @@ export const UploadFile: React.FC<{
 
   const uploadFile = () => {
     setIsOpen(false);
-    const fileRef = ref(storage, `images/${v4()}/${fileG!.name}`);
+    const id = v4();
+    uploadCallback({ id: id, name: fileName, percent: 0 });
+    const fileRef = ref(storage, `images/${id}/${fileG!.name}`);
     const uploadTask = uploadBytesResumable(fileRef, fileG!);
     uploadTask.on(
       "state_changed",
       (snapshot) => {
         const progress =
           (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        uploadCallback({ id: id, name: fileName, percent: progress });
         console.log("Upload is " + progress + "% done");
         switch (snapshot.state) {
           case "paused":
@@ -82,6 +99,7 @@ export const UploadFile: React.FC<{
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           console.log("File uploaded! ", downloadURL);
           fileSubmit(downloadURL);
+          uploadCallback({ id: id, name: fileName, percent: 101 });
         });
       }
     );
@@ -137,6 +155,7 @@ export const UploadFile: React.FC<{
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => uploadFileKey(e)}
                   placeholder={`Message #${channel.name}`}
+                  autoFocus
                 />
               </form>
             </div>

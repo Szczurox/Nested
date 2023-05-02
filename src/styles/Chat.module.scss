@@ -18,15 +18,16 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-left: 15px;
-      padding-right: 15px;
-      border-radius: 5px;
-      padding-bottom: 6px;
+      padding-left: 20px;
+      padding-right: 20px;
+      border-radius: 10px;
+      padding-bottom: 10px;
       margin: 20px;
       margin-bottom: 30px;
       margin-top: 0px;
       border-top: 1px solid gray;
       background-color: #474b53;
+      font-size: large;
 
       form {
         overflow-y: auto;
@@ -46,7 +47,7 @@
           width: 100%;
           resize: none;
           padding: 15px;
-          padding-top: 10px;
+          padding-top: 16px;
           padding-bottom: 4px;
           border: none;
           outline-width: 0;
@@ -72,6 +73,13 @@
       }
     }
 
+    .chat_shadow {
+      width: 100%;
+      margin-bottom: 5px;
+      background-color: transparent;
+      box-shadow: 0px 2px 5px #26282c;
+    }
+
     .chat_messages {
       -ms-overflow-style: none;
       scrollbar-width: none;
@@ -79,6 +87,42 @@
       background-color: #363a3f;
       overflow-y: auto;
       overflow-x: hidden;
+    }
+
+    .chat_file_uploading {
+      background-color: #2f3135;
+      margin-left: 60px;
+      width: 40vw;
+      height: 10vh;
+      border-radius: 10px;
+      margin-top: 5px;
+
+      .chat_upload_icon {
+        display: inline-block;
+        width: 13%;
+        height: 8vh;
+        margin-top: 0.8vh;
+      }
+
+      .chat_upload_info {
+        margin-top: 0.8vh;
+        vertical-align: top;
+        display: inline-block;
+        width: 70%;
+      }
+
+      .chat_upload_progressbar {
+        width: 100%;
+      }
+
+      .chat_upload_name {
+        font-size: large;
+        margin-top: 8px;
+        margin-bottom: 10px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+      }
     }
 
     .chat_jump {

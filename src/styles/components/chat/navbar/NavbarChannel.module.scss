@@ -2,6 +2,7 @@
   padding: 2px;
   padding-left: 10px;
   padding-right: 10px;
+
   h4 {
     border-radius: 10px;
     border: 2px;
@@ -16,6 +17,10 @@
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    font-size: large;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
 
   .channel_name {

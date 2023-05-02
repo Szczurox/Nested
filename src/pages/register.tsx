@@ -8,6 +8,7 @@ import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
+import { createFirebaseApp } from "../firebase/clientApp";
 
 const SignupSchema = Yup.object().shape({
   username: Yup.string()
@@ -25,9 +26,11 @@ export const Register: React.FC<{}> = ({}) => {
   const { user, setUser, loadingUser } = useUser();
   const router = useRouter();
 
-  const createUser = async (username: string) => {
-    const db = getFirestore();
-    await setDoc(doc(db, "profile", user.uid), { username: username });
+  const app = createFirebaseApp();
+  const db = getFirestore(app!);
+
+  const createUser = async (username: string, uid: string) => {
+    await setDoc(doc(db, "profile", uid), { username: username });
   };
 
   const easing = [0.06, -0.5, 0.01, 0.99];
@@ -94,8 +97,11 @@ export const Register: React.FC<{}> = ({}) => {
               })
               .then((userCredential) => {
                 if (userCredential) {
-                  setUser({ uid: userCredential.user.uid, username: "" });
-                  createUser(values.username);
+                  setUser({
+                    uid: userCredential.user.uid,
+                    username: values.username,
+                  });
+                  createUser(values.username, userCredential.user.uid);
                   router.push("/chat");
                 }
               });
