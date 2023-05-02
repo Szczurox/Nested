@@ -10,7 +10,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       if (typeof window !== "undefined") {
         const loader = document.getElementById("globalLoader");
         if (loader) {
-          await new Promise((resolve) => setTimeout(resolve, 1500));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
           loader.remove();
         }
       }

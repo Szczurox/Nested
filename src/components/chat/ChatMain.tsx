@@ -2,7 +2,7 @@ import { TextareaAutosize } from "@material-ui/core";
 import { ProgressBar } from "react-bootstrap";
 import React, { useEffect, useRef, useState } from "react";
 import ChatHeader from "./ChatHeader";
-import Message from "./Message";
+import Message, { MessageData } from "./Message";
 import UploadFile, { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/Chat.module.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -26,22 +26,15 @@ import { serverTimestamp } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 
-export interface MessageData {
-  id: string;
-  content: string;
-  timestamp: string;
-  uid: string;
-  file?: string;
-}
-
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<MessageData[]>([]);
+  const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]);
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0));
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]);
   const [messagesEnd, setMessagesEnd] = useState(false);
   const [canScrollToBottom, setCanScrollToBottom] = useState(false);
-  const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]);
+  const [canFocus, setCanFocus] = useState(true);
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -115,20 +108,6 @@ export const ChatMain: React.FC = ({}) => {
 
     return callback(qMes);
   }
-
-  useEffect(() => {
-    document.addEventListener(
-      "keydown",
-      () => textAreaRef.current!.focus(),
-      false
-    );
-    return () =>
-      document.removeEventListener(
-        "keydown",
-        () => textAreaRef.current!.focus(),
-        false
-      );
-  });
 
   useEffect(() => {
     function getMessagesFirstBatch() {
@@ -246,7 +225,7 @@ export const ChatMain: React.FC = ({}) => {
   }
 
   const fileUploading = (fileData: FileUploadingData) => {
-    console.log(filesUploading);
+    if (fileData.percent == 0) setInput("");
     if (fileData.percent != 101)
       setFilesUploading((files) => [
         ...files.filter((el) => el.id != fileData.id),
@@ -321,7 +300,6 @@ export const ChatMain: React.FC = ({}) => {
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={sendMessage}
             placeholder={`Message #${channel.name}`}
-            autoFocus
             ref={textAreaRef}
           />
           <button

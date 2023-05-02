@@ -42,6 +42,21 @@
     margin-left: 10px;
   }
 
+  .message_content {
+    padding: none;
+    margin: none;
+  }
+
+  .message_image_text {
+    margin-top: -10px;
+    max-width: 800px;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    margin-left: 60px;
+  }
+
   .message_image {
     margin-top: 10px;
     max-width: 800px;

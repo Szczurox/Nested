@@ -14,6 +14,14 @@ interface MessageProps {
   children?: ReactNode;
 }
 
+export interface MessageData {
+  id: string;
+  content: string;
+  timestamp: string;
+  uid: string;
+  file?: string;
+}
+
 export const Message: React.FC<MessageProps> = ({
   id,
   content,
@@ -51,14 +59,20 @@ export const Message: React.FC<MessageProps> = ({
           </span>
         </h4>
         {content && (
-          <div className="message_content">
+          <div className={style.message_content}>
             <p>{content}</p>
           </div>
         )}
         {file && (
           <div className={style.message_embed}>
             <a href={file} target="_blank" rel="noreferrer">
-              <img className={style.message_image} src={file} alt="image" />
+              <img
+                className={
+                  content ? style.message_image_text : style.message_image
+                }
+                src={file}
+                alt="image"
+              />
             </a>
           </div>
         )}

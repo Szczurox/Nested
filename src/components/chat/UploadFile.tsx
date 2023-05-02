@@ -163,7 +163,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
               <div
                 className={styles.popup_cancel}
                 onClick={(_) => {
-                  setIsOpen(!isOpen);
+                  setIsOpen(false);
                   setInput("");
                 }}
               >
