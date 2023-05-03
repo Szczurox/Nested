@@ -6,6 +6,7 @@ import { motion, Variants } from "framer-motion";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useUser } from "context/userContext";
 import { useRouter } from "next/router";
+import { doc, getDoc } from "firebase/firestore";
 
 export const Login: React.FC<{}> = ({}) => {
   const { user, setUser, loadingUser } = useUser();
@@ -53,7 +54,6 @@ export const Login: React.FC<{}> = ({}) => {
               })
               .then((userCredential) => {
                 if (userCredential) {
-                  setUser({ uid: userCredential.user.uid, username: "" });
                   console.log(user.uid);
                   router.push("/chat");
                 }
