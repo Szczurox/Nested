@@ -17,7 +17,11 @@ import { doc, getFirestore, updateDoc } from "firebase/firestore";
 export const NavbarProfile: React.FC = ({}) => {
   const { user, setUser } = useUser();
 
-  const [avatar, setAvatar] = useState(user.avatar);
+  const [avatar, setAvatar] = useState(
+    user.avatar != ""
+      ? user.avatar
+      : "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
+  );
 
   const storage = getStorage();
   const app = createFirebaseApp();
@@ -74,13 +78,7 @@ export const NavbarProfile: React.FC = ({}) => {
   return (
     <div className={styles.navbar_profile}>
       <div className={styles.navbar_avatar}>
-        <Avatar
-          src={
-            avatar != ""
-              ? avatar
-              : "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
-          }
-        />
+        <Avatar src={avatar} />
         <input
           type="file"
           value=""

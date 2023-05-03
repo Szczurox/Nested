@@ -6,10 +6,9 @@ import { motion, Variants } from "framer-motion";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useUser } from "context/userContext";
 import { useRouter } from "next/router";
-import { doc, getDoc } from "firebase/firestore";
 
 export const Login: React.FC<{}> = ({}) => {
-  const { user, setUser, loadingUser } = useUser();
+  const { user, loadingUser } = useUser();
   const router = useRouter();
 
   const easing = [0.06, -0.5, 0.01, 0.99];
