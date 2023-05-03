@@ -4,7 +4,7 @@ import { Formik, Field, Form } from "formik";
 import styles from "../styles/Auth.module.scss";
 import { motion, Variants } from "framer-motion";
 import { useUser } from "context/userContext";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
@@ -30,7 +30,10 @@ export const Register: React.FC<{}> = ({}) => {
   const db = getFirestore(app!);
 
   const createUser = async (username: string, uid: string) => {
-    await setDoc(doc(db, "profile", uid), { username: username });
+    await setDoc(doc(db, "profile", uid), {
+      username: username,
+      createdAt: serverTimestamp(),
+    });
   };
 
   const easing = [0.06, -0.5, 0.01, 0.99];

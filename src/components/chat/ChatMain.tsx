@@ -34,7 +34,7 @@ export const ChatMain: React.FC = ({}) => {
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]);
   const [messagesEnd, setMessagesEnd] = useState(false);
   const [canScrollToBottom, setCanScrollToBottom] = useState(false);
-  const [canFocus, setCanFocus] = useState(true);
+  const [autoScroll, setAutoScroll] = useState(true);
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -46,6 +46,9 @@ export const ChatMain: React.FC = ({}) => {
   const db = getFirestore(app!);
 
   const handleScroll = (_: any) => {
+    const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
+    setAutoScroll(scrollTop >= scrollHeight - clientHeight - 100);
+
     if (listInnerRef.current) {
       const { scrollTop, scrollHeight } = listInnerRef.current;
       if (scrollTop < scrollHeight / 4 && !messagesEnd) {
@@ -53,8 +56,11 @@ export const ChatMain: React.FC = ({}) => {
         const unsub = getMessages();
         setUnsubs([...unsubs, unsub]);
       }
-      if (scrollTop < scrollHeight / 1.9) setCanScrollToBottom(true);
-      else setCanScrollToBottom(false);
+      if (scrollTop < scrollHeight / 1.9 && messages.length > 60) {
+        setCanScrollToBottom(true);
+      } else {
+        setCanScrollToBottom(false);
+      }
     }
   };
 
@@ -65,19 +71,29 @@ export const ChatMain: React.FC = ({}) => {
     }
   };
 
+  async function wait(time: number) {
+    await new Promise((resolve) => setTimeout(resolve, time));
+  }
+
   function callback(qMes: any) {
     return onSnapshot(qMes, (querySnapshot: any) => {
       querySnapshot.docChanges().forEach((change: any) => {
-        setMessages((messages) => [
-          {
-            id: change.doc.id,
-            content: change.doc.data().content,
-            timestamp: change.doc.data().time,
-            uid: change.doc.data().userid,
-            file: change.doc.data().file,
-          },
-          ...messages.filter((el) => el.id !== change.doc.id),
-        ]);
+        if (change.type === "added" || change.type === "modified") {
+          setMessages((messages) =>
+            [
+              {
+                id: change.doc.id,
+                content: change.doc.data().content,
+                timestamp: change.doc.data().time,
+                uid: change.doc.data().userid,
+                file: change.doc.data().file,
+              },
+              ...messages.filter((el) => el.id !== change.doc.id),
+            ].sort((x, y) => {
+              return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
+            })
+          );
+        }
       });
       if (querySnapshot.docs.length > 0) {
         setLastKey(
@@ -109,6 +125,13 @@ export const ChatMain: React.FC = ({}) => {
     return callback(qMes);
   }
 
+  const onImageLoadComplete = () => {
+    if (listInnerRef.current && autoScroll) {
+      listInnerRef.current.focus();
+      scrollToBottom();
+    }
+  };
+
   useEffect(() => {
     function getMessagesFirstBatch() {
       // Channels query
@@ -128,28 +151,33 @@ export const ChatMain: React.FC = ({}) => {
       );
 
       const unsub = onSnapshot(qMes, (querySnapshot) => {
-        const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
-        let scroll = scrollTop >= scrollHeight - clientHeight - 100;
-
         querySnapshot.docChanges().forEach((change) => {
           if (change.type === "added" || change.type === "modified") {
             if (!messages.map((el) => el.id).includes(change.doc.id)) {
-              setMessages((messages) => [
-                ...messages.filter((el) => el.id !== change.doc.id),
-                {
-                  id: change.doc.id,
-                  content: change.doc.data().content,
-                  timestamp: change.doc.data().time,
-                  uid: change.doc.data().userid,
-                  file: change.doc.data().file,
-                },
-              ]);
+              setMessages((messages) =>
+                [
+                  ...messages.filter((el) => el.id !== change.doc.id),
+                  {
+                    id: change.doc.id,
+                    content: change.doc.data().content,
+                    timestamp: change.doc.data().time,
+                    uid: change.doc.data().userid,
+                    file: change.doc.data().file,
+                  },
+                ].sort((x, y) => {
+                  return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
+                })
+              );
             }
           }
           if (change.type === "removed") {
-            setMessages((messages) => [
-              ...messages.filter((el) => el.id !== change.doc.id),
-            ]);
+            setMessages((messages) =>
+              [...messages.filter((el) => el.id !== change.doc.id)].sort(
+                (x, y) => {
+                  return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
+                }
+              )
+            );
           }
         });
 
@@ -160,18 +188,8 @@ export const ChatMain: React.FC = ({}) => {
           setMessagesEnd(false);
         } else setMessagesEnd(true);
 
-        if (scroll) {
-          // Scroll after all images are loaded
-          Promise.all(
-            Array.from(document.images)
-              .filter((img) => !img.complete)
-              .map(
-                (img) =>
-                  new Promise((resolve) => {
-                    img.onload = img.onerror = resolve;
-                  })
-              )
-          ).then(() => {
+        if (autoScroll) {
+          wait(300).then(() => {
             if (listInnerRef.current) {
               listInnerRef.current.focus();
               scrollToBottom();
@@ -233,7 +251,9 @@ export const ChatMain: React.FC = ({}) => {
       ]);
     else
       setFilesUploading((files) => files.filter((el) => el.id != fileData.id));
-    scrollToBottom();
+    if (autoScroll) {
+      scrollToBottom();
+    }
   };
 
   return (
@@ -246,20 +266,17 @@ export const ChatMain: React.FC = ({}) => {
         onScroll={(e) => handleScroll(e)}
         ref={listInnerRef}
       >
-        {messages
-          .sort((x, y) => {
-            return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
-          })
-          .map(({ id, content, timestamp, uid, file }) => (
-            <Message
-              key={id}
-              id={id}
-              content={content}
-              time={timestamp}
-              userid={uid}
-              file={file}
-            />
-          ))}
+        {messages.map(({ id, content, timestamp, uid, file }) => (
+          <Message
+            key={id}
+            id={id}
+            content={content}
+            time={timestamp}
+            userid={uid}
+            file={file}
+            onImageLoad={onImageLoadComplete}
+          />
+        ))}
         {filesUploading.map(({ name, percent, id }) => {
           return (
             <Message
@@ -267,7 +284,7 @@ export const ChatMain: React.FC = ({}) => {
               id={id}
               content={""}
               time={moment().utcOffset("+00:00").format()}
-              userid={user.id}
+              userid={user.uid}
             >
               <div className={styles.chat_file_uploading}>
                 <InsertDriveFileIcon className={styles.chat_upload_icon} />
@@ -315,7 +332,7 @@ export const ChatMain: React.FC = ({}) => {
           <EmojiEmotionsIcon fontSize="large" />
         </div>
       </div>
-      {messages.length > 60 && canScrollToBottom && (
+      {canScrollToBottom && (
         <div
           className={styles.chat_jump}
           onClick={(_) => {

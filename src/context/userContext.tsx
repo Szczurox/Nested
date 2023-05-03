@@ -6,7 +6,7 @@ import { doc, getDoc, getFirestore } from "firebase/firestore";
 export const UserContext = createContext(undefined as any);
 
 export default function UserContextComp({ children }: any) {
-  const [user, setUser] = useState({ uid: "", username: "" });
+  const [user, setUser] = useState({ uid: "", username: "", avatar: "" });
   const [loadingUser, setLoadingUser] = useState(true);
 
   useEffect(() => {
@@ -19,8 +19,12 @@ export default function UserContextComp({ children }: any) {
           const uid = user.uid;
           const docSnap = await getDoc(doc(db, "profile", uid));
           if (docSnap.exists())
-            setUser({ uid: uid, username: docSnap.data().username });
-        } else setUser({ uid: "", username: "" });
+            setUser({
+              uid: uid,
+              username: docSnap.data().username,
+              avatar: docSnap.data().avatar ? docSnap.data().avatar : "",
+            });
+        } else setUser({ uid: "", username: "", avatar: "" });
       } catch (error) {
         console.log("ERROR: unable to get user");
       } finally {

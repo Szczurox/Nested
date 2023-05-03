@@ -12,6 +12,7 @@ interface MessageProps {
   file?: string;
   time?: string;
   children?: ReactNode;
+  onImageLoad?: () => void;
 }
 
 export interface MessageData {
@@ -29,8 +30,12 @@ export const Message: React.FC<MessageProps> = ({
   file,
   userid = "uid",
   children,
+  onImageLoad,
 }) => {
   const [username, setUsername] = useState("");
+  const [avatar, setAvatar] = useState(
+    "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
+  );
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -38,19 +43,19 @@ export const Message: React.FC<MessageProps> = ({
   useEffect(() => {
     async function getUserData() {
       const docSnap = await getDoc(doc(db, "profile", userid));
-      if (docSnap.exists()) setUsername(docSnap.data().username);
+      if (docSnap.exists()) {
+        setUsername(docSnap.data().username);
+        if (docSnap.data().avatar) setAvatar(docSnap.data().avatar);
+      }
     }
     getUserData();
   });
 
-  return (
+  return username ? (
     <div className={style.message} id={id}>
       <div className={style.message_info}>
         <div className={style.message_profilePicture}>
-          <Avatar
-            style={{ height: "45px", width: "45px" }}
-            src="https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
-          />
+          <Avatar style={{ height: "45px", width: "45px" }} src={avatar} />
         </div>
         <h4>
           {username}
@@ -72,6 +77,7 @@ export const Message: React.FC<MessageProps> = ({
                 }
                 src={file}
                 alt="image"
+                onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
               />
             </a>
           </div>
@@ -79,6 +85,8 @@ export const Message: React.FC<MessageProps> = ({
         {children}
       </div>
     </div>
+  ) : (
+    <div></div>
   );
 };
 
