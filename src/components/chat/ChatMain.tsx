@@ -13,6 +13,7 @@ import { createFirebaseApp } from "../../firebase/clientApp";
 import {
   addDoc,
   collection,
+  doc,
   getFirestore,
   limit,
   onSnapshot,
@@ -20,11 +21,13 @@ import {
   query,
   startAfter,
   Timestamp,
+  updateDoc,
 } from "firebase/firestore";
 import moment from "moment";
 import { serverTimestamp } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
+import SlowDownPopUp from "./popup/SlowDownPopUp";
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState("");
@@ -32,6 +35,7 @@ export const ChatMain: React.FC = ({}) => {
   const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]);
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0));
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]);
+  const [slowDownCount, setSlowDownCount] = useState(0);
   const [messagesEnd, setMessagesEnd] = useState(false);
   const [canScrollToBottom, setCanScrollToBottom] = useState(false);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -215,8 +219,10 @@ export const ChatMain: React.FC = ({}) => {
   }, [channel.id]);
 
   async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    // Send Message
-    if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
+    if (slowDownCount > 2) textAreaRef.current!.blur();
+    else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
+      const timestamp = serverTimestamp();
+      // Send Message
       e.preventDefault();
       if (input.replace(/\s/g, "").length) {
         await addDoc(
@@ -231,12 +237,18 @@ export const ChatMain: React.FC = ({}) => {
             "messages"
           ),
           {
-            createdAt: serverTimestamp(),
             time: moment().utcOffset("+00:00").format(),
             content: input,
             userid: user.uid,
+            createdAt: timestamp,
           }
-        );
+        ).catch((_) => {
+          setSlowDownCount(slowDownCount + 1);
+          console.log(slowDownCount);
+        });
+        await updateDoc(doc(db, "profile", user.uid), {
+          lastMessagedAt: timestamp,
+        });
       }
       setInput("");
     }
@@ -258,6 +270,9 @@ export const ChatMain: React.FC = ({}) => {
 
   return (
     <div className={styles.chat}>
+      {slowDownCount > 2 ? (
+        <SlowDownPopUp onOk={() => setSlowDownCount(0)} />
+      ) : null}
       <div className={styles.chat_shadow}>
         <ChatHeader />
       </div>

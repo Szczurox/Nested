@@ -20,6 +20,7 @@ import moment from "moment";
 import { createFirebaseApp } from "../../firebase/clientApp";
 import ScreenPopUp from "./popup/ScreenPopUp";
 import { TextareaAutosize } from "@material-ui/core";
+import UploadFilePopUp from "./popup/UploadFilePopUp";
 
 export interface FileUploadingData {
   id: string;
@@ -38,7 +39,6 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   disabled = false,
   uploadCallback,
 }) => {
-  const [input, setInput] = useState<string>("");
   const [fileName, setFileName] = useState<string>("");
   const [fileUrl, setFileUrl] = useState<string>("");
   const [fileG, setFileG] = useState<File>();
@@ -52,10 +52,8 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   const db = getFirestore(app!);
 
   async function checkFile(e: File) {
-    console.log(e.type);
     if (e.type.substring(0, 5) == "image") {
       console.log("valid");
-      if (chatInput) setInput(chatInput);
       setFileG(e);
       setFileName(e.name);
       setFileUrl(URL.createObjectURL(e));
@@ -63,14 +61,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     }
   }
 
-  const uploadFileKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
-      e.preventDefault();
-      uploadFile();
-    }
-  };
-
-  const uploadFile = () => {
+  const uploadFile = (input: string) => {
     setIsOpen(false);
     const id = v4();
     uploadCallback({ id: id, name: fileName, percent: 0 });
@@ -98,17 +89,15 @@ export const UploadFile: React.FC<UploadFileProps> = ({
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           console.log("File uploaded! ", downloadURL);
-          fileSubmit(downloadURL);
+          fileSubmit(downloadURL, input);
           uploadCallback({ id: id, name: fileName, percent: 101 });
         });
       }
     );
   };
 
-  async function fileSubmit(url: string) {
-    console.log(fileName);
+  async function fileSubmit(url: string, input: string) {
     input.replace(/\s/g, "");
-    console.log(channel.idC, channel.id, url, input);
     await addDoc(
       collection(
         db,
@@ -128,56 +117,17 @@ export const UploadFile: React.FC<UploadFileProps> = ({
         file: url,
       }
     );
-    setInput("");
   }
 
   return (
     <div className={styles.upload_file}>
       {isOpen && (
-        <ScreenPopUp>
-          <div>
-            <img
-              className={styles.upload_file_image}
-              src={fileUrl}
-              alt="Image couldn't load"
-            />
-            <p>
-              Upload to <b>#{channel.name}</b>
-            </p>
-            <div className={styles.popup_input}>
-              <form>
-                <TextareaAutosize
-                  value={input}
-                  maxRows={10}
-                  wrap="soft"
-                  maxLength={2000}
-                  disabled={channel.id == ""}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={(e) => uploadFileKey(e)}
-                  placeholder={`Message #${channel.name}`}
-                  autoFocus
-                />
-              </form>
-            </div>
-            <div className={styles.popup_buttons}>
-              <div
-                className={styles.popup_cancel}
-                onClick={(_) => {
-                  setIsOpen(false);
-                  setInput("");
-                }}
-              >
-                Cancel
-              </div>
-              <button
-                className={styles.popup_upload}
-                onClick={(_) => uploadFile()}
-              >
-                Upload
-              </button>
-            </div>
-          </div>
-        </ScreenPopUp>
+        <UploadFilePopUp
+          uploadFile={uploadFile}
+          fileUrl={fileUrl}
+          chatInput={chatInput ? chatInput : ""}
+          cancelled={() => setIsOpen(false)}
+        />
       )}
       <form>
         <div className={styles.upload_file_file}>

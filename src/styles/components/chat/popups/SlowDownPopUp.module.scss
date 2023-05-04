@@ -1,0 +1,27 @@
+.popup_text {
+  color: white;
+}
+
+.popup_buttons {
+  white-space: nowrap;
+  text-align: right;
+  .popup_ok {
+    white-space: nowrap;
+    border-radius: 5px;
+    background-color: rgb(95, 106, 110);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    margin-top: 10px;
+
+    &:hover {
+      background-color: #808b90;
+    }
+  }
+}
