@@ -3,7 +3,7 @@ import { ProgressBar } from "react-bootstrap";
 import React, { useEffect, useRef, useState } from "react";
 import ChatHeader from "./ChatHeader";
 import Message, { MessageData } from "./Message";
-import UploadFile, { FileUploadingData } from "./UploadFile";
+import UploadFile, { FileUploadingData, UploadFileProps } from "./UploadFile";
 import styles from "../../styles/Chat.module.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
@@ -28,6 +28,7 @@ import { serverTimestamp } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import SlowDownPopUp from "./popup/SlowDownPopUp";
+import { wait } from "components/utils/utils";
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState("");
@@ -48,6 +49,30 @@ export const ChatMain: React.FC = ({}) => {
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
+
+  const messagesCollection = collection(
+    db,
+    "groups",
+    "H8cO2zBjCyJYsmM4g5fv",
+    "categories",
+    channel.idC,
+    "channels",
+    channel.id,
+    "messages"
+  );
+
+  useEffect(() => {
+    document.addEventListener("paste", pasted);
+    return () => {
+      document.removeEventListener("paste", pasted);
+    };
+  });
+
+  const pasted = (e: ClipboardEvent) => {
+    if (e.clipboardData!.files[0] == undefined && channel.id != "") {
+      setInput(input + e.clipboardData!.getData("Text"));
+    }
+  };
 
   const handleScroll = (_: any) => {
     const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
@@ -74,10 +99,6 @@ export const ChatMain: React.FC = ({}) => {
         listInnerRef.current.scrollHeight - listInnerRef.current.clientHeight;
     }
   };
-
-  async function wait(time: number) {
-    await new Promise((resolve) => setTimeout(resolve, time));
-  }
 
   function callback(qMes: any) {
     return onSnapshot(qMes, (querySnapshot: any) => {
@@ -111,16 +132,7 @@ export const ChatMain: React.FC = ({}) => {
   function getMessages() {
     // Channels query
     const qMes = query(
-      collection(
-        db,
-        "groups",
-        "H8cO2zBjCyJYsmM4g5fv",
-        "categories",
-        channel.idC,
-        "channels",
-        channel.id,
-        "messages"
-      ),
+      messagesCollection,
       orderBy("createdAt", "desc"),
       limit(20),
       startAfter(lastKey)
@@ -140,16 +152,7 @@ export const ChatMain: React.FC = ({}) => {
     function getMessagesFirstBatch() {
       // Channels query
       const qMes = query(
-        collection(
-          db,
-          "groups",
-          "H8cO2zBjCyJYsmM4g5fv",
-          "categories",
-          channel.idC,
-          "channels",
-          channel.id,
-          "messages"
-        ),
+        messagesCollection,
         orderBy("createdAt", "desc"),
         limit(20)
       );
@@ -209,43 +212,29 @@ export const ChatMain: React.FC = ({}) => {
     textAreaRef.current!.focus();
     const unsub = getMessagesFirstBatch();
     return () => {
-      if (unsubs.length > 0) {
-        for (let i = 0; i < unsubs.length; i++) {
-          unsubs[i]();
-        }
-      }
+      if (unsubs.length > 0)
+        for (let i = 0; i < unsubs.length; i++) unsubs[i]();
       unsub();
     };
   }, [channel.id]);
 
   async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (slowDownCount > 2) textAreaRef.current!.blur();
+    if (slowDownCount > 1) textAreaRef.current!.blur();
     else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
       const timestamp = serverTimestamp();
       // Send Message
       e.preventDefault();
       if (input.replace(/\s/g, "").length) {
-        await addDoc(
-          collection(
-            db,
-            "groups",
-            "H8cO2zBjCyJYsmM4g5fv",
-            "categories",
-            channel.idC,
-            "channels",
-            channel.id,
-            "messages"
-          ),
-          {
-            time: moment().utcOffset("+00:00").format(),
-            content: input,
-            userid: user.uid,
-            createdAt: timestamp,
-          }
-        ).catch((_) => {
-          setSlowDownCount(slowDownCount + 1);
+        await addDoc(messagesCollection, {
+          time: moment().utcOffset("+00:00").format(),
+          content: input,
+          userid: user.uid,
+          createdAt: timestamp,
+        }).catch((_) => {
           console.log(slowDownCount);
+          setSlowDownCount(slowDownCount + 1);
         });
+
         await updateDoc(doc(db, "profile", user.uid), {
           lastMessagedAt: timestamp,
         });
@@ -270,7 +259,7 @@ export const ChatMain: React.FC = ({}) => {
 
   return (
     <div className={styles.chat}>
-      {slowDownCount > 2 ? (
+      {slowDownCount > 1 ? (
         <SlowDownPopUp onOk={() => setSlowDownCount(0)} />
       ) : null}
       <div className={styles.chat_shadow}>
@@ -317,11 +306,7 @@ export const ChatMain: React.FC = ({}) => {
         <div></div>
       </div>
       <div className={styles.chat_input}>
-        <UploadFile
-          disabled={channel.id == ""}
-          chatInput={input}
-          uploadCallback={fileUploading}
-        />
+        <UploadFile chatInput={input} uploadCallback={fileUploading} />
         <form>
           <TextareaAutosize
             value={input}

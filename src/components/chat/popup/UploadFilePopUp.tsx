@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "../../../styles/components/chat/popups/UploadFilePopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
 import { useChannel } from "../../../context/channelContext";
@@ -13,6 +13,19 @@ const SlowDownPopUp: React.FC<{
   const [input, setInput] = useState(chatInput);
 
   const { channel } = useChannel();
+
+  useEffect(() => {
+    document.addEventListener("paste", pasted);
+    return () => {
+      document.removeEventListener("paste", pasted);
+    };
+  });
+
+  const pasted = (e: ClipboardEvent) => {
+    if (e.clipboardData!.files[0] == undefined && channel.id != "") {
+      setInput(input + e.clipboardData!.getData("Text"));
+    }
+  };
 
   const uploadFileKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {

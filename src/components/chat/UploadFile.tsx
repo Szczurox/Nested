@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { RefObject, useEffect, useState } from "react";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import styles from "../../styles/components/chat/UploadFile.module.scss";
 import { v4 } from "uuid";
@@ -18,8 +18,6 @@ import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import moment from "moment";
 import { createFirebaseApp } from "../../firebase/clientApp";
-import ScreenPopUp from "./popup/ScreenPopUp";
-import { TextareaAutosize } from "@material-ui/core";
 import UploadFilePopUp from "./popup/UploadFilePopUp";
 
 export interface FileUploadingData {
@@ -30,13 +28,11 @@ export interface FileUploadingData {
 
 export interface UploadFileProps {
   chatInput?: string;
-  disabled?: boolean;
   uploadCallback: (fileData: FileUploadingData) => void;
 }
 
 export const UploadFile: React.FC<UploadFileProps> = ({
   chatInput,
-  disabled = false,
   uploadCallback,
 }) => {
   const [fileName, setFileName] = useState<string>("");
@@ -50,6 +46,19 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   const storage = getStorage();
   const app = createFirebaseApp();
   const db = getFirestore(app!);
+
+  useEffect(() => {
+    document.addEventListener("paste", pasted);
+    return () => {
+      document.removeEventListener("paste", pasted);
+    };
+  });
+
+  const pasted = (e: ClipboardEvent) => {
+    if (e.clipboardData!.files[0] != undefined && channel.id != "") {
+      checkFile(e.clipboardData!.files[0]);
+    }
+  };
 
   async function checkFile(e: File) {
     if (e.type.substring(0, 5) == "image") {
@@ -139,7 +148,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
             onChange={(e) => {
               if (e.target.files) checkFile(e.target.files[0]);
             }}
-            disabled={disabled}
+            disabled={channel.id == ""}
           />
         </div>
       </form>

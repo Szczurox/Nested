@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styles from "../../../styles/components/chat/popups/SlowDownPopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
 
 const SlowDownPopUp: React.FC<{ onOk: () => void }> = ({ onOk }) => {
+  useEffect(() => {
+    document.addEventListener("keydown", (e) =>
+      e.key == "Enter" ? onOk() : null
+    );
+    return () => {
+      document.removeEventListener("keydown", (e) =>
+        e.key == "Enter" ? onOk() : null
+      );
+    };
+  });
+
   return (
     <ScreenPopUp>
       <div className={styles.popup_text}>
