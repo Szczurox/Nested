@@ -101,7 +101,7 @@ export const ChatMain: React.FC = ({}) => {
   };
 
   const scrollAfterWait = () => {
-    wait(300).then(() => {
+    wait(200).then(() => {
       if (listInnerRef.current) {
         listInnerRef.current.focus();
         scrollToBottom();
@@ -111,7 +111,7 @@ export const ChatMain: React.FC = ({}) => {
 
   function callback(qMes: any) {
     return onSnapshot(qMes, (querySnapshot: any) => {
-      querySnapshot.docChanges().forEach((change: any) => {
+      querySnapshot.docChanges().forEach((change: any, index: number) => {
         if (change.type === "added" || change.type === "modified") {
           setMessages((messages) =>
             [
@@ -182,6 +182,7 @@ export const ChatMain: React.FC = ({}) => {
             if (!messages.map((el) => el.id).includes(change.doc.id)) {
               setMessages((messages) =>
                 [
+                  ...messages.filter((el) => el.id !== change.doc.id),
                   {
                     id: change.doc.id,
                     content: change.doc.data().content,
@@ -190,19 +191,29 @@ export const ChatMain: React.FC = ({}) => {
                     file: change.doc.data().file,
                     edited: change.doc.data().edited,
                   },
-                  ...messages.filter((el) => el.id !== change.doc.id),
                 ].sort((x, y) => {
                   return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
                 })
               );
             }
-
-            if (autoScroll && change.type != "modified") {
-              scrollAfterWait();
-            } else if (querySnapshot.docChanges.length == 2 && index > 1) {
-              if (querySnapshot.docChanges()[index - 1].type !== "removed")
-                scrollAfterWait();
-            } else if (autoScroll) scrollAfterWait();
+            console.log(
+              querySnapshot.docChanges().length,
+              querySnapshot.docChanges()
+            );
+            if (autoScroll && querySnapshot.docChanges().length > 1) {
+              console.log(querySnapshot.docChanges()[1].newIndex == 0);
+              if (index > 0) {
+                if (
+                  index > 0 &&
+                  querySnapshot.docChanges()[index - 1].type !== "removed"
+                )
+                  scrollAfterWait();
+                else if (querySnapshot.docChanges()[1].newIndex == 0)
+                  scrollAfterWait();
+                else if (querySnapshot.docChanges().length > 2)
+                  scrollAfterWait();
+              }
+            }
           }
           if (change.type === "removed") {
             setMessages((messages) =>

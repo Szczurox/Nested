@@ -7,12 +7,16 @@ export interface MessageContextType {
   setCurrentMessage: (id: string) => void;
 }
 
-export const MessageContext = createContext<MessageContextType | null>(null);
+export const MessageContext = createContext<MessageContextType>({
+  message: { id: "" },
+  setCurrentMessage: (id: string) => undefined,
+});
 
 export default function MessageContextComp({ children }: any) {
-  const [message, setMessage] = useState({ id: "" });
+  const [message, setMessage] = useState({ id: "" }); // ID of the message user is currently interacting with
 
   const setCurrentMessage = (id: string) => {
+    console.log(id);
     setMessage({ id: id });
   };
 

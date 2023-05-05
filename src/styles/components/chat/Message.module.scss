@@ -71,6 +71,25 @@
   &:hover {
     background-color: #32363b;
   }
+}
+
+.message_info {
+  margin-left: 20px;
+  margin-right: 60px;
+  p {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    word-break: break-word;
+    -ms-hyphens: auto;
+    -moz-hyphens: auto;
+    -webkit-hyphens: auto;
+    hyphens: auto;
+    margin-left: 60px;
+    margin-top: 2px;
+    margin-bottom: 0px;
+  }
+
   h4 {
     font-size: large;
     margin-bottom: -0px;
@@ -79,24 +98,6 @@
   .message_profilePicture {
     float: left;
     margin-right: 15px;
-  }
-
-  .message_info {
-    margin-left: 20px;
-    margin-right: 60px;
-    p {
-      white-space: pre-wrap;
-      overflow-wrap: break-word;
-      word-wrap: break-word;
-      word-break: break-word;
-      -ms-hyphens: auto;
-      -moz-hyphens: auto;
-      -webkit-hyphens: auto;
-      hyphens: auto;
-      margin-left: 60px;
-      margin-top: 2px;
-      margin-bottom: 0px;
-    }
   }
 
   .message_timestamp {
@@ -108,6 +109,11 @@
   .message_content {
     padding: none;
     margin: none;
+
+    .message_edited_indicator {
+      font-size: small;
+      color: rgb(115, 115, 115);
+    }
   }
 
   .message_image_text {

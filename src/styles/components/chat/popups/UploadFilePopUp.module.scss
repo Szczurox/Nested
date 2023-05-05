@@ -35,25 +35,6 @@
   }
 }
 
-.popup_upload {
-  border-radius: 5px;
-  background-color: #ff504d;
-  border: none;
-  color: white;
-  padding: 12px 24px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-  margin-top: 10px;
-
-  &:hover {
-    background-color: #e84846;
-  }
-}
-
 .popup_input {
   color: lightgrey;
   display: flex;

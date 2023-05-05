@@ -7,9 +7,8 @@
   background-color: #232528;
   color: white;
   border-radius: 2px;
-  border-color: #131313;
+  border-color: #363636;
   border-width: 2px;
-  box-shadow: 0px 2px 5px black;
   position: absolute;
   list-style: none;
   -webkit-touch-callout: none;
@@ -20,7 +19,7 @@
   display: flex;
   flex-direction: column;
   border-radius: 10px;
-  box-shadow: 0 10px 20px rgb(64 64 64 / 5%);
+  box-shadow: 0 10px 20px rgba(46, 46, 46, 0.5);
   padding: 10px 0;
   user-select: none;
   min-width: 20vw;
@@ -30,7 +29,10 @@
 .contextmenu > li {
   display: table-row;
   min-width: 14.6vw;
-  padding: 0.2vh 0.2vh 0.2vh 2vh;
+  padding: 0.8vh 0.8vw 0.8vh 0.8vw;
+  margin-left: 0.4vw;
+  margin-right: 0.4vw;
+  border-radius: 5px;
 }
 
 .contextmenu > li > p {
@@ -47,8 +49,7 @@
 }
 
 .contextmenu > li > svg {
-  padding: 0px;
-  margin: 0px;
+  padding: auto;
   margin-right: 10px;
   -webkit-user-drag: none;
   vertical-align: middle;
@@ -61,9 +62,9 @@
 }
 
 .contextmenu_delete {
-  color: red;
+  color: #ff504d;
   &:hover {
-    background-color: red;
+    background-color: #ff504d;
     color: white;
   }
 }

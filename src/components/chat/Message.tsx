@@ -17,6 +17,8 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
+import { useMessage } from "context/messageContext";
+import DeleteConfirmPopUp from "./popup/DeleteConfirmPopUp";
 
 interface MessageProps {
   id: string;
@@ -54,11 +56,13 @@ export const Message: React.FC<MessageProps> = ({
   const [avatar, setAvatar] = useState<string>(
     "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
   );
-  const [input, setInput] = useState<string>("");
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [input, setInput] = useState<string>(""); // Message edit input
+  const [isEditing, setIsEditing] = useState<boolean>(false); // Is message currently being edited
+  const [showPopUp, setShowPopUp] = useState<boolean>(false); // Delete confirmation pop-up
 
   const { channel } = useChannel();
   const { user } = useUser();
+  const { message, setCurrentMessage } = useMessage()!;
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -77,6 +81,31 @@ export const Message: React.FC<MessageProps> = ({
     channel.id,
     "messages",
     id
+  );
+
+  const messageContent = (
+    <div className={styles.message_content}>
+      <p>
+        {content}
+        {edited && (
+          <span className={styles.message_edited_indicator}>{" (edited)"}</span>
+        )}
+      </p>
+    </div>
+  );
+
+  const senderInfo = (
+    <>
+      <div className={styles.message_profilePicture}>
+        <Avatar style={{ height: "45px", width: "45px" }} src={avatar} />
+      </div>
+      <h4>
+        {username}
+        <span className={styles.message_timestamp}>
+          {moment(time).local().format("MMMM Do YYYY [at] hh:mm a")}
+        </span>
+      </h4>
+    </>
   );
 
   useEffect(() => {
@@ -98,32 +127,45 @@ export const Message: React.FC<MessageProps> = ({
       document.removeEventListener("click", handleClick);
       document.removeEventListener("contextmenu", handleClick);
     };
-  });
+  }, []);
+
+  useEffect(() => {
+    if (message.id != id) setIsEditing(false);
+  }, [message.id]);
 
   const handleClick = (e: Event): void => {
     if (
       e.type == "click" ||
       (e.type == "contextmenu" &&
-        !elementRef.current?.contains(e.target as Node)) ||
+        !elementRef.current?.contains(e.target as Node) &&
+        menuRef.current?.getListRef().current! != null &&
+        !menuRef.current?.getListRef().current!.contains(e.target as Node)) ||
       (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
     )
       menuRef.current?.closeMenu();
-    if (
-      isEditing &&
-      e.type == "keydown" &&
-      (e as KeyboardEvent).key == "Escape"
-    )
+
+    if (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
       setIsEditing(false);
   };
 
   const deleteMessage = async () => {
+    setShowPopUp(false);
     await deleteDoc(messageDoc);
     console.log("Deleted: " + id);
+  };
+
+  const deleteBegin = (e: any) => {
+    if (e.shiftKey == true) {
+      deleteMessage();
+    } else {
+      setShowPopUp(true);
+    }
   };
 
   const editBegin = () => {
     setIsEditing(true);
     setInput(content);
+    setCurrentMessage(id);
   };
 
   const updateMessage = async () => {
@@ -135,13 +177,15 @@ export const Message: React.FC<MessageProps> = ({
   };
 
   const editMessage = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key == "Escape") setIsEditing(false);
     if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
-      // Send Message
+      // Edit Message
       setIsEditing(false);
       e.preventDefault();
       if (input.replace(/\s/g, "").length) updateMessage();
       else {
-        deleteMessage();
+        // Ask if user wants to delete the message if input is set to empty
+        setShowPopUp(true);
       }
     }
   };
@@ -160,7 +204,7 @@ export const Message: React.FC<MessageProps> = ({
             </li>
             <li
               className={contextMenuStyles.contextmenu_delete}
-              onClick={(_) => deleteMessage()}
+              onClick={deleteBegin}
             >
               <DeleteIcon />
               Delete
@@ -175,6 +219,26 @@ export const Message: React.FC<MessageProps> = ({
           Copy Message ID
         </li>
       </ContextMenu>
+      {showPopUp ? (
+        <DeleteConfirmPopUp
+          onConfirm={() => (showPopUp ? deleteMessage() : null)}
+          onCancel={() => setShowPopUp(false)}
+        >
+          <div className={styles.message_info}>
+            {senderInfo}
+            {content && messageContent}
+            {file && (
+              <div className={styles.message_embed}>
+                <img
+                  className={styles.message_image_text}
+                  src={file}
+                  alt="image"
+                />
+              </div>
+            )}
+          </div>
+        </DeleteConfirmPopUp>
+      ) : null}
       <div
         className={styles.message}
         id={id}
@@ -184,21 +248,9 @@ export const Message: React.FC<MessageProps> = ({
         ref={elementRef}
       >
         <div className={styles.message_info}>
-          <div className={styles.message_profilePicture}>
-            <Avatar style={{ height: "45px", width: "45px" }} src={avatar} />
-          </div>
-          <h4>
-            {username}
-            <span className={styles.message_timestamp}>
-              {moment(time).local().format("MMMM Do YYYY [at] hh:mm a")}
-            </span>
-          </h4>
+          {senderInfo}
           {!isEditing ? (
-            content && (
-              <div className={styles.message_content}>
-                <p>{content}</p>
-              </div>
-            )
+            content && messageContent
           ) : (
             <div>
               <div className={styles.message_edit_input}>

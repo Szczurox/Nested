@@ -1,7 +1,9 @@
 import React, {
   ReactNode,
+  RefObject,
   forwardRef,
   useImperativeHandle,
+  useRef,
   useState,
 } from "react";
 import styles from "../../../styles/components/chat/contextmenu/ContextMenu.module.scss";
@@ -13,6 +15,7 @@ type ContextMenuProps = {
 type ContextMenuHandle = {
   closeMenu: () => void;
   handleContextMenu: (event: React.MouseEvent<HTMLElement>) => void;
+  getListRef: () => RefObject<HTMLUListElement>;
 };
 
 const ContextMenu: React.ForwardRefRenderFunction<
@@ -24,6 +27,9 @@ const ContextMenu: React.ForwardRefRenderFunction<
     x: 0,
     y: 0,
   });
+
+  const listRef = useRef<HTMLUListElement>(null); // Ref to main Unordered List element
+
   useImperativeHandle(ref, () => {
     return {
       closeMenu(): void {
@@ -35,16 +41,19 @@ const ContextMenu: React.ForwardRefRenderFunction<
 
         setMenuPoint({
           x:
-            event.pageX < window.innerWidth - (window.innerWidth / 100) * 10
+            event.pageX < window.innerWidth - (window.innerWidth / 100) * 20
               ? event.pageX
-              : event.pageX - window.innerWidth / 10,
+              : event.pageX - window.innerWidth / 5,
           y:
-            event.pageY < window.innerHeight - (window.innerHeight / 100) * 10
+            event.pageY < window.innerHeight - (window.innerHeight / 100) * 20
               ? event.pageY
-              : event.pageY - window.innerHeight / 20,
+              : event.pageY - window.innerHeight / 10,
         });
         setIsOpen(true);
-        console.log(isOpen);
+      },
+
+      getListRef(): RefObject<HTMLUListElement> {
+        return listRef;
       },
     };
   });
@@ -53,6 +62,8 @@ const ContextMenu: React.ForwardRefRenderFunction<
     <ul
       className={styles.contextmenu}
       style={{ top: menuPoint.y, left: menuPoint.x }}
+      onContextMenu={(e) => e.preventDefault()}
+      ref={listRef}
     >
       {children}
     </ul>

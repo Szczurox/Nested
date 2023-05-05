@@ -3,6 +3,7 @@ import styles from "../../../styles/components/chat/popups/UploadFilePopUp.modul
 import ScreenPopUp from "./ScreenPopUp";
 import { useChannel } from "../../../context/channelContext";
 import { TextareaAutosize } from "@material-ui/core";
+import PopUpButton, { buttonColors } from "./PopUpButton";
 
 const SlowDownPopUp: React.FC<{
   fileUrl: string;
@@ -15,11 +16,17 @@ const SlowDownPopUp: React.FC<{
   const { channel } = useChannel();
 
   useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key == "Enter") uploadFile(input);
+    };
+
     document.addEventListener("paste", pasted);
+    document.addEventListener("keydown", handler, false);
     return () => {
+      document.removeEventListener("keydown", handler, false);
       document.removeEventListener("paste", pasted);
     };
-  });
+  }, []);
 
   const pasted = (e: ClipboardEvent) => {
     if (e.clipboardData!.files[0] == undefined && channel.id != "") {
@@ -70,12 +77,12 @@ const SlowDownPopUp: React.FC<{
           >
             Cancel
           </div>
-          <button
-            className={styles.popup_upload}
+          <PopUpButton
             onClick={(_) => uploadFile(input)}
+            color={buttonColors.get("red")!}
           >
             Upload
-          </button>
+          </PopUpButton>
         </div>
       </div>
     </ScreenPopUp>
