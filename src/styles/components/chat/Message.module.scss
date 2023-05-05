@@ -7,6 +7,67 @@
   padding-left: 10px;
   color: white;
   background-color: #363a3f;
+
+  .message_edit_text_event {
+    color: rgb(132, 144, 148);
+    cursor: pointer;
+    &:hover {
+      color: rgb(170, 179, 182);
+    }
+  }
+
+  .message_edit_input {
+    color: lightgrey;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 10px;
+    padding-bottom: 10px;
+    margin: 20px;
+    margin-bottom: 5px;
+
+    margin-top: 0px;
+    background-color: #474b53;
+    font-size: large;
+
+    .message_edit_input_button {
+      display: none;
+    }
+
+    form {
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+
+      ::-webkit-scrollbar-track {
+        background: none;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #2f3135;
+      }
+
+      textarea {
+        white-space: pre-wrap;
+        width: 100%;
+        resize: none;
+        padding: 15px;
+        padding-top: 16px;
+        padding-bottom: 4px;
+        border: none;
+        outline-width: 0;
+        color: white;
+        background: transparent;
+        font-size: large;
+        line-height: 20px;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+    }
+  }
+
   &:hover {
     background-color: #32363b;
   }

@@ -31,15 +31,15 @@ import SlowDownPopUp from "./popup/SlowDownPopUp";
 import { wait } from "components/utils/utils";
 
 export const ChatMain: React.FC = ({}) => {
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState<string>("");
   const [messages, setMessages] = useState<MessageData[]>([]);
   const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]);
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0));
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]);
-  const [slowDownCount, setSlowDownCount] = useState(0);
-  const [messagesEnd, setMessagesEnd] = useState(false);
-  const [canScrollToBottom, setCanScrollToBottom] = useState(false);
-  const [autoScroll, setAutoScroll] = useState(true);
+  const [slowDownCount, setSlowDownCount] = useState<number>(0);
+  const [messagesEnd, setMessagesEnd] = useState<boolean>(false);
+  const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false);
+  const [autoScroll, setAutoScroll] = useState<boolean>(true);
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -100,6 +100,15 @@ export const ChatMain: React.FC = ({}) => {
     }
   };
 
+  const scrollAfterWait = () => {
+    wait(300).then(() => {
+      if (listInnerRef.current) {
+        listInnerRef.current.focus();
+        scrollToBottom();
+      }
+    });
+  };
+
   function callback(qMes: any) {
     return onSnapshot(qMes, (querySnapshot: any) => {
       querySnapshot.docChanges().forEach((change: any) => {
@@ -112,11 +121,21 @@ export const ChatMain: React.FC = ({}) => {
                 timestamp: change.doc.data().time,
                 uid: change.doc.data().userid,
                 file: change.doc.data().file,
+                edited: change.doc.data().edited,
               },
               ...messages.filter((el) => el.id !== change.doc.id),
             ].sort((x, y) => {
               return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
             })
+          );
+        }
+        if (change.type === "removed") {
+          setMessages((messages) =>
+            [...messages.filter((el) => el.id !== change.doc.id)].sort(
+              (x, y) => {
+                return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
+              }
+            )
           );
         }
       });
@@ -158,24 +177,32 @@ export const ChatMain: React.FC = ({}) => {
       );
 
       const unsub = onSnapshot(qMes, (querySnapshot) => {
-        querySnapshot.docChanges().forEach((change) => {
+        querySnapshot.docChanges().forEach((change, index) => {
           if (change.type === "added" || change.type === "modified") {
             if (!messages.map((el) => el.id).includes(change.doc.id)) {
               setMessages((messages) =>
                 [
-                  ...messages.filter((el) => el.id !== change.doc.id),
                   {
                     id: change.doc.id,
                     content: change.doc.data().content,
                     timestamp: change.doc.data().time,
                     uid: change.doc.data().userid,
                     file: change.doc.data().file,
+                    edited: change.doc.data().edited,
                   },
+                  ...messages.filter((el) => el.id !== change.doc.id),
                 ].sort((x, y) => {
                   return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
                 })
               );
             }
+
+            if (autoScroll && change.type != "modified") {
+              scrollAfterWait();
+            } else if (querySnapshot.docChanges.length == 2 && index > 1) {
+              if (querySnapshot.docChanges()[index - 1].type !== "removed")
+                scrollAfterWait();
+            } else if (autoScroll) scrollAfterWait();
           }
           if (change.type === "removed") {
             setMessages((messages) =>
@@ -194,15 +221,6 @@ export const ChatMain: React.FC = ({}) => {
           );
           setMessagesEnd(false);
         } else setMessagesEnd(true);
-
-        if (autoScroll) {
-          wait(300).then(() => {
-            if (listInnerRef.current) {
-              listInnerRef.current.focus();
-              scrollToBottom();
-            }
-          });
-        }
       });
 
       return unsub;
@@ -222,16 +240,18 @@ export const ChatMain: React.FC = ({}) => {
     if (slowDownCount > 1) textAreaRef.current!.blur();
     else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
       const timestamp = serverTimestamp();
+      const chatInput = input;
+      setInput("");
       // Send Message
       e.preventDefault();
-      if (input.replace(/\s/g, "").length) {
+      if (chatInput.replace(/\s/g, "").length) {
         await addDoc(messagesCollection, {
           time: moment().utcOffset("+00:00").format(),
-          content: input,
+          content: chatInput,
           userid: user.uid,
           createdAt: timestamp,
+          edited: false,
         }).catch((_) => {
-          console.log(slowDownCount);
           setSlowDownCount(slowDownCount + 1);
         });
 
@@ -239,7 +259,6 @@ export const ChatMain: React.FC = ({}) => {
           lastMessagedAt: timestamp,
         });
       }
-      setInput("");
     }
   }
 
@@ -270,7 +289,7 @@ export const ChatMain: React.FC = ({}) => {
         onScroll={(e) => handleScroll(e)}
         ref={listInnerRef}
       >
-        {messages.map(({ id, content, timestamp, uid, file }) => (
+        {messages.map(({ id, content, timestamp, uid, file, edited }) => (
           <Message
             key={id}
             id={id}
@@ -279,6 +298,7 @@ export const ChatMain: React.FC = ({}) => {
             userid={uid}
             file={file}
             onImageLoad={onImageLoadComplete}
+            edited={edited}
           />
         ))}
         {filesUploading.map(({ name, percent, id }) => {
@@ -321,7 +341,7 @@ export const ChatMain: React.FC = ({}) => {
           />
           <button
             disabled={channel.id == ""}
-            className={styles.chat_inputButton}
+            className={styles.chat_input_button}
             type="submit"
           >
             Send Message

@@ -15,7 +15,7 @@ import { createFirebaseApp } from "../../../firebase/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 
 export const NavbarProfile: React.FC = ({}) => {
-  const { user, setUser } = useUser();
+  const { user, setUserData } = useUser();
 
   const [avatar, setAvatar] = useState(
     user.avatar != ""
@@ -63,11 +63,7 @@ export const NavbarProfile: React.FC = ({}) => {
             console.log("File uploaded! ", downloadURL);
             fileSubmit(downloadURL).then(() => {
               setAvatar(downloadURL);
-              setUser({
-                uid: user.uid,
-                username: user.username,
-                avatar: downloadURL,
-              });
+              setUserData(user.uid, user.username, downloadURL);
             });
           });
         }

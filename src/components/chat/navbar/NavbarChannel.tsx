@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarChannel.module.scss";
 
 interface NavbarChannelProps {
-  name: String;
+  name: string;
   id: string;
   idC: string;
 }
@@ -14,7 +14,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   idC,
 }) => {
   const [isActive, setActive] = useState(false);
-  const { channel, setChannel } = useChannel();
+  const { channel, setChannelData } = useChannel();
 
   useEffect(() => {
     if (channel.id == id) setActive(true);
@@ -23,7 +23,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
   const handleToggle = () => {
     setActive(true);
-    setChannel({ id: id, name: name, idC: idC });
+    setChannelData(id, name, idC);
   };
 
   return (
