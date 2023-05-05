@@ -23,7 +23,7 @@ const SignupSchema = Yup.object().shape({
 });
 
 export const Register: React.FC<{}> = ({}) => {
-  const { user, setUser, loadingUser } = useUser();
+  const { user, loadingUser, setUserData } = useUser();
   const router = useRouter();
 
   const app = createFirebaseApp();
@@ -100,10 +100,7 @@ export const Register: React.FC<{}> = ({}) => {
               })
               .then((userCredential) => {
                 if (userCredential) {
-                  setUser({
-                    uid: userCredential.user.uid,
-                    username: values.username,
-                  });
+                  setUserData(userCredential.user.uid, values.username, "");
                   createUser(values.username, userCredential.user.uid);
                   router.push("/chat");
                 }
