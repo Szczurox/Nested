@@ -68,7 +68,9 @@ export const Message: React.FC<MessageProps> = ({
   const db = getFirestore(app!);
 
   const menuRef = useRef<ContextMenuHandle>(null);
+  const userMenuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
+  const avatarRef = useRef<HTMLImageElement>(null);
 
   const messageDoc = doc(
     db,
@@ -95,9 +97,6 @@ export const Message: React.FC<MessageProps> = ({
 
   const senderInfo = (
     <>
-      <div className={styles.message_profilePicture}>
-        <Avatar style={{ height: "45px", width: "45px" }} src={avatar} />
-      </div>
       <h4>
         {username}
         <span className={styles.message_timestamp}>
@@ -139,10 +138,21 @@ export const Message: React.FC<MessageProps> = ({
         !elementRef.current?.contains(e.target as Node) &&
         menuRef.current?.getListRef().current! != null &&
         !menuRef.current?.getListRef().current!.contains(e.target as Node)) ||
+      avatarRef.current?.contains(e.target as Node) ||
       (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
     )
       menuRef.current?.closeMenu();
-
+    if (
+      e.type == "click" ||
+      (e.type == "contextmenu" &&
+        !avatarRef.current?.contains(e.target as Node) &&
+        userMenuRef.current?.getListRef().current! != null &&
+        !userMenuRef.current
+          ?.getListRef()
+          .current!.contains(e.target as Node)) ||
+      (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
+    )
+      userMenuRef.current?.closeMenu();
     if (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
       setIsEditing(false);
   };
@@ -218,12 +228,24 @@ export const Message: React.FC<MessageProps> = ({
           Copy Message ID
         </li>
       </ContextMenu>
+      <ContextMenu ref={userMenuRef}>
+        <li
+          className={contextMenuStyles.contextmenu_normal}
+          onClick={() => navigator.clipboard.writeText(userid)}
+        >
+          <ContentCopyIcon />
+          Copy User ID
+        </li>
+      </ContextMenu>
       {showPopUp ? (
         <DeleteConfirmPopUp
           onConfirm={() => (showPopUp ? deleteMessage() : null)}
           onCancel={() => setShowPopUp(false)}
         >
           <div className={styles.message_info}>
+            <div className={styles.message_profilePicture}>
+              <Avatar style={{ height: "45px", width: "45px" }} src={avatar} />
+            </div>
             {senderInfo}
             {content && messageContent}
             {file && (
@@ -247,6 +269,18 @@ export const Message: React.FC<MessageProps> = ({
         ref={elementRef}
       >
         <div className={styles.message_info}>
+          <div
+            className={styles.message_profilePicture}
+            onContextMenu={(e) =>
+              !isEditing && userMenuRef.current?.handleContextMenu(e)
+            }
+          >
+            <Avatar
+              style={{ height: "45px", width: "45px" }}
+              src={avatar}
+              innerRef={avatarRef}
+            />
+          </div>
           {senderInfo}
           {!isEditing ? (
             content && messageContent
