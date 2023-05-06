@@ -1,0 +1,28 @@
+.contextmenu_element {
+  display: table-row;
+  min-width: 14.6vw;
+  padding: 0.8vh 0.8vw 0.8vh 0.8vw;
+  margin-left: 0.4vw;
+  margin-right: 0.4vw;
+  border-radius: 5px;
+}
+
+.contextmenu_element > p {
+  padding: none;
+  color: white;
+  margin: none;
+  padding: 10px 30px 10px 15px;
+  vertical-align: middle;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 45%;
+}
+
+.contextmenu_element > svg {
+  padding: auto;
+  margin-right: 10px;
+  -webkit-user-drag: none;
+  vertical-align: middle;
+}

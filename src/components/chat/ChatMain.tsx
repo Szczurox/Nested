@@ -72,16 +72,16 @@ export const ChatMain: React.FC = ({}) => {
   }, [popUpOpen]);
 
   useEffect(() => {
-    const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
-    if (scrollTop >= scrollHeight - clientHeight - 60) scrollToBottom();
-  }, [message]);
-
-  useEffect(() => {
     document.addEventListener("paste", pasted);
     return () => {
       document.removeEventListener("paste", pasted);
     };
   }, [input, popUpOpen]);
+
+  useEffect(() => {
+    const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
+    if (scrollTop >= scrollHeight - clientHeight - 60) scrollToBottom();
+  }, [message]);
 
   const pasted = (e: ClipboardEvent) => {
     if (
@@ -97,7 +97,6 @@ export const ChatMain: React.FC = ({}) => {
   };
 
   const handleKeyPress = (_: KeyboardEvent) => {
-    console.log(popUpOpen);
     if (document.activeElement?.tagName != "TEXTAREA" && !popUpOpen)
       textAreaRef.current!.focus();
   };
@@ -139,7 +138,7 @@ export const ChatMain: React.FC = ({}) => {
 
   function callback(qMes: any) {
     return onSnapshot(qMes, (querySnapshot: any) => {
-      querySnapshot.docChanges().forEach((change: any, index: number) => {
+      querySnapshot.docChanges().forEach((change: any) => {
         if (change.type === "added" || change.type === "modified") {
           setMessages((messages) =>
             [
@@ -271,8 +270,12 @@ export const ChatMain: React.FC = ({}) => {
   }, [channel.id]);
 
   async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (slowDownCount > 1) textAreaRef.current!.blur();
-    else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
+    if (slowDownCount > 1) {
+      // Don't update input if sending messages too quickly
+      e.preventDefault();
+      textAreaRef.current!.blur();
+      setPopUpOpen(true);
+    } else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
       const timestamp = serverTimestamp();
       const chatInput = input;
       setInput("");
@@ -314,7 +317,12 @@ export const ChatMain: React.FC = ({}) => {
   return (
     <div className={styles.chat}>
       {slowDownCount > 1 ? (
-        <SlowDownPopUp onOk={() => setSlowDownCount(0)} />
+        <SlowDownPopUp
+          onOk={() => {
+            setSlowDownCount(0);
+            setPopUpOpen(false);
+          }}
+        />
       ) : null}
       <div className={styles.chat_shadow}>
         <ChatHeader />

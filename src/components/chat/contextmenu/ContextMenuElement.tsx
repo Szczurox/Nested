@@ -1,24 +1,19 @@
 import React, { ReactNode, useCallback, useState } from "react";
-import styles from "../../../styles/components/chat/popups/PopUpButton.module.scss";
+import styles from "../../../styles/components/chat/contextmenu/ContextMenuElement.module.scss";
+import { ButtonColor, buttonColors } from "../popup/PopUpButton";
 
-export type ButtonColor = "red" | "grey";
-
-// Normal, onHover, onPress
-export const buttonColors = new Map<ButtonColor, [string, string, string]>([
-  ["red", ["#ff504d", "#e84846", "#d14341"]],
-  ["grey", ["#5f6a6e", "#808b90", "#6b7478"]],
-]);
-
-export interface PopUpButtonProps {
+interface ContextMenuElementProps {
   children: ReactNode;
-  color?: [string, string, string];
+  type?: ButtonColor;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+  colors?: [string, string, string];
 }
 
-const PopUpButton: React.FC<PopUpButtonProps> = ({
+const ContextMenuElement: React.FC<ContextMenuElementProps> = ({
   children,
-  color = ["#5f6a6e", "#808b90", "#6b7478"],
+  type = "grey",
   onClick,
+  colors = buttonColors.get(type)!,
 }) => {
   const [isHover, setIsHover] = useState(false); // Is user hovering over the button
   const [isPressed, setIsPressed] = useState(false); // Is user pressing the button
@@ -36,19 +31,22 @@ const PopUpButton: React.FC<PopUpButtonProps> = ({
   }, []);
 
   return (
-    <button
+    <li
+      className={`${styles.contextmenu_element} ${
+        type == "grey" ? styles.normal : styles.red
+      }`}
       onClick={onClick}
       onMouseEnter={() => setIsHover(true)}
       onMouseLeave={() => setIsHover(false)}
       onMouseDown={handleMouseDown}
-      className={styles.popup_button}
       style={{
-        backgroundColor: isPressed ? color[2] : isHover ? color[1] : color[0],
+        backgroundColor: isPressed ? colors[2] : isHover ? colors[1] : "",
+        color: !isHover && !isPressed && type == "red" ? colors[0] : "white",
       }}
     >
       {children}
-    </button>
+    </li>
   );
 };
 
-export default PopUpButton;
+export default ContextMenuElement;

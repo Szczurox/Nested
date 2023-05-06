@@ -2,11 +2,12 @@ import React, { useEffect } from "react";
 import styles from "../../../styles/components/chat/popups/SlowDownPopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
 import PopUpButton from "./PopUpButton";
+import { wait } from "components/utils/utils";
 
 const SlowDownPopUp: React.FC<{ onOk: () => void }> = ({ onOk }) => {
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key == "Enter") onOk();
+    const handler = async (e: KeyboardEvent) => {
+      if (e.key == "Enter") wait(1500).then(() => onOk());
     };
 
     document.addEventListener("keydown", handler, false);

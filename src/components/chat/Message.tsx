@@ -19,6 +19,7 @@ import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import { useMessage } from "context/messageContext";
 import DeleteConfirmPopUp from "./popup/DeleteConfirmPopUp";
+import ContextMenuElement from "./contextmenu/ContextMenuElement";
 
 interface MessageProps {
   id: string;
@@ -97,6 +98,18 @@ export const Message: React.FC<MessageProps> = ({
 
   const senderInfo = (
     <>
+      <div
+        className={styles.message_profilePicture}
+        onContextMenu={(e) =>
+          !isEditing && userMenuRef.current?.handleContextMenu(e)
+        }
+      >
+        <Avatar
+          style={{ height: "45px", width: "45px" }}
+          src={avatar}
+          innerRef={avatarRef}
+        />
+      </div>
       <h4>
         {username}
         <span className={styles.message_timestamp}>
@@ -204,38 +217,31 @@ export const Message: React.FC<MessageProps> = ({
       <ContextMenu ref={menuRef}>
         {userid == user.uid && (
           <>
-            <li
-              className={contextMenuStyles.contextmenu_normal}
-              onClick={(_) => editBegin()}
-            >
+            <ContextMenuElement onClick={(_) => editBegin()}>
               <EditIcon />
               Edit
-            </li>
-            <li
-              className={contextMenuStyles.contextmenu_delete}
-              onClick={deleteBegin}
-            >
-              <DeleteIcon />
-              Delete
-            </li>
+            </ContextMenuElement>
           </>
         )}
-        <li
-          className={contextMenuStyles.contextmenu_normal}
-          onClick={() => navigator.clipboard.writeText(id)}
-        >
+        {(userid == user.uid ||
+          user.permissions.includes("MODERATE_MESSAGES")) && (
+          <ContextMenuElement type="red" onClick={deleteBegin}>
+            <DeleteIcon />
+            Delete
+          </ContextMenuElement>
+        )}
+        <ContextMenuElement onClick={() => navigator.clipboard.writeText(id)}>
           <ContentCopyIcon />
           Copy Message ID
-        </li>
+        </ContextMenuElement>
       </ContextMenu>
       <ContextMenu ref={userMenuRef}>
-        <li
-          className={contextMenuStyles.contextmenu_normal}
-          onClick={() => navigator.clipboard.writeText(userid)}
+        <ContextMenuElement
+          onClick={(_) => navigator.clipboard.writeText(userid)}
         >
           <ContentCopyIcon />
           Copy User ID
-        </li>
+        </ContextMenuElement>
       </ContextMenu>
       {showPopUp ? (
         <DeleteConfirmPopUp
@@ -243,9 +249,6 @@ export const Message: React.FC<MessageProps> = ({
           onCancel={() => setShowPopUp(false)}
         >
           <div className={styles.message_info}>
-            <div className={styles.message_profilePicture}>
-              <Avatar style={{ height: "45px", width: "45px" }} src={avatar} />
-            </div>
             {senderInfo}
             {content && messageContent}
             {file && (
@@ -269,18 +272,6 @@ export const Message: React.FC<MessageProps> = ({
         ref={elementRef}
       >
         <div className={styles.message_info}>
-          <div
-            className={styles.message_profilePicture}
-            onContextMenu={(e) =>
-              !isEditing && userMenuRef.current?.handleContextMenu(e)
-            }
-          >
-            <Avatar
-              style={{ height: "45px", width: "45px" }}
-              src={avatar}
-              innerRef={avatarRef}
-            />
-          </div>
           {senderInfo}
           {!isEditing ? (
             content && messageContent

@@ -8,9 +8,9 @@ import React, {
 } from "react";
 import styles from "../../../styles/components/chat/contextmenu/ContextMenu.module.scss";
 
-type ContextMenuProps = {
+interface ContextMenuProps {
   children: ReactNode;
-};
+}
 
 type ContextMenuHandle = {
   closeMenu: () => void;
