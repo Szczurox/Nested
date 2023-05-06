@@ -29,11 +29,15 @@ export interface FileUploadingData {
 export interface UploadFileProps {
   chatInput?: string;
   uploadCallback: (fileData: FileUploadingData) => void;
+  onPopUp: () => void;
+  onCancel: () => void;
 }
 
 export const UploadFile: React.FC<UploadFileProps> = ({
   chatInput,
   uploadCallback,
+  onPopUp,
+  onCancel,
 }) => {
   const [fileName, setFileName] = useState<string>("");
   const [fileUrl, setFileUrl] = useState<string>("");
@@ -52,7 +56,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     return () => {
       document.removeEventListener("paste", pasted);
     };
-  });
+  }, []);
 
   const pasted = (e: ClipboardEvent) => {
     if (e.clipboardData!.files[0] != undefined && channel.id != "") {
@@ -66,6 +70,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
       setFileG(e);
       setFileName(e.name);
       setFileUrl(URL.createObjectURL(e));
+      onPopUp();
       setIsOpen(true);
     }
   }
@@ -128,6 +133,11 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     );
   }
 
+  const onUploadCancel = () => {
+    onCancel();
+    setIsOpen(false);
+  };
+
   return (
     <div className={styles.upload_file}>
       {isOpen && (
@@ -135,7 +145,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
           uploadFile={uploadFile}
           fileUrl={fileUrl}
           chatInput={chatInput ? chatInput : ""}
-          cancelled={() => setIsOpen(false)}
+          cancelled={onUploadCancel}
         />
       )}
       <form>

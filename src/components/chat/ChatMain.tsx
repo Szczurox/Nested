@@ -29,6 +29,7 @@ import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import SlowDownPopUp from "./popup/SlowDownPopUp";
 import { wait } from "components/utils/utils";
+import { useMessage } from "context/messageContext";
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState<string>("");
@@ -37,6 +38,7 @@ export const ChatMain: React.FC = ({}) => {
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0));
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]);
   const [slowDownCount, setSlowDownCount] = useState<number>(0);
+  const [popUpOpen, setPopUpOpen] = useState<boolean>(false);
   const [messagesEnd, setMessagesEnd] = useState<boolean>(false);
   const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false);
   const [autoScroll, setAutoScroll] = useState<boolean>(true);
@@ -46,6 +48,7 @@ export const ChatMain: React.FC = ({}) => {
 
   const { channel } = useChannel();
   const { user } = useUser();
+  const { message } = useMessage();
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -62,16 +65,41 @@ export const ChatMain: React.FC = ({}) => {
   );
 
   useEffect(() => {
+    document.addEventListener("keydown", handleKeyPress);
+    return () => {
+      document.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [popUpOpen]);
+
+  useEffect(() => {
+    const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
+    if (scrollTop >= scrollHeight - clientHeight - 60) scrollToBottom();
+  }, [message]);
+
+  useEffect(() => {
     document.addEventListener("paste", pasted);
     return () => {
       document.removeEventListener("paste", pasted);
     };
-  });
+  }, [input, popUpOpen]);
 
   const pasted = (e: ClipboardEvent) => {
-    if (e.clipboardData!.files[0] == undefined && channel.id != "") {
-      setInput(input + e.clipboardData!.getData("Text"));
+    if (
+      e.clipboardData!.files[0] == undefined &&
+      channel.id != "" &&
+      !popUpOpen
+    ) {
+      if ((input + e.clipboardData!.getData("Text")).length <= 2000)
+        setInput(input + e.clipboardData!.getData("Text"));
+      else
+        setInput((input + e.clipboardData!.getData("Text")).substring(0, 2000));
     }
+  };
+
+  const handleKeyPress = (_: KeyboardEvent) => {
+    console.log(popUpOpen);
+    if (document.activeElement?.tagName != "TEXTAREA" && !popUpOpen)
+      textAreaRef.current!.focus();
   };
 
   const handleScroll = (_: any) => {
@@ -196,12 +224,7 @@ export const ChatMain: React.FC = ({}) => {
                 })
               );
             }
-            console.log(
-              querySnapshot.docChanges().length,
-              querySnapshot.docChanges()
-            );
             if (autoScroll && querySnapshot.docChanges().length > 1) {
-              console.log(querySnapshot.docChanges()[1].newIndex == 0);
               if (index > 0) {
                 if (
                   index > 0 &&
@@ -274,6 +297,7 @@ export const ChatMain: React.FC = ({}) => {
   }
 
   const fileUploading = (fileData: FileUploadingData) => {
+    setPopUpOpen(false);
     if (fileData.percent == 0) setInput("");
     if (fileData.percent != 101)
       setFilesUploading((files) => [
@@ -337,7 +361,12 @@ export const ChatMain: React.FC = ({}) => {
         <div></div>
       </div>
       <div className={styles.chat_input}>
-        <UploadFile chatInput={input} uploadCallback={fileUploading} />
+        <UploadFile
+          chatInput={input}
+          uploadCallback={fileUploading}
+          onPopUp={() => setPopUpOpen(true)}
+          onCancel={() => setPopUpOpen(false)}
+        />
         <form>
           <TextareaAutosize
             value={input}

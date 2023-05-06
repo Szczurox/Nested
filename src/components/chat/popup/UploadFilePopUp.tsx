@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/popups/UploadFilePopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
 import { useChannel } from "../../../context/channelContext";
 import { TextareaAutosize } from "@material-ui/core";
 import PopUpButton, { buttonColors } from "./PopUpButton";
 
-const SlowDownPopUp: React.FC<{
+const UploadFilePopUp: React.FC<{
   fileUrl: string;
   chatInput: string;
   uploadFile: (input: string) => void;
@@ -13,26 +13,38 @@ const SlowDownPopUp: React.FC<{
 }> = ({ uploadFile, cancelled, fileUrl, chatInput }) => {
   const [input, setInput] = useState(chatInput);
 
+  const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
   const { channel } = useChannel();
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
+      if (document.activeElement?.tagName != "TEXTAREA")
+        textAreaRef.current!.focus();
       if (e.key == "Enter") uploadFile(input);
     };
 
-    document.addEventListener("paste", pasted);
     document.addEventListener("keydown", handler, false);
     return () => {
       document.removeEventListener("keydown", handler, false);
-      document.removeEventListener("paste", pasted);
     };
   }, []);
 
   const pasted = (e: ClipboardEvent) => {
     if (e.clipboardData!.files[0] == undefined && channel.id != "") {
-      setInput(input + e.clipboardData!.getData("Text"));
+      if ((input + e.clipboardData!.getData("Text")).length <= 2000)
+        setInput(input + e.clipboardData!.getData("Text"));
+      else
+        setInput((input + e.clipboardData!.getData("Text")).substring(0, 2000));
     }
   };
+
+  useEffect(() => {
+    document.addEventListener("paste", pasted);
+    return () => {
+      document.removeEventListener("paste", pasted);
+    };
+  }, [input]);
 
   const uploadFileKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
@@ -63,6 +75,13 @@ const SlowDownPopUp: React.FC<{
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => uploadFileKey(e)}
               placeholder={`Message #${channel.name}`}
+              ref={textAreaRef}
+              onFocus={(e) =>
+                e.target.setSelectionRange(
+                  e.target.value.length,
+                  e.target.value.length
+                )
+              }
               autoFocus
             />
           </form>
@@ -89,4 +108,4 @@ const SlowDownPopUp: React.FC<{
   );
 };
 
-export default SlowDownPopUp;
+export default UploadFilePopUp;

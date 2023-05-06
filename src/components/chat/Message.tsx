@@ -69,7 +69,6 @@ export const Message: React.FC<MessageProps> = ({
 
   const menuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const messageDoc = doc(
     db,
@@ -264,7 +263,13 @@ export const Message: React.FC<MessageProps> = ({
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={editMessage}
                     placeholder={`Message #${channel.name}`}
-                    ref={textAreaRef}
+                    onFocus={(e) =>
+                      e.target.setSelectionRange(
+                        e.target.value.length,
+                        e.target.value.length
+                      )
+                    }
+                    autoFocus
                   />
                   <button
                     disabled={channel.id == ""}
