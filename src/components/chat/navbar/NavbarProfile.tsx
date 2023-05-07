@@ -35,8 +35,6 @@ export const NavbarProfile: React.FC = ({}) => {
 
   const uploadAvatar = (file: File) => {
     if (file.type.substring(0, 5) == "image") {
-      console.log("valid");
-
       const fileRef = ref(storage, `profiles/${user.uid}`);
       const uploadTask = uploadBytesResumable(fileRef, file!);
 
@@ -63,7 +61,7 @@ export const NavbarProfile: React.FC = ({}) => {
             console.log("File uploaded! ", downloadURL);
             fileSubmit(downloadURL).then(() => {
               setAvatar(downloadURL);
-              setUserData(user.uid, user.username, downloadURL);
+              setUserData(user.uid, user.username, downloadURL, user.tag);
             });
           });
         }
@@ -86,7 +84,7 @@ export const NavbarProfile: React.FC = ({}) => {
       </div>
       <div className={styles.navbar_profileInfo}>
         <h3>{user.username}</h3>
-        <p>#0000</p>
+        <p>@{user.tag}</p>
       </div>
       <div className={styles.navbar_profileIcons}>
         <MicIcon />

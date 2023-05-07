@@ -2,7 +2,6 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { createFirebaseApp } from "../firebase/clientApp";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { useChannel } from "./channelContext";
 
 export type UserPermission = "MODERATE_MESSAGES";
 
@@ -10,13 +9,20 @@ export type User = {
   uid: string;
   username: string;
   avatar: string;
+  tag: string;
+  nickname: string;
   permissions: UserPermission[];
 };
 
 export interface UserContextType {
   user: User;
-  setUserData: (uid: string, username: string, avatar: string) => void;
-  setUserPermissions: (permissions: UserPermission[]) => void;
+  setUserData: (
+    uid: string,
+    username: string,
+    avatar: string,
+    tag: string
+  ) => void;
+  setMemberData: (nickname: string, permissions: UserPermission[]) => void;
   loadingUser: boolean;
 }
 
@@ -25,10 +31,18 @@ export const UserContext = createContext<UserContextType>({
     uid: "",
     username: "",
     avatar: "",
+    tag: "",
+    nickname: "",
     permissions: [],
   },
-  setUserData: (_uid: string, _username: string, _avatar: string) => undefined,
-  setUserPermissions: (_permissions: UserPermission[]) => undefined,
+  setUserData: (
+    _uid: string,
+    _username: string,
+    _avatar: string,
+    _tag: string
+  ) => undefined,
+  setMemberData: (_nickname: string, _permissions: UserPermission[]) =>
+    undefined,
   loadingUser: false,
 });
 
@@ -37,6 +51,8 @@ export default function UserContextComp({ children }: any) {
     uid: "",
     username: "",
     avatar: "",
+    tag: "",
+    nickname: "",
     permissions: [],
   });
   const [loadingUser, setLoadingUser] = useState(true);
@@ -45,17 +61,27 @@ export default function UserContextComp({ children }: any) {
   const auth = getAuth(app!);
   const db = getFirestore(app!);
 
-  const setUserData = (uid: string, username: string, avatar: string) => {
-    setUser({ uid: uid, username: username, avatar: avatar, permissions: [] });
+  const setUserData = (
+    uid: string,
+    username: string,
+    avatar: string,
+    tag: string
+  ) => {
+    setUser({
+      uid: uid,
+      username: username,
+      avatar: avatar,
+      tag: tag,
+      permissions: user.permissions,
+      nickname: user.nickname,
+    });
   };
 
-  const setUserPermissions = (permissions: UserPermission[]) => {
-    setUser({
-      uid: user.uid,
-      username: user.username,
-      avatar: user.avatar,
-      permissions: permissions,
-    });
+  const setMemberData = (nickname: string, permissions: UserPermission[]) => {
+    let userData = user;
+    userData.nickname = nickname;
+    userData.permissions = permissions;
+    setUser(userData);
   };
 
   useEffect(() => {
@@ -69,9 +95,19 @@ export default function UserContextComp({ children }: any) {
               uid: uid,
               username: docSnap.data().username,
               avatar: docSnap.data().avatar ? docSnap.data().avatar : "",
+              tag: docSnap.data().tag ? docSnap.data().tag : "",
               permissions: [],
+              nickname: "",
             });
-        } else setUser({ uid: "", username: "", avatar: "", permissions: [] });
+        } else
+          setUser({
+            uid: "",
+            username: "",
+            avatar: "",
+            tag: "",
+            permissions: [],
+            nickname: "",
+          });
       } catch (error) {
         console.log("ERROR: unable to get user");
       } finally {
@@ -84,7 +120,7 @@ export default function UserContextComp({ children }: any) {
 
   return (
     <UserContext.Provider
-      value={{ user, setUserData, setUserPermissions, loadingUser }}
+      value={{ user, setUserData, setMemberData, loadingUser }}
     >
       {children}
     </UserContext.Provider>

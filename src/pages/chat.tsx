@@ -7,11 +7,18 @@ import { ChatMain } from "components/chat/ChatMain";
 import Loading from "components/Loading";
 import { wait } from "components/utils/utils";
 import { createFirebaseApp } from "../firebase/clientApp";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
+import {
+  DocumentData,
+  QueryDocumentSnapshot,
+  doc,
+  getDoc,
+  getFirestore,
+  setDoc,
+} from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 
 const Chat = () => {
-  const { user, loadingUser, setUserPermissions } = useUser();
+  const { user, loadingUser, setMemberData } = useUser();
   const { channel } = useChannel();
 
   const router = useRouter();
@@ -36,15 +43,32 @@ const Chat = () => {
   });
 
   useEffect(() => {
-    async function setUserPerms() {
+    async function setUserPerms(
+      docSnapMember: QueryDocumentSnapshot<DocumentData>
+    ) {
+      setMemberData(
+        docSnapMember.data().nickname,
+        docSnapMember.data().permissions
+      );
+    }
+
+    // Adds user to members of the group if isn't one yet (temp till multiple groups)
+    async function checkMember() {
       const docSnapMember = await getDoc(
         doc(db, "groups", channel.idG, "members", user.uid)
       );
-      if (docSnapMember.exists())
-        setUserPermissions(docSnapMember.data().permissions);
+      if (docSnapMember.exists()) setUserPerms(docSnapMember);
+      else {
+        await setDoc(doc(db, "groups", channel.idG, "members", user.uid), {
+          nickname: user.username,
+          avatar: user.avatar,
+          nameColor: "",
+          permissions: [],
+        }).catch((err) => console.log(err));
+      }
     }
 
-    if (user.uid != "") setUserPerms();
+    if (user.uid != "") checkMember();
   }, [user.uid]);
 
   // Render only if user is authenticated

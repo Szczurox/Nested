@@ -1,7 +1,6 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { Avatar, TextareaAutosize } from "@material-ui/core";
 import styles from "../../styles/components/chat/Message.module.scss";
-import contextMenuStyles from "../../styles/components/chat/contextmenu/ContextMenu.module.scss";
 import moment from "moment";
 import {
   deleteDoc,
@@ -53,7 +52,8 @@ export const Message: React.FC<MessageProps> = ({
   onImageLoad,
   edited,
 }) => {
-  const [username, setUsername] = useState<string>("");
+  const [nickname, setNickname] = useState<string>("");
+  const [nickColor, setNickColor] = useState<string>("white");
   const [avatar, setAvatar] = useState<string>(
     "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
   );
@@ -108,10 +108,13 @@ export const Message: React.FC<MessageProps> = ({
           style={{ height: "45px", width: "45px" }}
           src={avatar}
           innerRef={avatarRef}
+          onLoad={(_) =>
+            !isEditing ? (onImageLoad ? onImageLoad!() : null) : null
+          }
         />
       </div>
-      <h4>
-        {username}
+      <h4 style={{ color: nickColor }}>
+        {nickname}
         <span className={styles.message_timestamp}>
           {moment(time).local().format("MMMM Do YYYY [at] hh:mm a")}
         </span>
@@ -121,10 +124,22 @@ export const Message: React.FC<MessageProps> = ({
 
   useEffect(() => {
     async function getUserData() {
-      const docSnap = await getDoc(doc(db, "profile", userid));
-      if (docSnap.exists()) {
-        setUsername(docSnap.data().username);
-        if (docSnap.data().avatar) setAvatar(docSnap.data().avatar);
+      if (channel.idG != "") {
+        const docMemberSnap = await getDoc(
+          doc(db, "groups", channel.idG, "members", userid)
+        );
+        if (docMemberSnap.exists()) {
+          setNickname(docMemberSnap.data().nickname);
+          setNickColor(docMemberSnap.data().nameColor);
+          if (docMemberSnap.data().avatar)
+            setAvatar(docMemberSnap.data().avatar);
+        } else {
+          const docSnap = await getDoc(doc(db, "profile", userid));
+          if (docSnap.exists()) {
+            setNickname(docSnap.data().username);
+            if (docSnap.data().avatar) setAvatar(docSnap.data().avatar);
+          }
+        }
       }
     }
 
@@ -212,7 +227,7 @@ export const Message: React.FC<MessageProps> = ({
     }
   };
 
-  return username ? (
+  return nickname ? (
     <>
       <ContextMenu ref={menuRef}>
         {userid == user.uid && (

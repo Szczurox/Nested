@@ -56,7 +56,7 @@ export const ChatMain: React.FC = ({}) => {
   const messagesCollection = collection(
     db,
     "groups",
-    "H8cO2zBjCyJYsmM4g5fv",
+    channel.idG,
     "categories",
     channel.idC,
     "channels",
@@ -125,15 +125,6 @@ export const ChatMain: React.FC = ({}) => {
       listInnerRef.current.scrollTop =
         listInnerRef.current.scrollHeight - listInnerRef.current.clientHeight;
     }
-  };
-
-  const scrollAfterWait = () => {
-    wait(200).then(() => {
-      if (listInnerRef.current) {
-        listInnerRef.current.focus();
-        scrollToBottom();
-      }
-    });
   };
 
   function callback(qMes: any) {
@@ -222,19 +213,6 @@ export const ChatMain: React.FC = ({}) => {
                   return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
                 })
               );
-            }
-            if (autoScroll && querySnapshot.docChanges().length > 1) {
-              if (index > 0) {
-                if (
-                  index > 0 &&
-                  querySnapshot.docChanges()[index - 1].type !== "removed"
-                )
-                  scrollAfterWait();
-                else if (querySnapshot.docChanges()[1].newIndex == 0)
-                  scrollAfterWait();
-                else if (querySnapshot.docChanges().length > 2)
-                  scrollAfterWait();
-              }
             }
           }
           if (change.type === "removed") {
