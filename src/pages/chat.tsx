@@ -9,10 +9,11 @@ import { wait } from "components/utils/utils";
 import { createFirebaseApp } from "../firebase/clientApp";
 import {
   DocumentData,
-  QueryDocumentSnapshot,
+  DocumentSnapshot,
   doc,
   getDoc,
   getFirestore,
+  onSnapshot,
   setDoc,
 } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
@@ -43,13 +44,13 @@ const Chat = () => {
   });
 
   useEffect(() => {
-    async function setUserPerms(
-      docSnapMember: QueryDocumentSnapshot<DocumentData>
-    ) {
-      setMemberData(
-        docSnapMember.data().nickname,
-        docSnapMember.data().permissions
-      );
+    async function setUserPerms(docSnapMember: DocumentSnapshot<DocumentData>) {
+      if (docSnapMember.exists()) {
+        setMemberData(
+          docSnapMember.data().nickname,
+          docSnapMember.data().permissions
+        );
+      }
     }
 
     // Adds user to members of the group if isn't one yet (temp till multiple groups)
@@ -57,19 +58,32 @@ const Chat = () => {
       const docSnapMember = await getDoc(
         doc(db, "groups", channel.idG, "members", user.uid)
       );
-      if (docSnapMember.exists()) setUserPerms(docSnapMember);
-      else {
+      let unsub: () => void;
+      if (docSnapMember.exists()) {
+        unsub = onSnapshot(
+          doc(db, "groups", channel.idG, "members", user.uid),
+          (docSnapMember) => setUserPerms(docSnapMember)
+        );
+      } else {
         await setDoc(doc(db, "groups", channel.idG, "members", user.uid), {
           nickname: user.username,
           avatar: user.avatar,
           nameColor: "",
           permissions: [],
         }).catch((err) => console.log(err));
+        unsub = onSnapshot(
+          doc(db, "groups", channel.idG, "members", user.uid),
+          (docSnapMember) => setUserPerms(docSnapMember)
+        );
       }
+      return unsub;
     }
-
-    if (user.uid != "") checkMember();
-  }, [user.uid]);
+    let unsub: () => void = () => undefined;
+    if (user.uid != "") checkMember().then((result) => (unsub = result));
+    return () => {
+      unsub();
+    };
+  }, [user.uid, channel.idG]);
 
   // Render only if user is authenticated
   return user.uid ? (

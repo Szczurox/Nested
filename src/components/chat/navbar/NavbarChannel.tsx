@@ -6,12 +6,14 @@ interface NavbarChannelProps {
   name: string;
   id: string;
   idC: string;
+  nameC?: string;
 }
 
 export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   name,
   id,
   idC,
+  nameC = "",
 }) => {
   const [isActive, setActive] = useState(false);
   const { channel, setChannelData } = useChannel();
@@ -23,7 +25,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
   const handleToggle = () => {
     setActive(true);
-    setChannelData(id, name, idC);
+    setChannelData(id, name, idC, nameC);
   };
 
   return (

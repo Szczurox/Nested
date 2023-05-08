@@ -9,6 +9,7 @@ import {
   getFirestore,
 } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase/clientApp";
+import { useChannel } from "context/channelContext";
 
 export type NavbarCategoriesVariant = "server" | "dms";
 
@@ -30,12 +31,13 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
   variant = "server",
 }) => {
   const [categories, setCategories] = useState<CategoryData[]>([]);
-  const [noneCategoryChannels, setNoneCategoryChannels] = useState<
-    ChannelData[]
-  >([]);
+  // Channels with category None
+  const [nCategoryChannels, setNCategoryChannels] = useState<ChannelData[]>([]);
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
+
+  const { channel } = useChannel();
 
   useEffect(() => {
     function categoriesGet() {
@@ -76,7 +78,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
         )
       );
       const unsub = onSnapshot(qCha, (querySnapshot) => {
-        setNoneCategoryChannels(
+        setNCategoryChannels(
           querySnapshot.docs.map((doc) => ({
             id: doc.id,
             name: doc.data().name,
@@ -89,13 +91,13 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
 
     categoriesGet();
     getChannel();
-  }, [db]);
+  }, [db, channel.idG]);
 
   return (
     <div className={styles.navbar_channels}>
       {variant == "server" ? (
         <>
-          {noneCategoryChannels.map(({ id, name }) => (
+          {nCategoryChannels.map(({ id, name }) => (
             <NavbarChannel key={id} id={id} idC="none" name={name} />
           ))}
           {categories.map(({ id, name }) => (

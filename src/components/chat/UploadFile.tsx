@@ -1,4 +1,4 @@
-import React, { RefObject, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import styles from "../../styles/components/chat/UploadFile.module.scss";
 import { v4 } from "uuid";
@@ -29,15 +29,11 @@ export interface FileUploadingData {
 export interface UploadFileProps {
   chatInput?: string;
   uploadCallback: (fileData: FileUploadingData) => void;
-  onPopUp: () => void;
-  onCancel: () => void;
 }
 
 export const UploadFile: React.FC<UploadFileProps> = ({
   chatInput,
   uploadCallback,
-  onPopUp,
-  onCancel,
 }) => {
   const [fileName, setFileName] = useState<string>("");
   const [fileUrl, setFileUrl] = useState<string>("");
@@ -70,7 +66,6 @@ export const UploadFile: React.FC<UploadFileProps> = ({
       setFileG(e);
       setFileName(e.name);
       setFileUrl(URL.createObjectURL(e));
-      onPopUp();
       setIsOpen(true);
     }
   }
@@ -79,7 +74,10 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     setIsOpen(false);
     const id = v4();
     uploadCallback({ id: id, name: fileName, percent: 0 });
-    const fileRef = ref(storage, `images/${id}/${fileG!.name}`);
+    const fileRef = ref(
+      storage,
+      `images/${channel.idG}/${channel.idC}/${id}/${fileG!.name}`
+    );
     const uploadTask = uploadBytesResumable(fileRef, fileG!);
     uploadTask.on(
       "state_changed",
@@ -133,11 +131,6 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     );
   }
 
-  const onUploadCancel = () => {
-    onCancel();
-    setIsOpen(false);
-  };
-
   return (
     <div className={styles.upload_file}>
       {isOpen && (
@@ -145,7 +138,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
           uploadFile={uploadFile}
           fileUrl={fileUrl}
           chatInput={chatInput ? chatInput : ""}
-          cancelled={onUploadCancel}
+          cancelled={() => setIsOpen(false)}
         />
       )}
       <form>

@@ -3,7 +3,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { createFirebaseApp } from "../firebase/clientApp";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 
-export type UserPermission = "MODERATE_MESSAGES";
+export type UserPermission = "MODERATE_MESSAGES" | "MANAGE_CHANNELS";
 
 export type User = {
   uid: string;
@@ -68,20 +68,20 @@ export default function UserContextComp({ children }: any) {
     tag: string
   ) => {
     setUser({
+      ...user,
       uid: uid,
       username: username,
       avatar: avatar,
       tag: tag,
-      permissions: user.permissions,
-      nickname: user.nickname,
     });
   };
 
   const setMemberData = (nickname: string, permissions: UserPermission[]) => {
-    let userData = user;
-    userData.nickname = nickname;
-    userData.permissions = permissions;
-    setUser(userData);
+    setUser({
+      ...user,
+      permissions: permissions,
+      nickname: nickname,
+    });
   };
 
   useEffect(() => {

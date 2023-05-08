@@ -130,7 +130,8 @@ export const Message: React.FC<MessageProps> = ({
         );
         if (docMemberSnap.exists()) {
           setNickname(docMemberSnap.data().nickname);
-          setNickColor(docMemberSnap.data().nameColor);
+          if (docMemberSnap.data().nameColor)
+            setNickColor(docMemberSnap.data().nameColor);
           if (docMemberSnap.data().avatar)
             setAvatar(docMemberSnap.data().avatar);
         } else {

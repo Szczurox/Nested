@@ -3,7 +3,7 @@ import { ProgressBar } from "react-bootstrap";
 import React, { useEffect, useRef, useState } from "react";
 import ChatHeader from "./ChatHeader";
 import Message, { MessageData } from "./Message";
-import UploadFile, { FileUploadingData, UploadFileProps } from "./UploadFile";
+import UploadFile, { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/Chat.module.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
@@ -28,8 +28,8 @@ import { serverTimestamp } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import SlowDownPopUp from "./popup/SlowDownPopUp";
-import { wait } from "components/utils/utils";
 import { useMessage } from "context/messageContext";
+import { usePopUp } from "context/popUpContext";
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState<string>("");
@@ -38,7 +38,6 @@ export const ChatMain: React.FC = ({}) => {
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0));
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]);
   const [slowDownCount, setSlowDownCount] = useState<number>(0);
-  const [popUpOpen, setPopUpOpen] = useState<boolean>(false);
   const [messagesEnd, setMessagesEnd] = useState<boolean>(false);
   const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false);
   const [autoScroll, setAutoScroll] = useState<boolean>(true);
@@ -49,6 +48,7 @@ export const ChatMain: React.FC = ({}) => {
   const { channel } = useChannel();
   const { user } = useUser();
   const { message } = useMessage();
+  const { popUp } = usePopUp();
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -69,14 +69,14 @@ export const ChatMain: React.FC = ({}) => {
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     };
-  }, [popUpOpen]);
+  }, [popUp.isOpen]);
 
   useEffect(() => {
     document.addEventListener("paste", pasted);
     return () => {
       document.removeEventListener("paste", pasted);
     };
-  }, [input, popUpOpen]);
+  }, [input, popUp.isOpen]);
 
   useEffect(() => {
     const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
@@ -87,7 +87,7 @@ export const ChatMain: React.FC = ({}) => {
     if (
       e.clipboardData!.files[0] == undefined &&
       channel.id != "" &&
-      !popUpOpen
+      !popUp.isOpen
     ) {
       if ((input + e.clipboardData!.getData("Text")).length <= 2000)
         setInput(input + e.clipboardData!.getData("Text"));
@@ -97,8 +97,12 @@ export const ChatMain: React.FC = ({}) => {
   };
 
   const handleKeyPress = (_: KeyboardEvent) => {
-    if (document.activeElement?.tagName != "TEXTAREA" && !popUpOpen)
-      textAreaRef.current!.focus();
+    if (
+      document.activeElement?.tagName != "TEXTAREA" &&
+      !popUp.isOpen &&
+      textAreaRef.current
+    )
+      textAreaRef.current.focus();
   };
 
   const handleScroll = (_: any) => {
@@ -195,7 +199,7 @@ export const ChatMain: React.FC = ({}) => {
       );
 
       const unsub = onSnapshot(qMes, (querySnapshot) => {
-        querySnapshot.docChanges().forEach((change, index) => {
+        querySnapshot.docChanges().forEach((change) => {
           if (change.type === "added" || change.type === "modified") {
             if (!messages.map((el) => el.id).includes(change.doc.id)) {
               setMessages((messages) =>
@@ -252,7 +256,6 @@ export const ChatMain: React.FC = ({}) => {
       // Don't update input if sending messages too quickly
       e.preventDefault();
       textAreaRef.current!.blur();
-      setPopUpOpen(true);
     } else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
       const timestamp = serverTimestamp();
       const chatInput = input;
@@ -272,13 +275,14 @@ export const ChatMain: React.FC = ({}) => {
 
         await updateDoc(doc(db, "profile", user.uid), {
           lastMessagedAt: timestamp,
+        }).catch((err) => {
+          console.log(err);
         });
       }
     }
   }
 
   const fileUploading = (fileData: FileUploadingData) => {
-    setPopUpOpen(false);
     if (fileData.percent == 0) setInput("");
     if (fileData.percent != 101)
       setFilesUploading((files) => [
@@ -295,12 +299,7 @@ export const ChatMain: React.FC = ({}) => {
   return (
     <div className={styles.chat}>
       {slowDownCount > 1 ? (
-        <SlowDownPopUp
-          onOk={() => {
-            setSlowDownCount(0);
-            setPopUpOpen(false);
-          }}
-        />
+        <SlowDownPopUp onOk={() => setSlowDownCount(0)} />
       ) : null}
       <div className={styles.chat_shadow}>
         <ChatHeader />
@@ -347,12 +346,7 @@ export const ChatMain: React.FC = ({}) => {
         <div></div>
       </div>
       <div className={styles.chat_input}>
-        <UploadFile
-          chatInput={input}
-          uploadCallback={fileUploading}
-          onPopUp={() => setPopUpOpen(true)}
-          onCancel={() => setPopUpOpen(false)}
-        />
+        <UploadFile chatInput={input} uploadCallback={fileUploading} />
         <form>
           <TextareaAutosize
             value={input}

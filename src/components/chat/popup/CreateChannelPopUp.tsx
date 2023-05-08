@@ -1,17 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
-import styles from "../../../styles/components/chat/popups/UploadFilePopUp.module.scss";
+import styles from "../../../styles/components/chat/popups/CreateChannelPopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
 import { useChannel } from "../../../context/channelContext";
 import { TextareaAutosize } from "@material-ui/core";
 import PopUpButton, { buttonColors } from "./PopUpButton";
 
-const UploadFilePopUp: React.FC<{
-  fileUrl: string;
-  chatInput: string;
-  uploadFile: (input: string) => void;
-  cancelled: () => void;
-}> = ({ uploadFile, cancelled, fileUrl, chatInput }) => {
-  const [input, setInput] = useState<string>(chatInput);
+const CreateChannelPopUp: React.FC<{
+  onConfirm: (channelName: string) => void;
+  onCancel: () => void;
+  categoryName: string;
+}> = ({ onConfirm, onCancel, categoryName }) => {
+  const [channelName, setChannelName] = useState<string>("");
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -21,7 +20,6 @@ const UploadFilePopUp: React.FC<{
     const handler = (e: KeyboardEvent) => {
       if (document.activeElement?.tagName != "TEXTAREA" && textAreaRef.current)
         textAreaRef.current!.focus();
-      if (e.key == "Enter") uploadFile(input);
     };
 
     document.addEventListener("keydown", handler, false);
@@ -32,10 +30,12 @@ const UploadFilePopUp: React.FC<{
 
   const pasted = (e: ClipboardEvent) => {
     if (e.clipboardData!.files[0] == undefined && channel.id != "") {
-      if ((input + e.clipboardData!.getData("Text")).length <= 2000)
-        setInput(input + e.clipboardData!.getData("Text"));
+      if ((channelName + e.clipboardData!.getData("Text")).length <= 40)
+        setChannelName(channelName + e.clipboardData!.getData("Text"));
       else
-        setInput((input + e.clipboardData!.getData("Text")).substring(0, 2000));
+        setChannelName(
+          (channelName + e.clipboardData!.getData("Text")).substring(0, 40)
+        );
     }
   };
 
@@ -44,37 +44,33 @@ const UploadFilePopUp: React.FC<{
     return () => {
       document.removeEventListener("paste", pasted);
     };
-  }, [input]);
+  }, [channelName]);
 
-  const uploadFileKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
+  const createChannelKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key == "Enter") {
       e.preventDefault();
-      uploadFile(input);
+      onConfirm(channelName);
     }
   };
 
   return (
     <ScreenPopUp>
       <div>
-        <img
-          className={styles.upload_file_image}
-          src={fileUrl}
-          alt="Image couldn't load"
-        />
-        <p>
-          Upload to <b>#{channel.name}</b>
-        </p>
+        <div className={styles.popup_text}>
+          <h3>Create Channel</h3>
+          <p>Create channel in {categoryName}</p>
+        </div>
         <div className={styles.popup_input}>
+          <span className={styles.hash}>#</span>
           <form>
             <TextareaAutosize
-              value={input}
-              maxRows={10}
-              wrap="soft"
-              maxLength={2000}
-              disabled={channel.id == ""}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => uploadFileKey(e)}
-              placeholder={`Message #${channel.name}`}
+              value={channelName}
+              wrap="off"
+              maxRows={1}
+              maxLength={100}
+              onChange={(e) => setChannelName(e.target.value)}
+              onKeyDown={(e) => createChannelKey(e)}
+              placeholder={`new-channel`}
               ref={textAreaRef}
               onFocus={(e) =>
                 e.target.setSelectionRange(
@@ -90,17 +86,17 @@ const UploadFilePopUp: React.FC<{
           <div
             className={styles.popup_cancel}
             onClick={(_) => {
-              setInput("");
-              cancelled();
+              setChannelName("");
+              onCancel();
             }}
           >
             Cancel
           </div>
           <PopUpButton
-            onClick={(_) => uploadFile(input)}
-            color={buttonColors.get("red")!}
+            onClick={(_) => onConfirm(channelName)}
+            color={buttonColors.get("grey")!}
           >
-            Upload
+            Create
           </PopUpButton>
         </div>
       </div>
@@ -108,4 +104,4 @@ const UploadFilePopUp: React.FC<{
   );
 };
 
-export default UploadFilePopUp;
+export default CreateChannelPopUp;

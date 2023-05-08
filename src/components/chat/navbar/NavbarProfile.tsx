@@ -13,9 +13,11 @@ import {
 } from "firebase/storage";
 import { createFirebaseApp } from "../../../firebase/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
+import { useChannel } from "context/channelContext";
 
 export const NavbarProfile: React.FC = ({}) => {
   const { user, setUserData } = useUser();
+  const { channel } = useChannel();
 
   const [avatar, setAvatar] = useState(
     user.avatar != ""
@@ -30,14 +32,20 @@ export const NavbarProfile: React.FC = ({}) => {
   async function fileSubmit(url: string) {
     await updateDoc(doc(db, "profile", user.uid), {
       avatar: url,
-    });
+    })
+      .catch((err) => console.log("User Error: " + err))
+      .then(
+        async () =>
+          await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
+            avatar: url,
+          }).catch((err) => console.log("Member Error: " + err))
+      );
   }
 
   const uploadAvatar = (file: File) => {
     if (file.type.substring(0, 5) == "image") {
       const fileRef = ref(storage, `profiles/${user.uid}`);
       const uploadTask = uploadBytesResumable(fileRef, file!);
-
       uploadTask.on(
         "state_changed",
         (snapshot) => {
@@ -58,7 +66,7 @@ export const NavbarProfile: React.FC = ({}) => {
         },
         () => {
           getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            console.log("File uploaded! ", downloadURL);
+            console.log("Avatar uploaded! ", downloadURL);
             fileSubmit(downloadURL).then(() => {
               setAvatar(downloadURL);
               setUserData(user.uid, user.username, downloadURL, user.tag);
