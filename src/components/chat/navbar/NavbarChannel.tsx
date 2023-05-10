@@ -69,6 +69,8 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
       id
     );
 
+    setShowPopUp(0);
+
     // Kick user out of the channel so that messages can't be seen anymore
     if (channel.id == id) setChannelData("", "", "", "");
 
@@ -86,6 +88,8 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
         "channels",
         id
       );
+
+      setShowPopUp(0);
 
       await updateDoc(channelDoc, {
         name: newName,
