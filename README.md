@@ -1,8 +1,21 @@
-This is a [Next.js](https://nextjs.org/) chat app bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Faicamp
+
+[![Lines of code](https://tokei.ekzhang.com/b1/github/Szczurox/Faicamp)](https://tokei.ekzhang.com/b1/github/Szczurox/Faicamp)
+[![License](https://img.shields.io/github/license/Szczurox/Faicamp?service=github)](https://github.com/Szczurox/Faicamp/blob/main/LICENSE)
+
+This is a [Next.js](https://nextjs.org/) chat app with [Firebase](https://firebase.google.com/)-based backend bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+
+The project is still in development.
 
 ## Getting Started
 
-First, run the development server:
+Firstly, install all needed dependencies:
+
+```bash
+npm install
+```
+
+Then, run the development server:
 
 ```bash
 npm run dev
@@ -10,25 +23,58 @@ npm run dev
 yarn dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+If you are using [Visual Studio Code](https://code.visualstudio.com/) this command should run automatically.
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.   
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+## Firebase 
 
-## Learn More
+This project uses [Firebase](https://firebase.google.com/) for database, storage and user authentication.
 
-To learn more about Next.js, take a look at the following resources:
+Go to [Firebase documentation](https://firebase.google.com/docs) for more information.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Getting Started with Firebase
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+To get Firebase up and running create a project by going to [Firebase console](https://console.firebase.google.com/u/0/).
+
+Then create [Firestore Database](https://firebase.google.com/docs/firestore) and [Cloud Storage](https://firebase.google.com/docs/storage).
+
+After you are done go to the project settings, scroll down and copy firebase config.
+
+Then you have 2 choices:
+
+1. 🟢 (Recommended) Create [.env.local](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) file with this structure
+```env
+NEXT_PUBLIC_FIREBASE_API_KEY=[apiKey]
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=[authDomain]
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=[projectId]
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=[storageBucket]
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=[messagingSenderId]
+NEXT_PUBLIC_FIREBASE_APP_ID=[appId]
+NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=[measurementId]
+```
+
+2. Go to [src/firebase/clientApp.tsx](https://github.com/Szczurox/Faicamp/blob/main/src/firebase/clientApp.ts) and paste the credentials into the clientCredentials object directly.
+
+Currently Firestore and Storage rules are not included in the projects repo, if you want to create secure rules check out [Firestore security documentation](https://firebase.google.com/docs/firestore/security/get-started)
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+This project uses [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) for hosting.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Check out [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Side notes
+
+- If you want you can deploy the app to [Firebase](https://firebase.google.com/docs/hosting) or any other host instead of Vercel, it shouldn't affect performance.
+I chose Vercel because of simplicity and better integration with GitHub as well as Next.js.   
+
+- If you prefer [yarn](https://yarnpkg.com/) over [npm](https://www.npmjs.com/) after creating `package-lock.json` you can remove `package.json` and use:
+```bash
+yarn import
+```
+&emsp;&ensp;&ensp;to create `yarn.lock` file from `package-lock.json`.
+
+
+   
