@@ -20,6 +20,8 @@ import moment from "moment";
 import { createFirebaseApp } from "../../firebase/clientApp";
 import UploadFilePopUp from "./popup/UploadFilePopUp";
 
+export type MediaType = "image" | "video";
+
 export interface FileUploadingData {
   id: string;
   name: string;
@@ -36,6 +38,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   uploadCallback,
 }) => {
   const [fileName, setFileName] = useState<string>("");
+  const [fileType, setFileType] = useState<string>("");
   const [fileUrl, setFileUrl] = useState<string>("");
   const [fileG, setFileG] = useState<File>();
   const [isOpen, setIsOpen] = useState(false);
@@ -61,8 +64,14 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   };
 
   async function checkFile(e: File) {
-    if (e.type.substring(0, 5) == "image") {
+    console.log(e.type);
+    // Allow only images, gifs and videos
+    if (
+      e.type.substring(0, 5) == "image" ||
+      e.type.substring(0, 5) == "video"
+    ) {
       console.log("valid");
+      setFileType(e.type.substring(0, 5));
       setFileG(e);
       setFileName(e.name);
       setFileUrl(URL.createObjectURL(e));
@@ -76,7 +85,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     uploadCallback({ id: id, name: fileName, percent: 0 });
     const fileRef = ref(
       storage,
-      `images/${channel.idG}/${channel.idC}/${id}/${fileG!.name}`
+      `media/${channel.idG}/${channel.idC}/${id}/${fileG!.name}`
     );
     const uploadTask = uploadBytesResumable(fileRef, fileG!);
     uploadTask.on(
@@ -97,6 +106,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
       },
       (error) => {
         console.log(error);
+        uploadCallback({ id: id, name: fileName, percent: 101 });
       },
       () => {
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
@@ -127,6 +137,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
         content: input,
         userid: user.uid,
         file: url,
+        fileType: fileType,
       }
     );
   }
@@ -139,6 +150,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
           fileUrl={fileUrl}
           chatInput={chatInput ? chatInput : ""}
           cancelled={() => setIsOpen(false)}
+          type={fileType as MediaType}
         />
       )}
       <form>

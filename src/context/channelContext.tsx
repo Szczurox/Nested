@@ -2,11 +2,11 @@ import { useState, createContext, useContext } from "react";
 
 export interface ChannelContextType {
   channel: {
-    id: string;
-    name: string;
-    idC: string;
-    nameC: string;
-    idG: string;
+    id: string; // Channel ID
+    name: string; // Channel name
+    idC: string; // Category ID
+    nameC: string; // Category name
+    idG: string; // Group ID
   };
   setChannelData: (
     id: string,

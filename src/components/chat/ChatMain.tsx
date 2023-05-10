@@ -24,10 +24,10 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import moment from "moment";
+import SlowDownPopUp from "./popup/SlowDownPopUp";
 import { serverTimestamp } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
-import SlowDownPopUp from "./popup/SlowDownPopUp";
 import { useMessage } from "context/messageContext";
 import { usePopUp } from "context/popUpContext";
 
@@ -96,11 +96,12 @@ export const ChatMain: React.FC = ({}) => {
     }
   };
 
-  const handleKeyPress = (_: KeyboardEvent) => {
+  const handleKeyPress = (e: KeyboardEvent) => {
     if (
       document.activeElement?.tagName != "TEXTAREA" &&
       !popUp.isOpen &&
-      textAreaRef.current
+      textAreaRef.current &&
+      !e.ctrlKey
     )
       textAreaRef.current.focus();
   };
@@ -144,6 +145,7 @@ export const ChatMain: React.FC = ({}) => {
                 uid: change.doc.data().userid,
                 file: change.doc.data().file,
                 edited: change.doc.data().edited,
+                fileType: change.doc.data().fileType,
               },
               ...messages.filter((el) => el.id !== change.doc.id),
             ].sort((x, y) => {
@@ -212,6 +214,7 @@ export const ChatMain: React.FC = ({}) => {
                     uid: change.doc.data().userid,
                     file: change.doc.data().file,
                     edited: change.doc.data().edited,
+                    fileType: change.doc.data().fileType,
                   },
                 ].sort((x, y) => {
                   return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
@@ -252,8 +255,8 @@ export const ChatMain: React.FC = ({}) => {
   }, [channel.id]);
 
   async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    if (slowDownCount > 1) {
-      // Don't update input if sending messages too quickly
+    if (slowDownCount > 1 || popUp.isOpen) {
+      // Don't update input if sending messages too quickly or pop-up is open
       e.preventDefault();
       textAreaRef.current!.blur();
     } else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
@@ -309,18 +312,21 @@ export const ChatMain: React.FC = ({}) => {
         onScroll={(e) => handleScroll(e)}
         ref={listInnerRef}
       >
-        {messages.map(({ id, content, timestamp, uid, file, edited }) => (
-          <Message
-            key={id}
-            id={id}
-            content={content}
-            time={timestamp}
-            userid={uid}
-            file={file}
-            onImageLoad={onImageLoadComplete}
-            edited={edited}
-          />
-        ))}
+        {messages.map(
+          ({ id, content, timestamp, uid, file, edited, fileType }) => (
+            <Message
+              key={id}
+              id={id}
+              content={content}
+              time={timestamp}
+              userid={uid}
+              file={file}
+              onImageLoad={onImageLoadComplete}
+              edited={edited}
+              fileType={fileType}
+            />
+          )
+        )}
         {filesUploading.map(({ name, percent, id }) => {
           return (
             <Message

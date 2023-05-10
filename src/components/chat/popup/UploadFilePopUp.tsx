@@ -4,13 +4,23 @@ import ScreenPopUp from "./ScreenPopUp";
 import { useChannel } from "../../../context/channelContext";
 import { TextareaAutosize } from "@material-ui/core";
 import PopUpButton, { buttonColors } from "./PopUpButton";
+import { MediaType } from "../UploadFile";
 
-const UploadFilePopUp: React.FC<{
+interface UploadFilePopUpProps {
   fileUrl: string;
   chatInput: string;
+  type: MediaType;
   uploadFile: (input: string) => void;
   cancelled: () => void;
-}> = ({ uploadFile, cancelled, fileUrl, chatInput }) => {
+}
+
+const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
+  uploadFile,
+  cancelled,
+  fileUrl,
+  chatInput,
+  type,
+}) => {
   const [input, setInput] = useState<string>(chatInput);
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -19,7 +29,11 @@ const UploadFilePopUp: React.FC<{
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (document.activeElement?.tagName != "TEXTAREA" && textAreaRef.current)
+      if (
+        document.activeElement?.tagName != "TEXTAREA" &&
+        textAreaRef.current &&
+        !e.ctrlKey
+      )
         textAreaRef.current!.focus();
       if (e.key == "Enter") uploadFile(input);
     };
@@ -56,11 +70,18 @@ const UploadFilePopUp: React.FC<{
   return (
     <ScreenPopUp>
       <div>
-        <img
-          className={styles.upload_file_image}
-          src={fileUrl}
-          alt="Image couldn't load"
-        />
+        {type === "image" ? (
+          <img
+            className={styles.upload_file_media}
+            src={fileUrl}
+            alt="Image couldn't load"
+          />
+        ) : (
+          <video className={styles.upload_file_media} controls>
+            <source src={fileUrl} />
+            Your browser does not support the video files, {fileUrl}.
+          </video>
+        )}
         <p>
           Upload to <b>#{channel.name}</b>
         </p>

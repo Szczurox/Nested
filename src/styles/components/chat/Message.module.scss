@@ -116,7 +116,17 @@
     }
   }
 
-  .message_image_text {
+  .message_delete_embed {
+    margin-top: -10px;
+    max-width: 400px;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    margin-left: 60px;
+  }
+
+  .message_embed_text {
     margin-top: -10px;
     max-width: 800px;
     max-height: 500px;
@@ -130,7 +140,7 @@
     margin-top: 12px;
   }
 
-  .message_image {
+  .message_embed {
     max-width: 800px;
     max-height: 500px;
     width: auto;

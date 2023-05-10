@@ -2,6 +2,7 @@ import React, {
   ReactNode,
   RefObject,
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useRef,
   useState,
@@ -10,9 +11,10 @@ import styles from "../../../styles/components/chat/contextmenu/ContextMenu.modu
 
 interface ContextMenuProps {
   children: ReactNode;
+  parentRef: RefObject<HTMLDivElement>;
 }
 
-type ContextMenuHandle = {
+export type ContextMenuHandle = {
   closeMenu: () => void;
   handleContextMenu: (event: React.MouseEvent<HTMLElement>) => void;
   getListRef: () => RefObject<HTMLUListElement>;
@@ -21,7 +23,7 @@ type ContextMenuHandle = {
 const ContextMenu: React.ForwardRefRenderFunction<
   ContextMenuHandle,
   ContextMenuProps
-> = ({ children }, ref) => {
+> = ({ children, parentRef }, ref) => {
   const [isOpen, setIsOpen] = useState(false);
   const [menuPoint, setMenuPoint] = useState<{ x: number; y: number }>({
     x: 0,
@@ -37,6 +39,7 @@ const ContextMenu: React.ForwardRefRenderFunction<
       },
 
       handleContextMenu(event: React.MouseEvent<HTMLElement>): void {
+        console.log(true);
         event.preventDefault();
 
         setMenuPoint({
@@ -49,6 +52,7 @@ const ContextMenu: React.ForwardRefRenderFunction<
               ? event.pageY
               : event.pageY - window.innerHeight / 10,
         });
+
         setIsOpen(true);
       },
 
@@ -57,6 +61,30 @@ const ContextMenu: React.ForwardRefRenderFunction<
       },
     };
   });
+
+  const handleCloseMenu = (e: Event): void => {
+    if (
+      e.type == "click" ||
+      (e.type == "keydown" && (e as KeyboardEvent).key == "Escape") ||
+      (e.type == "contextmenu" &&
+        !parentRef.current?.contains(e.target as Node) &&
+        listRef.current != null &&
+        !listRef.current!.contains(e.target as Node))
+    ) {
+      setIsOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener("keydown", handleCloseMenu);
+    document.addEventListener("click", handleCloseMenu);
+    document.addEventListener("contextmenu", handleCloseMenu);
+
+    return () => {
+      document.removeEventListener("keydown", handleCloseMenu);
+      document.removeEventListener("contextmenu", handleCloseMenu);
+    };
+  }, []);
 
   return isOpen ? (
     <ul

@@ -4,6 +4,8 @@ import React, { useEffect } from "react";
 import { useUser } from "context/userContext";
 import { useRouter } from "next/router";
 import { ChatMain } from "components/chat/ChatMain";
+import Loading from "components/Loading";
+import { wait } from "components/utils/utils";
 import { createFirebaseApp } from "../firebase/clientApp";
 import {
   DocumentData,
@@ -28,6 +30,17 @@ const Chat = () => {
   // Route to login if user is not authenticated
   useEffect(() => {
     if (user.uid == "" && !loadingUser) router.push("/login");
+    else loading();
+
+    async function loading() {
+      if (typeof window !== "undefined") {
+        const loader = document.getElementById("globalLoader");
+        if (loader) {
+          await wait(500);
+          loader.remove();
+        }
+      }
+    }
   }, [user.uid, loadingUser]);
 
   useEffect(() => {
@@ -75,6 +88,7 @@ const Chat = () => {
   // Render only if user is authenticated
   return user.uid ? (
     <div className={styles.app}>
+      <Loading />
       <Navbar />
       <ChatMain />
     </div>

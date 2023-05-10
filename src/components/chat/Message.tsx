@@ -10,7 +10,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { createFirebaseApp } from "../../firebase/clientApp";
-import ContextMenu from "./contextmenu/ContextMenu";
+import ContextMenu, { ContextMenuHandle } from "./contextmenu/ContextMenu";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -19,12 +19,14 @@ import { useUser } from "context/userContext";
 import { useMessage } from "context/messageContext";
 import DeleteConfirmPopUp from "./popup/DeleteConfirmPopUp";
 import ContextMenuElement from "./contextmenu/ContextMenuElement";
+import { MediaType } from "./UploadFile";
 
 interface MessageProps {
   id: string;
   content: string;
   userid: string;
   file?: string;
+  fileType?: MediaType;
   time?: string;
   edited?: boolean;
   children?: ReactNode;
@@ -37,16 +39,16 @@ export interface MessageData {
   timestamp: string;
   uid: string; // Id of user that sent the message
   file?: string;
+  fileType?: MediaType;
   edited?: boolean;
 }
-
-type ContextMenuHandle = React.ElementRef<typeof ContextMenu>;
 
 export const Message: React.FC<MessageProps> = ({
   id,
   content,
   time,
   file,
+  fileType,
   userid = "uid",
   children,
   onImageLoad,
@@ -57,6 +59,7 @@ export const Message: React.FC<MessageProps> = ({
   const [avatar, setAvatar] = useState<string>(
     "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
   );
+  const [realTime, setRealTime] = useState<string>("");
   const [input, setInput] = useState<string>(""); // Message edit input
   const [isEditing, setIsEditing] = useState<boolean>(false); // Is message currently being edited
   const [showPopUp, setShowPopUp] = useState<boolean>(false); // Delete confirmation pop-up
@@ -85,43 +88,6 @@ export const Message: React.FC<MessageProps> = ({
     id
   );
 
-  const messageContent = (
-    <div className={styles.message_content}>
-      <p>
-        {content}
-        {edited && (
-          <span className={styles.message_edited_indicator}>{" (edited)"}</span>
-        )}
-      </p>
-    </div>
-  );
-
-  const senderInfo = (
-    <>
-      <div
-        className={styles.message_profilePicture}
-        onContextMenu={(e) =>
-          !isEditing && userMenuRef.current?.handleContextMenu(e)
-        }
-      >
-        <Avatar
-          style={{ height: "45px", width: "45px" }}
-          src={avatar}
-          innerRef={avatarRef}
-          onLoad={(_) =>
-            !isEditing ? (onImageLoad ? onImageLoad!() : null) : null
-          }
-        />
-      </div>
-      <h4 style={{ color: nickColor }}>
-        {nickname}
-        <span className={styles.message_timestamp}>
-          {moment(time).local().format("MMMM Do YYYY [at] hh:mm a")}
-        </span>
-      </h4>
-    </>
-  );
-
   useEffect(() => {
     async function getUserData() {
       if (channel.idG != "") {
@@ -144,14 +110,26 @@ export const Message: React.FC<MessageProps> = ({
       }
     }
 
+    function setTime() {
+      // Day the message was sent
+      const messageDay = moment(time).local().format("Do");
+
+      // Set the formatted date to Today/Yesterday if the message was sent on the according day
+      if (moment().local().format("Do") == messageDay)
+        setRealTime(moment(time).local().format("[Today] [at] hh:mm a"));
+      else if (moment().local().subtract(1, "days").format("Do") == messageDay)
+        setRealTime(moment(time).local().format("[Yesterday] [at] hh:mm a"));
+      else
+        setRealTime(moment(time).local().format("MMMM Do YYYY [at] hh:mm a"));
+    }
+
     document.addEventListener("keydown", handleClick);
-    document.addEventListener("click", handleClick);
     document.addEventListener("contextmenu", handleClick);
     getUserData();
+    setTime();
 
     return () => {
       document.removeEventListener("keydown", handleClick);
-      document.removeEventListener("click", handleClick);
       document.removeEventListener("contextmenu", handleClick);
     };
   }, []);
@@ -161,27 +139,9 @@ export const Message: React.FC<MessageProps> = ({
   }, [message.id]);
 
   const handleClick = (e: Event): void => {
-    if (
-      e.type == "click" ||
-      (e.type == "contextmenu" &&
-        !elementRef.current?.contains(e.target as Node) &&
-        menuRef.current?.getListRef().current! != null &&
-        !menuRef.current?.getListRef().current!.contains(e.target as Node)) ||
-      avatarRef.current?.contains(e.target as Node) ||
-      (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
-    )
+    if (avatarRef.current?.contains(e.target as Node))
       menuRef.current?.closeMenu();
-    if (
-      e.type == "click" ||
-      (e.type == "contextmenu" &&
-        !avatarRef.current?.contains(e.target as Node) &&
-        userMenuRef.current?.getListRef().current! != null &&
-        !userMenuRef.current
-          ?.getListRef()
-          .current!.contains(e.target as Node)) ||
-      (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
-    )
-      userMenuRef.current?.closeMenu();
+
     if (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
       setIsEditing(false);
   };
@@ -216,21 +176,94 @@ export const Message: React.FC<MessageProps> = ({
 
   const editMessage = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key == "Escape") setIsEditing(false);
-    if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
+    if (e.key == "Enter" && e.shiftKey == false) {
       // Edit Message
       setIsEditing(false);
       e.preventDefault();
-      if (input.replace(/\s/g, "").length) updateMessage();
-      else {
-        // Ask if user wants to delete the message if input is set to empty
-        setShowPopUp(true);
+      if (input != content) {
+        if (input.replace(/\s/g, "").length) updateMessage();
+        else {
+          // Ask if user wants to delete the message if input is set to empty
+          setShowPopUp(true);
+        }
       }
     }
   };
 
+  const messageContent = (
+    <div className={styles.message_content}>
+      <p>
+        {content}
+        {edited && (
+          <span className={styles.message_edited_indicator}>{" (edited)"}</span>
+        )}
+      </p>
+    </div>
+  );
+
+  const fileContent = (inPopUp: boolean) =>
+    file ? (
+      <div className={styles.message_embed}>
+        {fileType == "image" ? (
+          <a href={file} target="_blank" rel="noreferrer">
+            <img
+              className={
+                inPopUp
+                  ? styles.message_delete_embed
+                  : content != "" || isEditing
+                  ? styles.message_embed_text
+                  : styles.message_embed
+              }
+              src={file}
+              alt="image"
+              onLoad={(_) => (!inPopUp && onImageLoad ? onImageLoad() : null)}
+            />
+          </a>
+        ) : (
+          <video
+            className={
+              inPopUp
+                ? styles.message_delete_embed
+                : content != "" || isEditing
+                ? styles.message_embed_text
+                : styles.message_embed
+            }
+            controls
+          >
+            <source src={file} />
+            Your browser does not support the video files, {file}.
+          </video>
+        )}
+      </div>
+    ) : null;
+
+  const senderInfo = (
+    <>
+      <div
+        className={styles.message_profilePicture}
+        onContextMenu={(e) =>
+          !isEditing && userMenuRef.current?.handleContextMenu(e)
+        }
+      >
+        <Avatar
+          style={{ height: "45px", width: "45px" }}
+          src={avatar}
+          innerRef={avatarRef}
+          onLoad={(_) =>
+            !isEditing ? (onImageLoad ? onImageLoad!() : null) : null
+          }
+        />
+      </div>
+      <h4 style={{ color: nickColor }}>
+        {nickname}
+        <span className={styles.message_timestamp}>{realTime}</span>
+      </h4>
+    </>
+  );
+
   return nickname ? (
     <>
-      <ContextMenu ref={menuRef}>
+      <ContextMenu ref={menuRef} parentRef={elementRef}>
         {userid == user.uid && (
           <>
             <ContextMenuElement onClick={(_) => editBegin()}>
@@ -251,7 +284,7 @@ export const Message: React.FC<MessageProps> = ({
           Copy Message ID
         </ContextMenuElement>
       </ContextMenu>
-      <ContextMenu ref={userMenuRef}>
+      <ContextMenu ref={userMenuRef} parentRef={avatarRef}>
         <ContextMenuElement
           onClick={(_) => navigator.clipboard.writeText(userid)}
         >
@@ -267,15 +300,7 @@ export const Message: React.FC<MessageProps> = ({
           <div className={styles.message_info}>
             {senderInfo}
             {content && messageContent}
-            {file && (
-              <div className={styles.message_embed}>
-                <img
-                  className={styles.message_image_text}
-                  src={file}
-                  alt="image"
-                />
-              </div>
-            )}
+            {fileContent(true)}
           </div>
         </DeleteConfirmPopUp>
       ) : null}
@@ -339,22 +364,7 @@ export const Message: React.FC<MessageProps> = ({
               </p>
             </div>
           )}
-          {file && (
-            <div className={styles.message_embed}>
-              <a href={file} target="_blank" rel="noreferrer">
-                <img
-                  className={
-                    content != "" || isEditing
-                      ? styles.message_image_text
-                      : styles.message_image
-                  }
-                  src={file}
-                  alt="image"
-                  onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
-                />
-              </a>
-            </div>
-          )}
+          {fileContent(false)}
           {children}
         </div>
       </div>

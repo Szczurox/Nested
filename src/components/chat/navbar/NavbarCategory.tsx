@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 import { useUser } from "context/userContext";
 import { useChannel } from "context/channelContext";
-import CreateChannelPopUp from "../popup/CreateChannelPopUp";
+import ChannelPopUp from "../popup/ChannelPopUp";
 
 export type NavbarCategoryVariant = "server" | "dms";
 
@@ -86,14 +86,14 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
             if (!channels.map((el) => el.id).includes(change.doc.id)) {
               setChannels((channels) =>
                 [
+                  ...channels.filter((el) => el.id !== change.doc.id),
                   {
                     id: change.doc.id,
                     createdAt: change.doc.data().createdAt,
                     name: change.doc.data().name,
                   },
-                  ...channels.filter((el) => el.id !== change.doc.id),
                 ].sort((x, y) => {
-                  return new Date(x.createdAt) < new Date(y.createdAt) ? 1 : -1;
+                  return x.createdAt > y.createdAt ? 1 : -1;
                 })
               );
             }
@@ -102,7 +102,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
             setChannels((channels) =>
               [...channels.filter((el) => el.id !== change.doc.id)].sort(
                 (x, y) => {
-                  return new Date(x.createdAt) < new Date(y.createdAt) ? 1 : -1;
+                  return x.createdAt > y.createdAt ? 1 : -1;
                 }
               )
             );
@@ -131,11 +131,12 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
   return (
     <div className="navbar_category" id={idC}>
       {showPopUp ? (
-        <CreateChannelPopUp
+        <ChannelPopUp
           categoryName={name}
           onConfirm={createChannel}
           onCancel={() => setShowPopUp(false)}
-        ></CreateChannelPopUp>
+          type="create"
+        ></ChannelPopUp>
       ) : null}
       <div className={styles.navbar_channels_header}>
         {body}
