@@ -83,10 +83,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     setIsOpen(false);
     const id = v4();
     uploadCallback({ id: id, name: fileName, percent: 0 });
-    const fileRef = ref(
-      storage,
-      `media/${channel.idG}/${channel.idC}/${id}/${fileG!.name}`
-    );
+    const fileRef = ref(storage, `media/${channel.idC}/${id}/${fileG!.name}`);
     const uploadTask = uploadBytesResumable(fileRef, fileG!);
     uploadTask.on(
       "state_changed",
@@ -121,16 +118,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   async function fileSubmit(url: string, input: string) {
     input.replace(/\s/g, "");
     await addDoc(
-      collection(
-        db,
-        "groups",
-        "H8cO2zBjCyJYsmM4g5fv",
-        "categories",
-        channel.idC,
-        "channels",
-        channel.id,
-        "messages"
-      ),
+      collection(db, "groups", channel.idG, "channels", channel.id, "messages"),
       {
         createdAt: serverTimestamp(),
         time: moment().utcOffset("+00:00").format(),

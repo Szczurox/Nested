@@ -3,21 +3,25 @@ import styles from "../../../styles/components/chat/popups/PopUpButton.module.sc
 
 export type ButtonColor = "red" | "grey";
 
-// Normal, onHover, onPress
-export const buttonColors = new Map<ButtonColor, [string, string, string]>([
-  ["red", ["#ff504d", "#e84846", "#d14341"]],
-  ["grey", ["#5f6a6e", "#808b90", "#6b7478"]],
+export type ButtonColorType = [string, string, string, string];
+
+// Normal, onHover, onPress, disabled
+export const buttonColors = new Map<ButtonColor, ButtonColorType>([
+  ["red", ["#ff504d", "#e84846", "#d14341", "#ad3736"]],
+  ["grey", ["#5f6a6e", "#808b90", "#6b7478", "#52595c"]],
 ]);
 
 export interface PopUpButtonProps {
   children: ReactNode;
-  color?: [string, string, string];
+  color?: ButtonColorType;
+  disabled?: boolean;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
 const PopUpButton: React.FC<PopUpButtonProps> = ({
   children,
-  color = ["#5f6a6e", "#808b90", "#6b7478"],
+  color = buttonColors.get("red")!,
+  disabled = false,
   onClick,
 }) => {
   const [isHover, setIsHover] = useState(false); // Is user hovering over the button
@@ -42,8 +46,15 @@ const PopUpButton: React.FC<PopUpButtonProps> = ({
       onMouseLeave={() => setIsHover(false)}
       onMouseDown={handleMouseDown}
       className={styles.popup_button}
+      disabled={disabled}
       style={{
-        backgroundColor: isPressed ? color[2] : isHover ? color[1] : color[0],
+        backgroundColor: disabled
+          ? color[3]
+          : isPressed
+          ? color[2]
+          : isHover
+          ? color[1]
+          : color[0],
       }}
     >
       {children}

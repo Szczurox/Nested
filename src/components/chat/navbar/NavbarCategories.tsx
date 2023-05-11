@@ -1,30 +1,29 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarCategories.module.scss";
-import { NavbarCategory } from "./NavbarCategory";
-import { NavbarChannel } from "./NavbarChannel";
+import { CategoryData, NavbarCategory } from "./NavbarCategory";
+import { ChannelData, NavbarChannel } from "./NavbarChannel";
 import {
   query,
   collection,
   onSnapshot,
   getFirestore,
+  where,
 } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase/clientApp";
 import { useChannel } from "context/channelContext";
+import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
+import ContextMenuElement from "../contextmenu/ContextMenuElement";
+import AddIcon from "@material-ui/icons/Add";
+import { useUser } from "context/userContext";
+import BasicDeletePopUp from "../popup/BasicDeletePopUp";
+import BasicInputPopUp from "../popup/BasicInputPopUp";
+import { addCategory } from "components/utils/categoryQueries";
+import { addChannel } from "components/utils/channelQueries";
 
 export type NavbarCategoriesVariant = "server" | "dms";
 
 export interface NavbarCategoriesProps {
   variant?: NavbarCategoriesVariant;
-}
-
-export interface ChannelData {
-  id: string;
-  name: string;
-}
-
-export interface CategoryData {
-  id: string;
-  name: string;
 }
 
 export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
@@ -33,32 +32,48 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
   const [categories, setCategories] = useState<CategoryData[]>([]);
   // Channels with category None
   const [nCategoryChannels, setNCategoryChannels] = useState<ChannelData[]>([]);
+  const [showPopUp, setShowPopUp] = useState<number>(0);
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
 
   const { channel } = useChannel();
+  const { user } = useUser();
+
+  const menuRef = useRef<ContextMenuHandle>(null);
+  const elementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function categoriesGet() {
       // Categories query
-      const qCat = query(
-        collection(db, "groups", "H8cO2zBjCyJYsmM4g5fv", "categories")
-      );
+      const qCat = query(collection(db, "groups", channel.idG, "categories"));
 
       const unsub = onSnapshot(qCat, (querySnapshot) => {
-        setCategories(
-          // Filtering categories so that "none" category is handled differently
-          querySnapshot.docs.reduce(function (filtered: CategoryData[], doc) {
-            if (doc.id != "none") {
-              return filtered.concat({
-                id: doc.id,
-                name: doc.data().name,
-              });
-            }
-            return filtered;
-          }, [])
-        );
+        querySnapshot.docChanges().forEach((change) => {
+          if (change.type === "added" || change.type === "modified") {
+            setCategories((channels) =>
+              [
+                ...channels.filter((el) => el.id !== change.doc.id),
+                {
+                  id: change.doc.id,
+                  createdAt: change.doc.data().createdAt,
+                  name: change.doc.data().name,
+                },
+              ].sort((x, y) => {
+                return x.createdAt > y.createdAt ? 1 : -1;
+              })
+            );
+          }
+          if (change.type === "removed") {
+            setCategories((channels) =>
+              [...channels.filter((el) => el.id !== change.doc.id)].sort(
+                (x, y) => {
+                  return x.createdAt > y.createdAt ? 1 : -1;
+                }
+              )
+            );
+          }
+        });
       });
 
       return unsub;
@@ -68,22 +83,38 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
     async function getChannel() {
       // Channels query
       const qCha = query(
-        collection(
-          db,
-          "groups",
-          "H8cO2zBjCyJYsmM4g5fv",
-          "categories",
-          "none",
-          "channels"
-        )
+        collection(db, "groups", channel.idG, "channels"),
+        where("categoryId", "==", "")
       );
+
       const unsub = onSnapshot(qCha, (querySnapshot) => {
-        setNCategoryChannels(
-          querySnapshot.docs.map((doc) => ({
-            id: doc.id,
-            name: doc.data().name,
-          }))
-        );
+        querySnapshot.docChanges().forEach((change) => {
+          if (change.type === "added" || change.type === "modified") {
+            if (!nCategoryChannels.map((el) => el.id).includes(change.doc.id)) {
+              setNCategoryChannels((channels) =>
+                [
+                  ...channels.filter((el) => el.id !== change.doc.id),
+                  {
+                    id: change.doc.id,
+                    createdAt: change.doc.data().createdAt,
+                    name: change.doc.data().name,
+                  },
+                ].sort((x, y) => {
+                  return x.createdAt > y.createdAt ? 1 : -1;
+                })
+              );
+            }
+          }
+          if (change.type === "removed") {
+            setNCategoryChannels((channels) =>
+              [...channels.filter((el) => el.id !== change.doc.id)].sort(
+                (x, y) => {
+                  return x.createdAt > y.createdAt ? 1 : -1;
+                }
+              )
+            );
+          }
+        });
       });
 
       return unsub;
@@ -93,20 +124,70 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
     getChannel();
   }, [db, channel.idG]);
 
+  const createCategory = (name: string) => {
+    setShowPopUp(0);
+    addCategory(name, channel.idG);
+  };
+
+  const createChannel = (name: string) => {
+    setShowPopUp(0);
+    addChannel(name, channel.idG);
+  };
+
   return (
-    <div className={styles.navbar_channels}>
-      {variant == "server" ? (
-        <>
-          {nCategoryChannels.map(({ id, name }) => (
-            <NavbarChannel key={id} id={id} idC="none" name={name} />
-          ))}
-          {categories.map(({ id, name }) => (
-            <NavbarCategory key={id} idC={id} name={name} />
-          ))}
-        </>
-      ) : (
-        <NavbarCategory name="DIRECT MESSAGES" idC="1" />
+    <>
+      {user.permissions.includes("MANAGE_CHANNELS") && (
+        <ContextMenu ref={menuRef} parentRef={elementRef}>
+          <ContextMenuElement type={"grey"} onClick={(_) => setShowPopUp(1)}>
+            <AddIcon />
+            Add Channel
+          </ContextMenuElement>
+          <ContextMenuElement type={"grey"} onClick={(_) => setShowPopUp(2)}>
+            <AddIcon />
+            Add Category
+          </ContextMenuElement>
+        </ContextMenu>
       )}
-    </div>
+
+      {showPopUp ? (
+        <BasicInputPopUp
+          onConfirm={showPopUp == 1 ? createChannel : createCategory}
+          onCancel={() => setShowPopUp(0)}
+          confirmButtonName={"Create"}
+          placeHolder={showPopUp == 1 ? "new-channel" : ""}
+          hash={true}
+        >
+          <h3>{showPopUp == 1 ? "Create Channel" : "Change Category Name"}</h3>
+          {showPopUp == 1 ? (
+            <p>Create a channel without category</p>
+          ) : (
+            <p>Create a category</p>
+          )}
+        </BasicInputPopUp>
+      ) : null}
+
+      <div
+        className={styles.navbar_channels}
+        ref={elementRef}
+        onContextMenu={
+          menuRef.current
+            ? menuRef.current!.handleContextMenu
+            : (e) => e.preventDefault()
+        }
+      >
+        {variant == "server" ? (
+          <>
+            {nCategoryChannels.map(({ id, name }) => (
+              <NavbarChannel key={id} id={id} idC="none" name={name} />
+            ))}
+            {categories.map(({ id, name }) => (
+              <NavbarCategory key={id} idC={id} name={name} />
+            ))}
+          </>
+        ) : (
+          <NavbarCategory name="DIRECT MESSAGES" idC="" />
+        )}
+      </div>
+    </>
   );
 };

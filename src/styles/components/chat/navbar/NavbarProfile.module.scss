@@ -10,17 +10,20 @@
     flex: 1;
     padding: 10px;
     padding-bottom: 0px;
-    -webkit-touch-callout: all;
-    -webkit-user-select: all;
-    -khtml-user-select: all;
-    -moz-user-select: all;
-    -ms-user-select: all;
-    user-select: all;
 
     h3 {
       color: white;
       margin-bottom: 0px;
       font-size: large;
+    }
+
+    p {
+      -webkit-touch-callout: all;
+      -webkit-user-select: all;
+      -khtml-user-select: all;
+      -moz-user-select: all;
+      -ms-user-select: all;
+      user-select: all;
     }
   }
 

@@ -57,10 +57,8 @@ export const ChatMain: React.FC = ({}) => {
     db,
     "groups",
     channel.idG,
-    "categories",
-    channel.idC,
     "channels",
-    channel.id,
+    channel.id ? channel.id : "None",
     "messages"
   );
 
@@ -87,7 +85,8 @@ export const ChatMain: React.FC = ({}) => {
     if (
       e.clipboardData!.files[0] == undefined &&
       channel.id != "" &&
-      !popUp.isOpen
+      !popUp.isOpen &&
+      document.activeElement?.tagName != "TEXTAREA"
     ) {
       if ((input + e.clipboardData!.getData("Text")).length <= 2000)
         setInput(input + e.clipboardData!.getData("Text"));
@@ -101,7 +100,7 @@ export const ChatMain: React.FC = ({}) => {
       document.activeElement?.tagName != "TEXTAREA" &&
       !popUp.isOpen &&
       textAreaRef.current &&
-      !e.ctrlKey
+      ((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
     )
       textAreaRef.current.focus();
   };

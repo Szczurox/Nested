@@ -1,29 +1,29 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/popups/ChannelPopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
 import { TextareaAutosize } from "@material-ui/core";
 import PopUpButton, { buttonColors } from "./PopUpButton";
 
-interface ChannelPopUpProps {
-  onConfirm: (channelName: string) => void;
+interface BasicInputPopUpProps {
+  onConfirm: (input: string) => void;
   onCancel: () => void;
-  categoryName?: string;
-  name?: string;
-  type: ChannelType;
+  value?: string;
+  placeHolder?: string;
+  confirmButtonName?: string;
+  hash?: boolean;
+  children?: ReactNode;
 }
 
-type ChannelType = "create" | "update";
-
-const ChannelPopUp: React.FC<ChannelPopUpProps> = ({
+const BasicInputPopUp: React.FC<BasicInputPopUpProps> = ({
   onConfirm,
   onCancel,
-  categoryName,
-  name,
-  type,
+  value = "",
+  placeHolder = "",
+  confirmButtonName = "Confirm",
+  hash = false,
+  children = null,
 }) => {
-  const [channelName, setChannelName] = useState<string>(
-    type == "update" ? name! : ""
-  );
+  const [input, setInput] = useState<string>(value);
 
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -32,7 +32,7 @@ const ChannelPopUp: React.FC<ChannelPopUpProps> = ({
       if (
         document.activeElement?.tagName != "TEXTAREA" &&
         textAreaRef.current &&
-        !e.ctrlKey
+        ((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
       )
         textAreaRef.current!.focus();
     };
@@ -45,12 +45,10 @@ const ChannelPopUp: React.FC<ChannelPopUpProps> = ({
 
   const pasted = (e: ClipboardEvent) => {
     if (e.clipboardData!.files[0] == undefined) {
-      if ((channelName + e.clipboardData!.getData("Text")).length <= 40)
-        setChannelName(channelName + e.clipboardData!.getData("Text"));
+      if ((input + e.clipboardData!.getData("Text")).length <= 40)
+        setInput(input + e.clipboardData!.getData("Text"));
       else
-        setChannelName(
-          (channelName + e.clipboardData!.getData("Text")).substring(0, 40)
-        );
+        setInput((input + e.clipboardData!.getData("Text")).substring(0, 40));
     }
   };
 
@@ -59,39 +57,30 @@ const ChannelPopUp: React.FC<ChannelPopUpProps> = ({
     return () => {
       document.removeEventListener("paste", pasted);
     };
-  }, [channelName]);
+  }, [input]);
 
   const createChannelKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key == "Enter") {
       e.preventDefault();
-      onConfirm(channelName);
+      onConfirm(input);
     }
   };
 
   return (
     <ScreenPopUp>
       <div>
-        <div className={styles.popup_text}>
-          <h3>
-            {type === "create" ? "Create Channel" : "Change Channel Name"}
-          </h3>
-          {type === "create" ? (
-            <p>Create channel in {categoryName}</p>
-          ) : (
-            <p>Change name for #{name}</p>
-          )}
-        </div>
+        <div className={styles.popup_text}>{children}</div>
         <div className={styles.popup_input}>
-          <span className={styles.hash}>#</span>
+          {hash && <span className={styles.hash}>#</span>}
           <form>
             <TextareaAutosize
-              value={channelName}
+              value={input}
               wrap="off"
               maxRows={1}
               maxLength={100}
-              onChange={(e) => setChannelName(e.target.value)}
+              onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => createChannelKey(e)}
-              placeholder={type === "create" ? `new-channel` : name}
+              placeholder={placeHolder}
               ref={textAreaRef}
               onFocus={(e) =>
                 e.target.setSelectionRange(
@@ -107,17 +96,18 @@ const ChannelPopUp: React.FC<ChannelPopUpProps> = ({
           <div
             className={styles.popup_cancel}
             onClick={(_) => {
-              setChannelName("");
+              setInput("");
               onCancel();
             }}
           >
             Cancel
           </div>
           <PopUpButton
-            onClick={(_) => onConfirm(channelName)}
+            onClick={(_) => onConfirm(input)}
             color={buttonColors.get("grey")!}
+            disabled={!input.replace(/\s/g, "").length}
           >
-            {type == "create" ? "Create" : "Change"}
+            {confirmButtonName}
           </PopUpButton>
         </div>
       </div>
@@ -125,4 +115,4 @@ const ChannelPopUp: React.FC<ChannelPopUpProps> = ({
   );
 };
 
-export default ChannelPopUp;
+export default BasicInputPopUp;

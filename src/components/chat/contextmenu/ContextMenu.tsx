@@ -39,7 +39,6 @@ const ContextMenu: React.ForwardRefRenderFunction<
       },
 
       handleContextMenu(event: React.MouseEvent<HTMLElement>): void {
-        console.log(true);
         event.preventDefault();
 
         setMenuPoint({

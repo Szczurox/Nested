@@ -32,7 +32,7 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
       if (
         document.activeElement?.tagName != "TEXTAREA" &&
         textAreaRef.current &&
-        !e.ctrlKey
+        ((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
       )
         textAreaRef.current!.focus();
       if (e.key == "Enter") uploadFile(input);

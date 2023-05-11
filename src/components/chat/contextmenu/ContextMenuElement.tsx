@@ -1,12 +1,16 @@
 import React, { ReactNode, useCallback, useState } from "react";
 import styles from "../../../styles/components/chat/contextmenu/ContextMenuElement.module.scss";
-import { ButtonColor, buttonColors } from "../popup/PopUpButton";
+import {
+  ButtonColor,
+  ButtonColorType,
+  buttonColors,
+} from "../popup/PopUpButton";
 
 interface ContextMenuElementProps {
   children: ReactNode;
   type?: ButtonColor;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
-  colors?: [string, string, string];
+  colors?: ButtonColorType;
 }
 
 const ContextMenuElement: React.FC<ContextMenuElementProps> = ({

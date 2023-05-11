@@ -18,13 +18,22 @@ import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AddIcon from "@mui/icons-material/Add";
-import ChannelPopUp from "../popup/ChannelPopUp";
+import BasicInputPopUp from "../popup/BasicInputPopUp";
+import BasicDeletePopUp from "../popup/BasicDeletePopUp";
+import { addChannel } from "components/utils/channelQueries";
+import { useUser } from "context/userContext";
 
 interface NavbarChannelProps {
   name: string;
   id: string;
   idC: string;
   nameC?: string;
+}
+
+export interface ChannelData {
+  id: string;
+  name: string;
+  createdAt: string;
 }
 
 export const NavbarChannel: React.FC<NavbarChannelProps> = ({
@@ -38,6 +47,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   const [showPopUp, setShowPopUp] = useState<number>(0);
 
   const { channel, setChannelData } = useChannel();
+  const { user } = useUser();
 
   const menuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -59,15 +69,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     // It won't actually delete the channel, it's subcollections (messages) will still exist
     // Because of that for now inactive channels will need to get deleted manually using the CLI or console
     // TODO: Server side function for deleting all channel's messages (performance issues if on client) (maybe Cron Job?)
-    const channelDoc = doc(
-      db,
-      "groups",
-      channel.idG,
-      "categories",
-      idC,
-      "channels",
-      id
-    );
+    const channelDoc = doc(db, "groups", channel.idG, "channels", id);
 
     setShowPopUp(0);
 
@@ -79,15 +81,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
   const changeChannelName = async (newName: string) => {
     if (newName != name && newName.replace(/\s/g, "").length) {
-      const channelDoc = doc(
-        db,
-        "groups",
-        channel.idG,
-        "categories",
-        idC,
-        "channels",
-        id
-      );
+      const channelDoc = doc(db, "groups", channel.idG, "channels", id);
 
       setShowPopUp(0);
 
@@ -98,56 +92,57 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   };
 
   const createChannel = async (channelName: string) => {
-    const channelsCollection = collection(
-      db,
-      "groups",
-      channel.idG,
-      "categories",
-      channel.idC,
-      "channels"
-    );
-
     setShowPopUp(0);
-
-    await addDoc(channelsCollection, {
-      name: channelName.replace(/\s/g, "").length ? channelName : "new-channel",
-      createdAt: serverTimestamp(),
-    });
+    await addChannel(channelName, channel.idG, idC);
   };
 
   return (
     <>
       {showPopUp ? (
         showPopUp == 1 ? (
-          <DeleteChannelPopUp
-            channelName={name}
+          <BasicDeletePopUp
             onCancel={() => setShowPopUp(0)}
             onConfirm={deleteChannel}
-          />
+          >
+            <h3>Delete Channel</h3>
+            <p>Are you sure u want to delete #{name} channel?</p>
+          </BasicDeletePopUp>
         ) : (
-          <ChannelPopUp
-            type={showPopUp == 2 ? "update" : "create"}
-            onConfirm={showPopUp == 2 ? changeChannelName : createChannel}
+          <BasicInputPopUp
+            onConfirm={showPopUp == 3 ? createChannel : changeChannelName}
             onCancel={() => setShowPopUp(0)}
-            categoryName={nameC}
-            name={name}
-          />
+            confirmButtonName={showPopUp == 3 ? "Create" : "Confirm"}
+            value={showPopUp == 3 ? "" : name}
+            placeHolder={showPopUp == 3 ? "new-channel" : name}
+            hash={true}
+          >
+            <h3>{showPopUp == 3 ? "Create Channel" : "Change Channel Name"}</h3>
+            {showPopUp == 3 ? (
+              <p>Create channel in {nameC}</p>
+            ) : (
+              <p>Change name for #{name}</p>
+            )}
+          </BasicInputPopUp>
         )
       ) : null}
 
       <ContextMenu ref={menuRef} parentRef={elementRef}>
-        <ContextMenuElement type={"grey"} onClick={(_) => setShowPopUp(2)}>
-          <EditIcon />
-          Change Channel Name
-        </ContextMenuElement>
-        <ContextMenuElement type={"grey"} onClick={(_) => setShowPopUp(3)}>
-          <AddIcon />
-          Create Channel
-        </ContextMenuElement>
-        <ContextMenuElement type={"red"} onClick={(_) => setShowPopUp(1)}>
-          <DeleteIcon />
-          Delete Channel
-        </ContextMenuElement>
+        {user.permissions.includes("MANAGE_CHANNELS") ? (
+          <>
+            <ContextMenuElement type={"grey"} onClick={(_) => setShowPopUp(2)}>
+              <EditIcon />
+              Change Channel Name
+            </ContextMenuElement>
+            <ContextMenuElement type={"grey"} onClick={(_) => setShowPopUp(3)}>
+              <AddIcon />
+              Create Channel
+            </ContextMenuElement>
+            <ContextMenuElement type={"red"} onClick={(_) => setShowPopUp(1)}>
+              <DeleteIcon />
+              Delete Channel
+            </ContextMenuElement>
+          </>
+        ) : null}
         <ContextMenuElement
           type={"grey"}
           onClick={(_) => navigator.clipboard.writeText(id)}

@@ -79,9 +79,7 @@ export const Message: React.FC<MessageProps> = ({
   const messageDoc = doc(
     db,
     "groups",
-    "H8cO2zBjCyJYsmM4g5fv",
-    "categories",
-    channel.idC,
+    channel.idG,
     "channels",
     channel.id,
     "messages",
