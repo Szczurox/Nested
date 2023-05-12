@@ -81,6 +81,7 @@ const ContextMenu: React.ForwardRefRenderFunction<
 
     return () => {
       document.removeEventListener("keydown", handleCloseMenu);
+      document.removeEventListener("click", handleCloseMenu);
       document.removeEventListener("contextmenu", handleCloseMenu);
     };
   }, []);

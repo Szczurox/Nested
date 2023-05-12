@@ -43,6 +43,8 @@ export interface MessageData {
   edited?: boolean;
 }
 
+type ContentType = "text" | "link" | "iframe";
+
 export const Message: React.FC<MessageProps> = ({
   id,
   content,
@@ -63,6 +65,7 @@ export const Message: React.FC<MessageProps> = ({
   const [input, setInput] = useState<string>(""); // Message edit input
   const [isEditing, setIsEditing] = useState<boolean>(false); // Is message currently being edited
   const [showPopUp, setShowPopUp] = useState<boolean>(false); // Delete confirmation pop-up
+  const [parsedContent, setParsedContent] = useState<[string, ContentType][]>();
 
   const { channel } = useChannel();
   const { user } = useUser();
@@ -121,10 +124,21 @@ export const Message: React.FC<MessageProps> = ({
         setRealTime(moment(time).local().format("MMMM Do YYYY [at] hh:mm a"));
     }
 
+    function checkForLinks() {
+      if (content.includes("https://")) {
+        content
+          .split(/([http|ftp|https]+:\/\/[\w\S(\.|:|/)]+)/g)
+          .forEach((el) => {
+            console.log(el);
+          });
+      }
+    }
+
     document.addEventListener("keydown", handleClick);
     document.addEventListener("contextmenu", handleClick);
     getUserData();
     setTime();
+    checkForLinks();
 
     return () => {
       document.removeEventListener("keydown", handleClick);

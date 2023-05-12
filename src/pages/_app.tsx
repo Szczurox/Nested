@@ -15,10 +15,27 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 
     const routeChangeEndHandler = () => setIsRouteChanging(false);
 
+    const checkForZoom = (e: any) => {
+      if (e.ctrlKey && (e.key == "+" || e.key == "-" || e.key == "=")) {
+        e.preventDefault();
+      }
+    };
+
+    const checkForZoomScroll = (e: any) => {
+      if (e.ctrlKey) {
+        e.preventDefault();
+        return false;
+      }
+    };
+
+    document.addEventListener("keydown", checkForZoom);
+    document.addEventListener("wheel", checkForZoomScroll, { passive: false });
     router.events.on("routeChangeStart", routeChangeStartHandler);
     router.events.on("routeChangeComplete", routeChangeEndHandler);
     router.events.on("routeChangeError", routeChangeEndHandler);
     return () => {
+      document.removeEventListener("keydown", checkForZoom);
+      document.removeEventListener("wheel", checkForZoomScroll);
       router.events.off("routeChangeStart", routeChangeStartHandler);
       router.events.off("routeChangeComplete", routeChangeEndHandler);
       router.events.off("routeChangeError", routeChangeEndHandler);

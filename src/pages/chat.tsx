@@ -70,7 +70,7 @@ const Chat = () => {
           avatar: user.avatar,
           nameColor: "",
           permissions: [],
-        }).catch((err) => console.log(err));
+        });
         unsub = onSnapshot(
           doc(db, "groups", channel.idG, "members", user.uid),
           (docSnapMember) => setUserPerms(docSnapMember)

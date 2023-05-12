@@ -6,7 +6,6 @@ import Message, { MessageData } from "./Message";
 import UploadFile, { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/Chat.module.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
-import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
 import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import GifIcon from "@material-ui/icons/Gif";
 import { createFirebaseApp } from "../../firebase/clientApp";
@@ -30,6 +29,7 @@ import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import { useMessage } from "context/messageContext";
 import { usePopUp } from "context/popUpContext";
+import Emoji from "./ui-icons/Emoji";
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState<string>("");
@@ -374,7 +374,7 @@ export const ChatMain: React.FC = ({}) => {
         </form>
         <div className={styles.chat_input_icons}>
           <GifIcon fontSize="large" />
-          <EmojiEmotionsIcon fontSize="large" />
+          <Emoji />
         </div>
       </div>
       {canScrollToBottom && (
