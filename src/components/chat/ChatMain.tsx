@@ -33,15 +33,16 @@ import InformationPopUp from "./popup/InformationPopUp";
 import { wait } from "components/utils/utils";
 
 export const ChatMain: React.FC = ({}) => {
-  const [input, setInput] = useState<string>("");
-  const [messages, setMessages] = useState<MessageData[]>([]);
-  const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]);
-  const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0));
-  const [unsubs, setUnsubs] = useState<(() => void)[]>([]);
-  const [slowDownCount, setSlowDownCount] = useState<number>(0);
-  const [messagesEnd, setMessagesEnd] = useState<boolean>(false);
-  const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false);
-  const [autoScroll, setAutoScroll] = useState<boolean>(true);
+  const [input, setInput] = useState<string>(""); // Textarea input
+  const [messages, setMessages] = useState<MessageData[]>([]); // Array of all messages currently loaded
+  const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]); // Array of all file progress messages
+  const [unsubs, setUnsubs] = useState<(() => void)[]>([]); // Array of all unsubscribers
+  const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0)); // Creation date of the last message fetched
+  const [slowDownCount, setSlowDownCount] = useState<number>(0); // Show Slow Down pop-up if reaches 2
+  const [messagesEnd, setMessagesEnd] = useState<boolean>(false); // True if no more messages to load on the current channel
+  const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false); // Show Scroll To Bottom button
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Are messages loading
+  const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -62,6 +63,8 @@ export const ChatMain: React.FC = ({}) => {
     channel.id ? channel.id : "None",
     "messages"
   );
+
+  const querySizeLimit = 20;
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
@@ -106,22 +109,36 @@ export const ChatMain: React.FC = ({}) => {
       textAreaRef.current.focus();
   };
 
-  const handleScroll = (_: any) => {
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
     setAutoScroll(scrollTop >= scrollHeight - clientHeight - 100);
 
     if (listInnerRef.current) {
       const { scrollTop, scrollHeight } = listInnerRef.current;
+      if (
+        isLoading &&
+        e.currentTarget.scrollTop < e.currentTarget.scrollHeight / 4 - 202
+      )
+        e.currentTarget.scrollTop = e.currentTarget.scrollHeight / 4 + 101;
       if (scrollTop < scrollHeight / 4 && !messagesEnd) {
-        listInnerRef.current.scrollTop += scrollHeight / 4;
-        const unsub = getMessages();
-        setUnsubs([...unsubs, unsub]);
+        if (!isLoading) {
+          setIsLoading(true);
+          const unsub = getMessages();
+          setUnsubs([...unsubs, unsub]);
+        }
       }
       if (scrollTop < scrollHeight / 1.9 && messages.length > 60) {
         setCanScrollToBottom(true);
       } else {
         setCanScrollToBottom(false);
       }
+    }
+  };
+
+  const onImageLoadComplete = () => {
+    if (listInnerRef.current && autoScroll) {
+      listInnerRef.current.focus();
+      scrollToBottom();
     }
   };
 
@@ -132,7 +149,7 @@ export const ChatMain: React.FC = ({}) => {
     }
   };
 
-  function callback(qMes: any) {
+  const handleMessageSnapshot = (qMes: any) => {
     return onSnapshot(qMes, (querySnapshot: any) => {
       querySnapshot.docChanges().forEach((change: any) => {
         if (change.type === "added" || change.type === "modified") {
@@ -169,27 +186,21 @@ export const ChatMain: React.FC = ({}) => {
         );
         setMessagesEnd(false);
       } else setMessagesEnd(true);
+      setIsLoading(false);
     });
-  }
+  };
 
   function getMessages() {
     // Channels query
     const qMes = query(
       messagesCollection,
       orderBy("createdAt", "desc"),
-      limit(20),
+      limit(querySizeLimit),
       startAfter(lastKey)
     );
 
-    return callback(qMes);
+    return handleMessageSnapshot(qMes);
   }
-
-  const onImageLoadComplete = () => {
-    if (listInnerRef.current && autoScroll) {
-      listInnerRef.current.focus();
-      scrollToBottom();
-    }
-  };
 
   useEffect(() => {
     function getMessagesFirstBatch() {
@@ -197,56 +208,16 @@ export const ChatMain: React.FC = ({}) => {
       const qMes = query(
         messagesCollection,
         orderBy("createdAt", "desc"),
-        limit(20)
+        limit(querySizeLimit)
       );
 
-      const unsub = onSnapshot(qMes, (querySnapshot) => {
-        querySnapshot.docChanges().forEach((change) => {
-          if (change.type === "added" || change.type === "modified") {
-            if (!messages.map((el) => el.id).includes(change.doc.id)) {
-              setMessages((messages) =>
-                [
-                  ...messages.filter((el) => el.id !== change.doc.id),
-                  {
-                    id: change.doc.id,
-                    content: change.doc.data().content,
-                    timestamp: change.doc.data().time,
-                    uid: change.doc.data().userid,
-                    file: change.doc.data().file,
-                    edited: change.doc.data().edited,
-                    fileType: change.doc.data().fileType,
-                  },
-                ].sort((x, y) => {
-                  return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
-                })
-              );
-            }
-          }
-          if (change.type === "removed") {
-            setMessages((messages) =>
-              [...messages.filter((el) => el.id !== change.doc.id)].sort(
-                (x, y) => {
-                  return new Date(x.timestamp) > new Date(y.timestamp) ? 1 : -1;
-                }
-              )
-            );
-          }
-        });
-
-        if (querySnapshot.docs.length > 0) {
-          setLastKey(
-            querySnapshot.docs[querySnapshot.docs.length - 1].data().createdAt
-          );
-          setMessagesEnd(false);
-        } else setMessagesEnd(true);
-      });
-
-      return unsub;
+      return handleMessageSnapshot(qMes);
     }
 
     setMessages([]);
     textAreaRef.current!.focus();
     setAutoScroll(true);
+    setCanScrollToBottom(false);
     const unsub = getMessagesFirstBatch();
     return () => {
       if (unsubs.length > 0)
@@ -262,21 +233,26 @@ export const ChatMain: React.FC = ({}) => {
       textAreaRef.current!.blur();
     } else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
       const timestamp = serverTimestamp();
-      const chatInput = input;
+      // Get current input and reset textarea instantly, before message gets fully sent
+      const chatInput = input.replace(/^\s+|\s+$/g, "");
       setInput("");
-      // Send Message
       e.preventDefault();
-      if (chatInput.replace(/\s/g, "").length) {
+      if (chatInput.length) {
         await addDoc(messagesCollection, {
           time: moment().utcOffset("+00:00").format(),
           content: chatInput,
           userid: user.uid,
           createdAt: timestamp,
           edited: false,
-        }).catch((_) => {
-          setSlowDownCount(slowDownCount + 1);
-        });
+        })
+          .catch((_) => {
+            // Create rejection is surely caused by trying to send too many messages
+            setSlowDownCount(slowDownCount + 1);
+          })
+          .then((_) => scrollToBottom());
 
+        // Update the time at which the last message was sent by the user
+        // Rate limit user
         await updateDoc(doc(db, "profile", user.uid), {
           lastMessagedAt: timestamp,
         }).catch((err) => {
@@ -286,6 +262,7 @@ export const ChatMain: React.FC = ({}) => {
     }
   }
 
+  // Message at the bottom that show file upload progress
   const fileUploading = (fileData: FileUploadingData) => {
     if (fileData.percent == 0) setInput("");
     if (fileData.percent != 101)
@@ -319,7 +296,7 @@ export const ChatMain: React.FC = ({}) => {
         ref={listInnerRef}
       >
         {messages.map(
-          ({ id, content, timestamp, uid, file, edited, fileType }) => (
+          ({ id, content, timestamp, uid, file, edited, fileType }, index) => (
             <Message
               key={id}
               id={id}

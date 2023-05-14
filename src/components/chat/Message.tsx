@@ -69,17 +69,20 @@ export const Message: React.FC<MessageProps> = ({
   const [isEditing, setIsEditing] = useState<boolean>(false); // Is message currently being edited
   const [showPopUp, setShowPopUp] = useState<boolean>(false); // Delete confirmation pop-up
   const [menuOnLink, setMenuOnLink] = useState<boolean>(false); // Is content menu opened on link / embed
+  // Content after getting divided into links and non-links
   const [parsedContent, setParsedContent] = useState<[string, ContentType][]>(
     []
   );
+  // Files from message content links
   const [filesFromLinks, setFilesFromLinks] = useState<[string, MediaType][]>(
     []
   );
+  // Iframes from message content links
   const [iframes, setIframes] = useState<string[]>([]);
 
   const { channel } = useChannel();
   const { user } = useUser();
-  const { message, setCurrentMessage } = useMessage()!;
+  const { message, setCurrentMessage } = useMessage();
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -109,16 +112,19 @@ export const Message: React.FC<MessageProps> = ({
   useEffect(() => {
     async function getUserData() {
       if (channel.idG != "") {
+        // Try to get user's member object
         const docMemberSnap = await getDoc(
           doc(db, "groups", channel.idG, "members", userid)
         );
         if (docMemberSnap.exists()) {
+          // If it exists set all message data accordingly
           setNickname(docMemberSnap.data().nickname);
           if (docMemberSnap.data().nameColor)
             setNickColor(docMemberSnap.data().nameColor);
           if (docMemberSnap.data().avatar)
             setAvatar(docMemberSnap.data().avatar);
         } else {
+          // If it doesn't exist get author info from users
           const docSnap = await getDoc(doc(db, "profile", userid));
           if (docSnap.exists()) {
             setNickname(docSnap.data().username);
@@ -133,6 +139,7 @@ export const Message: React.FC<MessageProps> = ({
       const messageDay = moment(time).local().format("Do");
 
       // Set the formatted date to Today/Yesterday if the message was sent on the according day
+      // Otherwise set it to
       if (moment().local().format("Do") == messageDay)
         setRealTime(moment(time).local().format("[Today] [at] hh:mm a"));
       else if (moment().local().subtract(1, "days").format("Do") == messageDay)
@@ -142,26 +149,33 @@ export const Message: React.FC<MessageProps> = ({
     }
 
     function checkForLinks() {
+      // Check if there are any links in the content
       if (content.includes("https://") || content.includes("http://")) {
+        // Split content into links and non-links
         content.split(/([http|https]+:\/\/[\w\S(\.|:|/)]+)/g).forEach((el) => {
+          // If element is link
           if (el.startsWith("https://") || el.startsWith("http://")) {
+            // Remove all metadata from possible image/vide
             const parsedLink = el.substring(0, el.indexOf("?"));
+
+            // If image then add as image, if video then add as video to files
             if (/\.(jpg|jpeg|png|webp|avif|gif)$/.test(parsedLink)) {
               setFilesFromLinks((files) => [...files, [el, "image"]]);
             } else if (/\.(mp4|mov|avi|mkv|flv)$/.test(parsedLink)) {
               setFilesFromLinks((files) => [...files, [el, "video"]]);
             }
-            setParsedContent((parsedContent) => [
-              ...parsedContent!,
-              [el, "link"],
-            ]);
-            if (
+
+            // Check if is a link to one of the supported iframes (only YouTube for now)
+            else if (
               allowedIFrames.some((element) => el.startsWith(element)) &&
               !iframes.includes(el)
             ) {
+              // Parse youtube URL so that it links to embed
               const elParsed = el
                 .replace("youtu.be/", "www.youtube.com/embed/")
                 .replace("watch?v=", "embed/");
+
+              // Remove unnecessary link data such as playlist ID and add to iframes
               setIframes((iframes) => [
                 ...iframes.filter((element) => element != el),
                 elParsed.slice(
@@ -170,7 +184,15 @@ export const Message: React.FC<MessageProps> = ({
                 ),
               ]);
             }
-          } else
+
+            // Add as link
+            setParsedContent((parsedContent) => [
+              ...parsedContent!,
+              [el, "link"],
+            ]);
+          }
+          // Add as text
+          else
             setParsedContent((parsedContent) => [
               ...parsedContent!,
               [el, "text"],
@@ -179,11 +201,12 @@ export const Message: React.FC<MessageProps> = ({
       } else setParsedContent([[content, "text"]]);
     }
 
-    document.addEventListener("keydown", handleClick);
-    document.addEventListener("contextmenu", handleClick);
     getUserData();
     setTime();
     checkForLinks();
+
+    document.addEventListener("keydown", handleClick);
+    document.addEventListener("contextmenu", handleClick);
 
     return () => {
       document.removeEventListener("keydown", handleClick);
@@ -192,17 +215,18 @@ export const Message: React.FC<MessageProps> = ({
   }, []);
 
   useEffect(() => {
+    // If another message is getting edited stop editing this message
     if (message.id != id) setIsEditing(false);
   }, [message.id]);
 
   const handleClick = (e: Event): void => {
+    // Close message content menu if contextmenu used on avatar
     if (avatarRef.current?.contains(e.target as Node))
       menuRef.current?.closeMenu();
 
     const type = (e.target! as HTMLElement).tagName;
 
-    console.log(type);
-
+    // Additional message contextmenu options if used on embed or link
     if (type == "A" || type == "IMG" || type == "VIDEO") {
       setMenuOnLink(true);
       if (type == "A") setCurrentLink((e.target as HTMLLinkElement).href);
@@ -212,9 +236,8 @@ export const Message: React.FC<MessageProps> = ({
         setCurrentLink((e.target as HTMLImageElement).currentSrc);
     } else setMenuOnLink(false);
 
-    if (type)
-      if (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
-        setIsEditing(false);
+    if (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
+      setIsEditing(false);
   };
 
   const deleteMessage = async () => {
