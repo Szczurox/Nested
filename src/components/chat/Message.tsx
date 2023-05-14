@@ -268,7 +268,7 @@ export const Message: React.FC<MessageProps> = ({
           el[1] == "text" ? (
             <span>{el[0]}</span>
           ) : (
-            <a href={el[0]} target="_blank">
+            <a href={el[0]} target="_blank" rel="noreferrer">
               {el[0]}
             </a>
           )
