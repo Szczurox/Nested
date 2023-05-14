@@ -13,19 +13,20 @@ export const buttonColors = new Map<ButtonColor, ButtonColorType>([
 
 export interface PopUpButtonProps {
   children: ReactNode;
-  color?: ButtonColorType;
+  color?: ButtonColor;
   disabled?: boolean;
   onClick?: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
 const PopUpButton: React.FC<PopUpButtonProps> = ({
   children,
-  color = buttonColors.get("red")!,
+  color = "grey",
   disabled = false,
   onClick,
 }) => {
   const [isHover, setIsHover] = useState(false); // Is user hovering over the button
   const [isPressed, setIsPressed] = useState(false); // Is user pressing the button
+  const realColor = buttonColors.get(color)!;
 
   const handleMouseDown = useCallback(() => {
     setIsPressed(true);
@@ -49,12 +50,12 @@ const PopUpButton: React.FC<PopUpButtonProps> = ({
       disabled={disabled}
       style={{
         backgroundColor: disabled
-          ? color[3]
+          ? realColor[3]
           : isPressed
-          ? color[2]
+          ? realColor[2]
           : isHover
-          ? color[1]
-          : color[0],
+          ? realColor[1]
+          : realColor[0],
       }}
     >
       {children}

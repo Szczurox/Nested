@@ -23,13 +23,14 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import moment from "moment";
-import SlowDownPopUp from "./popup/SlowDownPopUp";
 import { serverTimestamp } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import { useMessage } from "context/messageContext";
 import { usePopUp } from "context/popUpContext";
 import Emoji from "./ui-icons/Emoji";
+import InformationPopUp from "./popup/InformationPopUp";
+import { wait } from "components/utils/utils";
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState<string>("");
@@ -245,6 +246,7 @@ export const ChatMain: React.FC = ({}) => {
 
     setMessages([]);
     textAreaRef.current!.focus();
+    setAutoScroll(true);
     const unsub = getMessagesFirstBatch();
     return () => {
       if (unsubs.length > 0)
@@ -301,7 +303,12 @@ export const ChatMain: React.FC = ({}) => {
   return (
     <div className={styles.chat}>
       {slowDownCount > 1 ? (
-        <SlowDownPopUp onOk={() => setSlowDownCount(0)} />
+        <InformationPopUp
+          onOk={() => wait(1500).then(() => setSlowDownCount(0))}
+        >
+          <h3>Slow down!</h3>
+          <p>You are trying to send messages too quickly.</p>
+        </InformationPopUp>
       ) : null}
       <div className={styles.chat_shadow}>
         <ChatHeader />

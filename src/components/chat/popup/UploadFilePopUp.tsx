@@ -117,10 +117,7 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
           >
             Cancel
           </div>
-          <PopUpButton
-            onClick={(_) => uploadFile(input)}
-            color={buttonColors.get("red")!}
-          >
+          <PopUpButton onClick={(_) => uploadFile(input)} color={"red"}>
             Upload
           </PopUpButton>
         </div>

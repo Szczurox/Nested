@@ -36,10 +36,7 @@ const DeleteConfirmPopUp: React.FC<DeleteConfirmPopUpProps> = ({
         <div className={styles.popup_cancel} onClick={(_) => onCancel()}>
           Cancel
         </div>
-        <PopUpButton
-          onClick={(_) => onConfirm()}
-          color={buttonColors.get("red")!}
-        >
+        <PopUpButton onClick={(_) => onConfirm()} color={"red"}>
           Delete
         </PopUpButton>
       </div>

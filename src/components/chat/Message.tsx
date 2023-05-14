@@ -14,6 +14,8 @@ import ContextMenu, { ContextMenuHandle } from "./contextmenu/ContextMenu";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import OpenInNewIcon from "@material-ui/icons/OpenInNew";
+import LinkIcon from "@material-ui/icons/Link";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import { useMessage } from "context/messageContext";
@@ -43,7 +45,7 @@ export interface MessageData {
   edited?: boolean;
 }
 
-type ContentType = "text" | "link" | "iframe";
+type ContentType = "text" | "link";
 
 export const Message: React.FC<MessageProps> = ({
   id,
@@ -61,11 +63,19 @@ export const Message: React.FC<MessageProps> = ({
   const [avatar, setAvatar] = useState<string>(
     "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
   );
-  const [realTime, setRealTime] = useState<string>("");
+  const [realTime, setRealTime] = useState<string>(""); // Time after formatting
   const [input, setInput] = useState<string>(""); // Message edit input
+  const [currentLink, setCurrentLink] = useState<string>(""); // Link to embed / link user used contextmenu on
   const [isEditing, setIsEditing] = useState<boolean>(false); // Is message currently being edited
   const [showPopUp, setShowPopUp] = useState<boolean>(false); // Delete confirmation pop-up
-  const [parsedContent, setParsedContent] = useState<[string, ContentType][]>();
+  const [menuOnLink, setMenuOnLink] = useState<boolean>(false); // Is content menu opened on link / embed
+  const [parsedContent, setParsedContent] = useState<[string, ContentType][]>(
+    []
+  );
+  const [filesFromLinks, setFilesFromLinks] = useState<[string, MediaType][]>(
+    []
+  );
+  const [iframes, setIframes] = useState<string[]>([]);
 
   const { channel } = useChannel();
   const { user } = useUser();
@@ -78,6 +88,13 @@ export const Message: React.FC<MessageProps> = ({
   const userMenuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLImageElement>(null);
+
+  const allowedIFrames: string[] = [
+    "https://youtube.com",
+    "https://www.youtube.com",
+    "https://youtu.be",
+    "https://www.youtu.be",
+  ];
 
   const messageDoc = doc(
     db,
@@ -125,13 +142,41 @@ export const Message: React.FC<MessageProps> = ({
     }
 
     function checkForLinks() {
-      if (content.includes("https://")) {
-        content
-          .split(/([http|ftp|https]+:\/\/[\w\S(\.|:|/)]+)/g)
-          .forEach((el) => {
-            console.log(el);
-          });
-      }
+      if (content.includes("https://") || content.includes("http://")) {
+        content.split(/([http|https]+:\/\/[\w\S(\.|:|/)]+)/g).forEach((el) => {
+          if (el.startsWith("https://") || el.startsWith("http://")) {
+            const parsedLink = el.substring(0, el.indexOf("?"));
+            if (/\.(jpg|jpeg|png|webp|avif|gif)$/.test(parsedLink)) {
+              setFilesFromLinks((files) => [...files, [el, "image"]]);
+            } else if (/\.(mp4|mov|avi|mkv|flv)$/.test(parsedLink)) {
+              setFilesFromLinks((files) => [...files, [el, "video"]]);
+            }
+            setParsedContent((parsedContent) => [
+              ...parsedContent!,
+              [el, "link"],
+            ]);
+            if (
+              allowedIFrames.some((element) => el.startsWith(element)) &&
+              !iframes.includes(el)
+            ) {
+              const elParsed = el
+                .replace("youtu.be/", "www.youtube.com/embed/")
+                .replace("watch?v=", "embed/");
+              setIframes((iframes) => [
+                ...iframes.filter((element) => element != el),
+                elParsed.slice(
+                  0,
+                  el.includes("&") ? el.indexOf("&") - 2 : elParsed.length
+                ),
+              ]);
+            }
+          } else
+            setParsedContent((parsedContent) => [
+              ...parsedContent!,
+              [el, "text"],
+            ]);
+        });
+      } else setParsedContent([[content, "text"]]);
     }
 
     document.addEventListener("keydown", handleClick);
@@ -154,8 +199,22 @@ export const Message: React.FC<MessageProps> = ({
     if (avatarRef.current?.contains(e.target as Node))
       menuRef.current?.closeMenu();
 
-    if (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
-      setIsEditing(false);
+    const type = (e.target! as HTMLElement).tagName;
+
+    console.log(type);
+
+    if (type == "A" || type == "IMG" || type == "VIDEO") {
+      setMenuOnLink(true);
+      if (type == "A") setCurrentLink((e.target as HTMLLinkElement).href);
+      if (type == "IMG")
+        setCurrentLink((e.target as HTMLImageElement).currentSrc);
+      if (type == "VIDEO")
+        setCurrentLink((e.target as HTMLImageElement).currentSrc);
+    } else setMenuOnLink(false);
+
+    if (type)
+      if (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
+        setIsEditing(false);
   };
 
   const deleteMessage = async () => {
@@ -205,7 +264,15 @@ export const Message: React.FC<MessageProps> = ({
   const messageContent = (
     <div className={styles.message_content}>
       <p>
-        {content}
+        {parsedContent.map((el) =>
+          el[1] == "text" ? (
+            <span>{el[0]}</span>
+          ) : (
+            <a href={el[0]} target="_blank">
+              {el[0]}
+            </a>
+          )
+        )}
         {edited && (
           <span className={styles.message_edited_indicator}>{" (edited)"}</span>
         )}
@@ -213,41 +280,80 @@ export const Message: React.FC<MessageProps> = ({
     </div>
   );
 
-  const fileContent = (inPopUp: boolean) =>
-    file ? (
-      <div className={styles.message_embed}>
-        {fileType == "image" ? (
-          <a href={file} target="_blank" rel="noreferrer">
-            <img
-              className={
-                inPopUp
-                  ? styles.message_delete_embed
-                  : content != "" || isEditing
-                  ? styles.message_embed_text
-                  : styles.message_embed
-              }
-              src={file}
-              alt="image"
-              onLoad={(_) => (!inPopUp && onImageLoad ? onImageLoad() : null)}
-            />
-          </a>
-        ) : (
-          <video
-            className={
-              inPopUp
-                ? styles.message_delete_embed
-                : content != "" || isEditing
-                ? styles.message_embed_text
-                : styles.message_embed
-            }
-            controls
-          >
-            <source src={file} />
-            Your browser does not support the video files, {file}.
-          </video>
-        )}
-      </div>
-    ) : null;
+  const fileContent = (inPopUp: boolean) => {
+    return (
+      <>
+        {file ? (
+          <div className={styles.message_embed}>
+            {fileType == "image" ? (
+              <a href={file} target="_blank" rel="noreferrer">
+                <img
+                  className={
+                    inPopUp
+                      ? styles.message_delete_embed
+                      : content != "" || isEditing
+                      ? styles.message_embed_text
+                      : styles.message_embed
+                  }
+                  src={file}
+                  alt="image"
+                  onLoad={(_) =>
+                    !inPopUp && onImageLoad ? onImageLoad() : null
+                  }
+                />
+              </a>
+            ) : (
+              <video
+                className={
+                  inPopUp
+                    ? styles.message_delete_embed
+                    : content != "" || isEditing
+                    ? styles.message_embed_text
+                    : styles.message_embed
+                }
+                controls
+              >
+                <source
+                  src={file}
+                  onLoad={(_) =>
+                    !inPopUp && onImageLoad ? onImageLoad() : null
+                  }
+                />
+                Your browser does not support the video files, {file}.
+              </video>
+            )}
+          </div>
+        ) : null}
+        {/*  Embeds from links  */}
+        {!inPopUp ? (
+          <>
+            {iframes.map((el) => {
+              console.log(el);
+              return (
+                <iframe
+                  src={el}
+                  className={styles.message_iframe}
+                  onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
+                />
+              );
+            })}
+            {filesFromLinks.map((el) =>
+              el[1] == "image" ? (
+                <img src={el[0]} className={styles.message_embed_link}></img>
+              ) : (
+                <video className={styles.message_embed_link} controls>
+                  <source
+                    src={el[0]}
+                    onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
+                  />
+                </video>
+              )
+            )}
+          </>
+        ) : null}
+      </>
+    );
+  };
 
   const senderInfo = (
     <>
@@ -290,6 +396,22 @@ export const Message: React.FC<MessageProps> = ({
             <DeleteIcon />
             Delete
           </ContextMenuElement>
+        )}
+        {menuOnLink && (
+          <>
+            <ContextMenuElement
+              onClick={() => navigator.clipboard.writeText(currentLink)}
+            >
+              <LinkIcon />
+              Copy Link
+            </ContextMenuElement>
+            <ContextMenuElement
+              onClick={() => window!.open(currentLink, "_blank")!.focus()}
+            >
+              <OpenInNewIcon />
+              Open Link
+            </ContextMenuElement>
+          </>
         )}
         <ContextMenuElement onClick={() => navigator.clipboard.writeText(id)}>
           <ContentCopyIcon />

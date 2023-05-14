@@ -18,8 +18,8 @@ import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AddIcon from "@mui/icons-material/Add";
-import BasicInputPopUp from "../popup/BasicInputPopUp";
-import BasicDeletePopUp from "../popup/BasicDeletePopUp";
+import InputPopUp from "../popup/InputPopUp";
+import BasicDeletePopUp from "../popup/DeletePopUp";
 import { addChannel } from "components/utils/channelQueries";
 import { useUser } from "context/userContext";
 
@@ -108,7 +108,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
             <p>Are you sure u want to delete #{name} channel?</p>
           </BasicDeletePopUp>
         ) : (
-          <BasicInputPopUp
+          <InputPopUp
             onConfirm={showPopUp == 3 ? createChannel : changeChannelName}
             onCancel={() => setShowPopUp(0)}
             confirmButtonName={showPopUp == 3 ? "Create" : "Confirm"}
@@ -122,7 +122,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
             ) : (
               <p>Change name for #{name}</p>
             )}
-          </BasicInputPopUp>
+          </InputPopUp>
         )
       ) : null}
 

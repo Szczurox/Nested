@@ -20,10 +20,10 @@ import {
 } from "firebase/firestore";
 import { useUser } from "context/userContext";
 import { useChannel } from "context/channelContext";
-import BasicInputPopUp from "../popup/BasicInputPopUp";
+import InputPopUp from "../popup/InputPopUp";
 import ContextMenuElement from "../contextmenu/ContextMenuElement";
 import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
-import BasicDeletePopUp from "../popup/BasicDeletePopUp";
+import DeletePopUp from "../popup/DeletePopUp";
 import { addChannel } from "components/utils/channelQueries";
 
 export type NavbarCategoryVariant = "server" | "dms";
@@ -162,15 +162,15 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 
       {showPopUp ? (
         showPopUp == 3 ? (
-          <BasicDeletePopUp
+          <DeletePopUp
             onCancel={() => setShowPopUp(0)}
             onConfirm={deleteCategory}
           >
             <h3>Delete Category</h3>
             <p>Are you sure u want to delete {name} category?</p>
-          </BasicDeletePopUp>
+          </DeletePopUp>
         ) : (
-          <BasicInputPopUp
+          <InputPopUp
             onConfirm={showPopUp == 1 ? createChannel : changeCategoryName}
             onCancel={() => setShowPopUp(0)}
             confirmButtonName={showPopUp == 1 ? "Create" : "Confirm"}
@@ -186,7 +186,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
             ) : (
               <p>Change name for {name}</p>
             )}
-          </BasicInputPopUp>
+          </InputPopUp>
         )
       ) : null}
 

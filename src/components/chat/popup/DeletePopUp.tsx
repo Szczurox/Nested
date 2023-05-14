@@ -3,13 +3,13 @@ import styles from "../../../styles/components/chat/popups/DeleteConfirmPopUp.mo
 import ScreenPopUp from "./ScreenPopUp";
 import PopUpButton, { buttonColors } from "./PopUpButton";
 
-export interface DeleteChannelPopUpProps {
+export interface DeletePopUpProps {
   onConfirm: () => void;
   onCancel: () => void;
   children?: ReactNode;
 }
 
-const DeleteChannelPopUp: React.FC<DeleteChannelPopUpProps> = ({
+const DeletePopUp: React.FC<DeletePopUpProps> = ({
   onConfirm,
   onCancel,
   children,
@@ -32,10 +32,7 @@ const DeleteChannelPopUp: React.FC<DeleteChannelPopUpProps> = ({
         <div className={styles.popup_cancel} onClick={(_) => onCancel()}>
           Cancel
         </div>
-        <PopUpButton
-          onClick={(_) => onConfirm()}
-          color={buttonColors.get("red")!}
-        >
+        <PopUpButton onClick={(_) => onConfirm()} color={"red"}>
           Delete
         </PopUpButton>
       </div>
@@ -43,4 +40,4 @@ const DeleteChannelPopUp: React.FC<DeleteChannelPopUpProps> = ({
   );
 };
 
-export default DeleteChannelPopUp;
+export default DeletePopUp;

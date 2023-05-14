@@ -4,7 +4,7 @@ import ScreenPopUp from "./ScreenPopUp";
 import { TextareaAutosize } from "@material-ui/core";
 import PopUpButton, { buttonColors } from "./PopUpButton";
 
-interface BasicInputPopUpProps {
+interface InputPopUpProps {
   onConfirm: (input: string) => void;
   onCancel: () => void;
   value?: string;
@@ -14,7 +14,7 @@ interface BasicInputPopUpProps {
   children?: ReactNode;
 }
 
-const BasicInputPopUp: React.FC<BasicInputPopUpProps> = ({
+const InputPopUp: React.FC<InputPopUpProps> = ({
   onConfirm,
   onCancel,
   value = "",
@@ -104,7 +104,7 @@ const BasicInputPopUp: React.FC<BasicInputPopUpProps> = ({
           </div>
           <PopUpButton
             onClick={(_) => onConfirm(input)}
-            color={buttonColors.get("grey")!}
+            color={"grey"}
             disabled={!input.replace(/\s/g, "").length}
           >
             {confirmButtonName}
@@ -115,4 +115,4 @@ const BasicInputPopUp: React.FC<BasicInputPopUpProps> = ({
   );
 };
 
-export default BasicInputPopUp;
+export default InputPopUp;

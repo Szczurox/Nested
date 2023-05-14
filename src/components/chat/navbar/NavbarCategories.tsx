@@ -15,8 +15,7 @@ import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
 import ContextMenuElement from "../contextmenu/ContextMenuElement";
 import AddIcon from "@material-ui/icons/Add";
 import { useUser } from "context/userContext";
-import BasicDeletePopUp from "../popup/BasicDeletePopUp";
-import BasicInputPopUp from "../popup/BasicInputPopUp";
+import InputPopUp from "../popup/InputPopUp";
 import { addCategory } from "components/utils/categoryQueries";
 import { addChannel } from "components/utils/channelQueries";
 
@@ -150,7 +149,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
       )}
 
       {showPopUp ? (
-        <BasicInputPopUp
+        <InputPopUp
           onConfirm={showPopUp == 1 ? createChannel : createCategory}
           onCancel={() => setShowPopUp(0)}
           confirmButtonName={"Create"}
@@ -163,7 +162,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
           ) : (
             <p>Create a category</p>
           )}
-        </BasicInputPopUp>
+        </InputPopUp>
       ) : null}
 
       <div

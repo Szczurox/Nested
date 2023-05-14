@@ -76,6 +76,7 @@
 .message_info {
   margin-left: 20px;
   margin-right: 60px;
+
   p {
     white-space: pre-wrap;
     overflow-wrap: break-word;
@@ -127,7 +128,7 @@
   }
 
   .message_embed_text {
-    margin-top: -10px;
+    margin-top: 0px;
     max-width: 800px;
     max-height: 500px;
     width: auto;
@@ -137,12 +138,29 @@
   }
 
   .message_embed {
-    margin-top: 12px;
-  }
-
-  .message_embed {
+    margin-top: 4px;
     max-width: 800px;
     max-height: 500px;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+  }
+
+  .message_embed_link {
+    margin-top: 4px;
+    max-width: 800px;
+    max-height: 500px;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    margin-left: 60px;
+  }
+
+  .message_iframe {
+    margin-top: 4px;
+    margin-left: 60px;
+    min-width: 500px;
+    min-height: 300px;
     width: auto;
     height: auto;
     border-radius: 10px;

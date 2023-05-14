@@ -19,6 +19,7 @@ import { useUser } from "context/userContext";
 import moment from "moment";
 import { createFirebaseApp } from "../../firebase/clientApp";
 import UploadFilePopUp from "./popup/UploadFilePopUp";
+import InformationPopUp from "./popup/InformationPopUp";
 
 export type MediaType = "image" | "video";
 
@@ -41,7 +42,9 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   const [fileType, setFileType] = useState<string>("");
   const [fileUrl, setFileUrl] = useState<string>("");
   const [fileG, setFileG] = useState<File>();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [isTooLarge, setIsTooLarge] = useState<boolean>(false);
+  const [isWrongType, setIsWrongType] = useState<boolean>(false);
 
   const { channel } = useChannel();
   const { user } = useUser();
@@ -70,13 +73,15 @@ export const UploadFile: React.FC<UploadFileProps> = ({
       e.type.substring(0, 5) == "image" ||
       e.type.substring(0, 5) == "video"
     ) {
-      console.log("valid");
-      setFileType(e.type.substring(0, 5));
-      setFileG(e);
-      setFileName(e.name);
-      setFileUrl(URL.createObjectURL(e));
-      setIsOpen(true);
-    }
+      if (e.size / 1024 / 1024 < 5) {
+        console.log("valid");
+        setFileType(e.type.substring(0, 5));
+        setFileG(e);
+        setFileName(e.name);
+        setFileUrl(URL.createObjectURL(e));
+        setIsOpen(true);
+      } else setIsTooLarge(true);
+    } else setIsWrongType(true);
   }
 
   const uploadFile = (input: string) => {
@@ -140,6 +145,18 @@ export const UploadFile: React.FC<UploadFileProps> = ({
           cancelled={() => setIsOpen(false)}
           type={fileType as MediaType}
         />
+      )}
+      {isTooLarge && (
+        <InformationPopUp onOk={() => setIsTooLarge(false)}>
+          <h3>Your file too large!</h3>
+          <p>Maximum file upload size is 5MB.</p>
+        </InformationPopUp>
+      )}
+      {isWrongType && (
+        <InformationPopUp onOk={() => setIsWrongType(false)}>
+          <h3>Unsupported file type!</h3>
+          <p>Only image, video and gif files are supported.</p>
+        </InformationPopUp>
       )}
       <form>
         <div className={styles.upload_file_file}>
