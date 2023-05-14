@@ -334,14 +334,23 @@ export const Message: React.FC<MessageProps> = ({
                   src={el}
                   className={styles.message_iframe}
                   onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
+                  key={el}
                 />
               );
             })}
             {filesFromLinks.map((el) =>
               el[1] == "image" ? (
-                <img src={el[0]} className={styles.message_embed_link}></img>
+                <img
+                  src={el[0]}
+                  className={styles.message_embed_link}
+                  key={el[0]}
+                ></img>
               ) : (
-                <video className={styles.message_embed_link} controls>
+                <video
+                  className={styles.message_embed_link}
+                  controls
+                  key={el[0]}
+                >
                   <source
                     src={el[0]}
                     onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
