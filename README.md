@@ -1,6 +1,6 @@
 # Faicamp
 
-[![Lines of code](https://tokei.rs/b1/github/XAMPPRocky/tokei)](https://github.com/XAMPPRocky/tokei)
+[![Lines of code](https://tokei.rs/b1/github/Szczurox/Faicamp)](https://github.com/Szczurox/Faicamp)
 [![License](https://img.shields.io/github/license/Szczurox/Faicamp?service=github)](https://github.com/Szczurox/Faicamp/blob/main/LICENSE)
 
 This is a [Next.js](https://nextjs.org/) chat app with [Firebase](https://firebase.google.com/)-based backend bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
