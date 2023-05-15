@@ -28,12 +28,16 @@ function MyApp({ Component, pageProps, router }: AppProps) {
       }
     };
 
+    const handleContextMenu = (e: Event) => e.preventDefault();
+
+    document.addEventListener("contextmenu", handleContextMenu);
     document.addEventListener("keydown", checkForZoom);
     document.addEventListener("wheel", checkForZoomScroll, { passive: false });
     router.events.on("routeChangeStart", routeChangeStartHandler);
     router.events.on("routeChangeComplete", routeChangeEndHandler);
     router.events.on("routeChangeError", routeChangeEndHandler);
     return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
       document.removeEventListener("keydown", checkForZoom);
       document.removeEventListener("wheel", checkForZoomScroll);
       router.events.off("routeChangeStart", routeChangeStartHandler);

@@ -351,7 +351,6 @@ export const Message: React.FC<MessageProps> = ({
         {!inPopUp ? (
           <>
             {iframes.map((el) => {
-              console.log(el);
               return (
                 <iframe
                   src={el}

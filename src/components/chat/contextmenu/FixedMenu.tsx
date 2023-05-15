@@ -14,6 +14,7 @@ interface FixedMenuProps {
   children: ReactNode;
   isTop?: boolean;
   menuPoint: { x: number; y: number };
+  parentRef: RefObject<HTMLDivElement> | RefObject<HTMLSpanElement>;
 }
 
 export type FixedMenuHandle = {
@@ -25,7 +26,7 @@ export type FixedMenuHandle = {
 const FixedMenu: React.ForwardRefRenderFunction<
   FixedMenuHandle,
   FixedMenuProps
-> = ({ children, isTop = false, menuPoint }, ref) => {
+> = ({ children, isTop = false, menuPoint, parentRef }, ref) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const menuRef = useRef<HTMLDivElement>(null); // Ref to main Unordered List element
@@ -57,13 +58,17 @@ const FixedMenu: React.ForwardRefRenderFunction<
       (e.type == "click" &&
         menuRef.current != null &&
         !menuRef.current!.contains(e.target as Node) &&
-        !(e as KeyboardEvent).shiftKey) ||
+        parentRef.current != null &&
+        !parentRef.current!.contains(e.target as Node)) ||
       (e.type == "keydown" && (e as KeyboardEvent).key == "Escape") ||
       (e.type == "contextmenu" &&
         menuRef.current != null &&
-        !menuRef.current!.contains(e.target as Node))
+        !menuRef.current!.contains(e.target as Node) &&
+        parentRef.current != null &&
+        !parentRef.current!.contains(e.target as Node))
     ) {
       setIsOpen(false);
+      setCurrentPopUp(false);
     }
   };
 

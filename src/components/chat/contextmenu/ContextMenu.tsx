@@ -11,7 +11,7 @@ import styles from "../../../styles/components/chat/contextmenu/ContextMenu.modu
 
 interface ContextMenuProps {
   children: ReactNode;
-  parentRef: RefObject<HTMLDivElement>;
+  parentRef: RefObject<HTMLDivElement> | RefObject<HTMLSpanElement>;
 }
 
 export type ContextMenuHandle = {

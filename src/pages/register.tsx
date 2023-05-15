@@ -34,6 +34,8 @@ export const Register: React.FC<{}> = ({}) => {
       username: username,
       createdAt: serverTimestamp(),
       tag: username,
+      avatar:
+        "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png",
     });
   };
 
