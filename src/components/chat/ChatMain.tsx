@@ -167,7 +167,7 @@ export const ChatMain: React.FC = ({}) => {
   const handleMessageSnapshot = (qMes: any) => {
     return onSnapshot(qMes, (querySnapshot: any) => {
       querySnapshot.docChanges().forEach((change: any) => {
-        if (change.type === "removed") {
+        if (change.type === "removed" || change.type === "modified") {
           setMessages((messages) => [
             ...messages.filter((el) => el.id !== change.doc.id),
           ]);
