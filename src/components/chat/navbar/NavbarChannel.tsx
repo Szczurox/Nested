@@ -3,14 +3,14 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarChannel.module.scss";
 import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
 import ContextMenuElement from "../contextmenu/ContextMenuElement";
-import DeleteChannelPopUp from "../popup/DeleteChannelPopUp";
 import {
-  addDoc,
-  collection,
   deleteDoc,
   doc,
+  getDoc,
   getFirestore,
+  onSnapshot,
   serverTimestamp,
+  setDoc,
   updateDoc,
 } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase/clientApp";
@@ -18,6 +18,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import AddIcon from "@mui/icons-material/Add";
+import CircleIcon from "@mui/icons-material/Circle";
 import InputPopUp from "../popup/InputPopUp";
 import BasicDeletePopUp from "../popup/DeletePopUp";
 import { addChannel } from "components/utils/channelQueries";
@@ -28,12 +29,14 @@ interface NavbarChannelProps {
   id: string;
   idC: string;
   nameC?: string;
+  lastMessageAt?: number;
 }
 
 export interface ChannelData {
   id: string;
   name: string;
   createdAt: string;
+  lastMessageAt: number;
 }
 
 export const NavbarChannel: React.FC<NavbarChannelProps> = ({
@@ -41,8 +44,10 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   id,
   idC,
   nameC = "",
+  lastMessageAt,
 }) => {
-  const [isActive, setActive] = useState<boolean>(false);
+  const [isActive, setIsActive] = useState<boolean>(false);
+  const [isUnread, setIsUnread] = useState<boolean>(false);
   // 0 - None  /  1 - Delete  /  2 - Change Name  /  3 - Create
   const [showPopUp, setShowPopUp] = useState<number>(0);
 
@@ -55,13 +60,58 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   const app = createFirebaseApp();
   const db = getFirestore(app!);
 
+  const partRef = doc(
+    db,
+    "groups",
+    channel.idG,
+    "channels",
+    id,
+    "participants",
+    user.uid
+  );
+
   useEffect(() => {
-    if (channel.id == id) setActive(true);
-    else setActive(false);
+    if (channel.id == id) setIsActive(true);
+    else setIsActive(false);
   }, [channel.id, id]);
 
+  useEffect(() => {
+    const participantSnapshot = () => {
+      return onSnapshot(partRef, (doc) => {
+        if (doc.exists() && doc.data()!.lastActive != null) {
+          if (doc.data()!.lastActive < lastMessageAt!) setIsUnread(true);
+          else setIsUnread(false);
+        }
+      });
+    };
+
+    async function checkParticipant() {
+      const participantDoc = await getDoc(partRef);
+      if (lastMessageAt) {
+        if (participantDoc.exists()) {
+          return participantSnapshot();
+        } else {
+          await setDoc(partRef, { lastActive: serverTimestamp() });
+          return participantSnapshot();
+        }
+      } else return () => undefined;
+    }
+
+    checkParticipant().then((res) => {
+      return () => res();
+    });
+  }, []);
+
+  const updateLastActive = async () => {
+    await setDoc(
+      doc(db, "groups", channel.idG, "channels", id, "participants", user.uid),
+      { lastActive: serverTimestamp() }
+    );
+  };
+
   const handleToggle = () => {
-    setActive(true);
+    updateLastActive();
+    setIsActive(true);
     setChannelData(id, name, idC, nameC);
   };
 
@@ -156,6 +206,8 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
         className={
           isActive
             ? `${styles.channel} ${styles.active}`
+            : isUnread
+            ? `${styles.channel} ${styles.unread}`
             : `${styles.channel} ${styles.inactive}`
         }
         id={id}
@@ -164,6 +216,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
         ref={elementRef}
       >
         <h4>
+          {isUnread && <CircleIcon className={styles.unread_dot} />}
           <span className={styles.hash}>#</span>
           <div className={styles.channel_name}>{name}</div>
         </h4>

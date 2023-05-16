@@ -88,29 +88,28 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
 
       const unsub = onSnapshot(qCha, (querySnapshot) => {
         querySnapshot.docChanges().forEach((change) => {
-          if (change.type === "added" || change.type === "modified") {
-            if (!nCategoryChannels.map((el) => el.id).includes(change.doc.id)) {
-              setNCategoryChannels((channels) =>
-                [
-                  ...channels.filter((el) => el.id !== change.doc.id),
-                  {
-                    id: change.doc.id,
-                    createdAt: change.doc.data().createdAt,
-                    name: change.doc.data().name,
-                  },
-                ].sort((x, y) => {
-                  return x.createdAt > y.createdAt ? 1 : -1;
-                })
-              );
-            }
-          }
-          if (change.type === "removed") {
+          if (change.type === "removed" || change.type == "modified") {
             setNCategoryChannels((channels) =>
               [...channels.filter((el) => el.id !== change.doc.id)].sort(
                 (x, y) => {
                   return x.createdAt > y.createdAt ? 1 : -1;
                 }
               )
+            );
+          }
+          if (change.type === "added" || change.type === "modified") {
+            setNCategoryChannels((channels) =>
+              [
+                ...channels.filter((el) => el.id !== change.doc.id),
+                {
+                  id: change.doc.id,
+                  createdAt: change.doc.data().createdAt,
+                  name: change.doc.data().name,
+                  lastMessageAt: change.doc.data().lastMessageAt,
+                },
+              ].sort((x, y) => {
+                return x.createdAt > y.createdAt ? 1 : -1;
+              })
             );
           }
         });
@@ -176,8 +175,14 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
       >
         {variant == "server" ? (
           <>
-            {nCategoryChannels.map(({ id, name }) => (
-              <NavbarChannel key={id} id={id} idC="none" name={name} />
+            {nCategoryChannels.map(({ id, name, lastMessageAt }) => (
+              <NavbarChannel
+                key={id}
+                id={id}
+                idC="none"
+                name={name}
+                lastMessageAt={lastMessageAt}
+              />
             ))}
             {categories.map(({ id, name }) => (
               <NavbarCategory key={id} idC={id} name={name} />

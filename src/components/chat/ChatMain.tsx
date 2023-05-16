@@ -18,6 +18,7 @@ import {
   onSnapshot,
   orderBy,
   query,
+  setDoc,
   startAfter,
   Timestamp,
   updateDoc,
@@ -149,10 +150,24 @@ export const ChatMain: React.FC = ({}) => {
     }
   };
 
+  const updateLastActive = async () =>
+    await setDoc(
+      doc(
+        db,
+        "groups",
+        channel.idG,
+        "channels",
+        channel.id,
+        "participants",
+        user.uid
+      ),
+      { lastActive: serverTimestamp() }
+    );
+
   const handleMessageSnapshot = (qMes: any) => {
     return onSnapshot(qMes, (querySnapshot: any) => {
       querySnapshot.docChanges().forEach((change: any) => {
-        if (change.type === "removed" || change.type === "modified") {
+        if (change.type === "removed") {
           setMessages((messages) => [
             ...messages.filter((el) => el.id !== change.doc.id),
           ]);
@@ -166,6 +181,7 @@ export const ChatMain: React.FC = ({}) => {
             change.doc.data().createdAt.nanoseconds / 1000000;
           setMessages((messages) =>
             [
+              ...messages.filter((el) => el.id !== change.doc.id),
               {
                 id: change.doc.id,
                 content: change.doc.data().content,
@@ -175,13 +191,14 @@ export const ChatMain: React.FC = ({}) => {
                 edited: change.doc.data().edited,
                 fileType: change.doc.data().fileType,
               },
-              ...messages.filter((el) => el.id !== change.doc.id),
             ].sort((x, y) => {
               return x.timestamp > y.timestamp ? 1 : -1;
             })
           );
         }
       });
+      if (querySnapshot.docChanges().length < querySizeLimit)
+        updateLastActive();
       if (querySnapshot.docs.length > 0) {
         setLastKey(
           querySnapshot.docs[querySnapshot.docs.length - 1].data().createdAt
@@ -216,16 +233,18 @@ export const ChatMain: React.FC = ({}) => {
       return handleMessageSnapshot(qMes);
     }
 
-    setMessages([]);
-    textAreaRef.current!.focus();
-    setAutoScroll(true);
-    setCanScrollToBottom(false);
-    const unsub = getMessagesFirstBatch();
-    return () => {
-      if (unsubs.length > 0)
-        for (let i = 0; i < unsubs.length; i++) unsubs[i]();
-      unsub();
-    };
+    if (channel.id != "") {
+      setMessages([]);
+      textAreaRef.current!.focus();
+      setAutoScroll(true);
+      setCanScrollToBottom(false);
+      const unsub = getMessagesFirstBatch();
+      return () => {
+        if (unsubs.length > 0)
+          for (let i = 0; i < unsubs.length; i++) unsubs[i]();
+        unsub();
+      };
+    }
   }, [channel.id]);
 
   async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
@@ -234,16 +253,22 @@ export const ChatMain: React.FC = ({}) => {
       e.preventDefault();
       textAreaRef.current!.blur();
     } else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
-      const timestamp = serverTimestamp();
       // Get current input and reset textarea instantly, before message gets fully sent
       const chatInput = input.replace(/^\s+|\s+$/g, "");
       setInput("");
       e.preventDefault();
       if (chatInput.length) {
+        await updateDoc(
+          doc(db, "groups", channel.idG, "channels", channel.id),
+          {
+            lastMessageAt: serverTimestamp(),
+          }
+        ).catch((err) => console.log("Update lastMessagedAt Error: " + err));
+
         await addDoc(messagesCollection, {
           content: chatInput,
           userid: user.uid,
-          createdAt: timestamp,
+          createdAt: serverTimestamp(),
           edited: false,
         })
           .catch((_) => {
@@ -255,7 +280,7 @@ export const ChatMain: React.FC = ({}) => {
         // Update the time at which the last message was sent by the user
         // Rate limit user
         await updateDoc(doc(db, "profile", user.uid), {
-          lastMessagedAt: timestamp,
+          lastMessagedAt: serverTimestamp(),
         }).catch((err) => {
           console.log(err);
         });

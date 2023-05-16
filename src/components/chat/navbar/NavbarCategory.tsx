@@ -71,6 +71,15 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 
       const unsub = onSnapshot(qCha, (querySnapshot) => {
         querySnapshot.docChanges().forEach((change) => {
+          if (change.type === "removed" || change.type == "modified") {
+            setChannels((channels) =>
+              [...channels.filter((el) => el.id !== change.doc.id)].sort(
+                (x, y) => {
+                  return x.createdAt > y.createdAt ? 1 : -1;
+                }
+              )
+            );
+          }
           if (change.type === "added" || change.type === "modified") {
             setChannels((channels) =>
               [
@@ -79,19 +88,11 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
                   id: change.doc.id,
                   createdAt: change.doc.data().createdAt,
                   name: change.doc.data().name,
+                  lastMessageAt: change.doc.data().lastMessageAt,
                 },
               ].sort((x, y) => {
                 return x.createdAt > y.createdAt ? 1 : -1;
               })
-            );
-          }
-          if (change.type === "removed") {
-            setChannels((channels) =>
-              [...channels.filter((el) => el.id !== change.doc.id)].sort(
-                (x, y) => {
-                  return x.createdAt > y.createdAt ? 1 : -1;
-                }
-              )
             );
           }
         });
@@ -232,6 +233,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
               idC={idC}
               name={channel.name}
               nameC={name}
+              lastMessageAt={channel.lastMessageAt}
             />
           ))}
         </div>

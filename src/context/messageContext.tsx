@@ -15,10 +15,7 @@ export const MessageContext = createContext<MessageContextType>({
 export default function MessageContextComp({ children }: any) {
   const [message, setMessage] = useState({ id: "" }); // ID of the message user is currently interacting with
 
-  const setCurrentMessage = (id: string) => {
-    console.log(id);
-    setMessage({ id: id });
-  };
+  const setCurrentMessage = (id: string) => setMessage({ id: id });
 
   return (
     <MessageContext.Provider value={{ message, setCurrentMessage }}>
