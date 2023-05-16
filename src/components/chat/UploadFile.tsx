@@ -126,7 +126,6 @@ export const UploadFile: React.FC<UploadFileProps> = ({
       collection(db, "groups", channel.idG, "channels", channel.id, "messages"),
       {
         createdAt: serverTimestamp(),
-        time: moment().utcOffset("+00:00").format(),
         content: input,
         userid: user.uid,
         file: url,
