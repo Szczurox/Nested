@@ -79,7 +79,7 @@ export const ChatMain: React.FC = ({}) => {
     return () => {
       document.removeEventListener("paste", pasted);
     };
-  }, [input, popUp.isOpen]);
+  }, [input, popUp.isOpen, channel.id]);
 
   useEffect(() => {
     const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
@@ -140,6 +140,7 @@ export const ChatMain: React.FC = ({}) => {
     if (listInnerRef.current && autoScroll) {
       listInnerRef.current.focus();
       scrollToBottom();
+      wait(300).then(() => scrollToBottom());
     }
   };
 

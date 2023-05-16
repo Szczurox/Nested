@@ -55,12 +55,29 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 
   useEffect(() => {
     document.addEventListener("paste", pasted);
+    document.addEventListener("drop", dropped);
+    document.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
     return () => {
       document.removeEventListener("paste", pasted);
+      document.removeEventListener("drop", dropped);
+      document.removeEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
     };
-  }, []);
+  }, [channel.id]);
+
+  const dropped = (e: DragEvent) => {
+    e.preventDefault();
+    console.log("hi");
+    if (e.dataTransfer!.files[0] != undefined && channel.id != "") {
+      checkFile(e.dataTransfer!.files[0]);
+    }
+  };
 
   const pasted = (e: ClipboardEvent) => {
+    console.log(e.clipboardData!.files[0], channel.id);
     if (e.clipboardData!.files[0] != undefined && channel.id != "") {
       checkFile(e.clipboardData!.files[0]);
     }

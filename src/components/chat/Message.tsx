@@ -335,13 +335,9 @@ export const Message: React.FC<MessageProps> = ({
                     : styles.message_embed
                 }
                 controls
+                src={file}
+                onLoad={(_) => (!inPopUp && onImageLoad ? onImageLoad() : null)}
               >
-                <source
-                  src={file}
-                  onLoad={(_) =>
-                    !inPopUp && onImageLoad ? onImageLoad() : null
-                  }
-                />
                 Your browser does not support the video files, {file}.
               </video>
             )}
@@ -372,12 +368,9 @@ export const Message: React.FC<MessageProps> = ({
                   className={styles.message_embed_link}
                   controls
                   key={el[0]}
-                >
-                  <source
-                    src={el[0]}
-                    onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
-                  />
-                </video>
+                  src={el[0]}
+                  onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
+                ></video>
               )
             )}
           </>
@@ -398,9 +391,7 @@ export const Message: React.FC<MessageProps> = ({
           style={{ height: "45px", width: "45px" }}
           src={avatar}
           innerRef={avatarRef}
-          onLoad={(_) =>
-            !isEditing ? (onImageLoad ? onImageLoad!() : null) : null
-          }
+          onLoad={onImageLoad}
         />
       </div>
       <h4 style={{ color: nickColor }}>
