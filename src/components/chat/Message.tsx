@@ -29,7 +29,7 @@ interface MessageProps {
   userid: string;
   file?: string;
   fileType?: MediaType;
-  time?: string;
+  time?: number;
   edited?: boolean;
   children?: ReactNode;
   onImageLoad?: () => void;
@@ -38,7 +38,7 @@ interface MessageProps {
 export interface MessageData {
   id: string; // Message id
   content: string;
-  timestamp: string;
+  timestamp: number;
   uid: string; // Id of user that sent the message
   file?: string;
   fileType?: MediaType;

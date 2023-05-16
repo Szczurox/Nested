@@ -35,7 +35,6 @@ import { wait } from "components/utils/utils";
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState<string>(""); // Textarea input
   const [messages, setMessages] = useState<MessageData[]>([]); // Array of all messages currently loaded
-  const [snapShot, setSnapshot] = useState<MessageData[]>([]); // Array of messages from snapshot
   const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]); // Array of all file progress messages
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]); // Array of all unsubscribers
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0)); // Creation date of the last message fetched
@@ -162,12 +161,15 @@ export const ChatMain: React.FC = ({}) => {
           (change.type === "added" || change.type === "modified") &&
           change.doc.data().createdAt != null
         ) {
+          let time: number =
+            change.doc.data().createdAt.seconds * 1000 +
+            change.doc.data().createdAt.nanoseconds / 1000000;
           setMessages((messages) =>
             [
               {
                 id: change.doc.id,
                 content: change.doc.data().content,
-                timestamp: change.doc.data().time,
+                timestamp: time,
                 uid: change.doc.data().userid,
                 file: change.doc.data().file,
                 edited: change.doc.data().edited,
@@ -175,10 +177,7 @@ export const ChatMain: React.FC = ({}) => {
               },
               ...messages.filter((el) => el.id !== change.doc.id),
             ].sort((x, y) => {
-              return moment(x.timestamp).valueOf() >
-                moment(y.timestamp).valueOf()
-                ? 1
-                : -1;
+              return x.timestamp > y.timestamp ? 1 : -1;
             })
           );
         }
@@ -242,7 +241,6 @@ export const ChatMain: React.FC = ({}) => {
       e.preventDefault();
       if (chatInput.length) {
         await addDoc(messagesCollection, {
-          time: moment().utcOffset("+00:00").valueOf(),
           content: chatInput,
           userid: user.uid,
           createdAt: timestamp,
@@ -319,7 +317,7 @@ export const ChatMain: React.FC = ({}) => {
               key={id}
               id={id}
               content={""}
-              time={moment().utcOffset("+00:00").format()}
+              time={moment().utcOffset("+00:00").valueOf()}
               userid={user.uid}
             >
               <div className={styles.chat_file_uploading}>
