@@ -197,6 +197,7 @@ export const ChatMain: React.FC = ({}) => {
           );
         }
       });
+
       if (querySnapshot.docChanges().length < querySizeLimit)
         updateLastActive();
       if (querySnapshot.docs.length > 0) {
@@ -233,12 +234,14 @@ export const ChatMain: React.FC = ({}) => {
       return handleMessageSnapshot(qMes);
     }
 
+    setMessages([]);
+
     if (channel.id != "") {
-      setMessages([]);
       textAreaRef.current!.focus();
       setAutoScroll(true);
       setCanScrollToBottom(false);
       const unsub = getMessagesFirstBatch();
+      scrollToBottom();
       return () => {
         if (unsubs.length > 0)
           for (let i = 0; i < unsubs.length; i++) unsubs[i]();
