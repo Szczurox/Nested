@@ -168,7 +168,8 @@ export const Message: React.FC<MessageProps> = ({
               ]);
             else {
               // Get emoji content and file link
-              let bucket = emojiBucket.find((el) => el.startsWith(el));
+              let bucket = emojiBucket.find((e) => e.startsWith(el));
+              console.log(emojiBucket, el);
               // If emoji exists in the bucket then add it to mapped bucket
               if (bucket) {
                 setMappedEmojiBucket((mappedEmojiBucket) => [
