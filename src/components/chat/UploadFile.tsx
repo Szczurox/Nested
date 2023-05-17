@@ -105,7 +105,10 @@ export const UploadFile: React.FC<UploadFileProps> = ({
     setIsOpen(false);
     const id = v4();
     uploadCallback({ id: id, name: fileName, percent: 0 });
-    const fileRef = ref(storage, `media/${channel.idC}/${id}/${fileG!.name}`);
+    const fileRef = ref(
+      storage,
+      `media/${channel.idG}/${channel.id}/${id}/${fileG!.name}`
+    );
     const uploadTask = uploadBytesResumable(fileRef, fileG!);
     uploadTask.on(
       "state_changed",

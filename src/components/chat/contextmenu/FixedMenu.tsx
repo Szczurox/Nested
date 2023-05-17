@@ -15,9 +15,12 @@ interface FixedMenuProps {
   isTop?: boolean;
   menuPoint: { x: number; y: number };
   parentRef: RefObject<HTMLDivElement> | RefObject<HTMLSpanElement>;
+  onOpen?: () => void;
+  onClose?: () => void;
 }
 
 export type FixedMenuHandle = {
+  isOpen: () => boolean;
   closeMenu: () => void;
   openMenu: (event: React.MouseEvent<HTMLElement>) => void;
   getMenuRef: () => RefObject<HTMLDivElement>;
@@ -26,7 +29,10 @@ export type FixedMenuHandle = {
 const FixedMenu: React.ForwardRefRenderFunction<
   FixedMenuHandle,
   FixedMenuProps
-> = ({ children, isTop = false, menuPoint, parentRef }, ref) => {
+> = (
+  { children, isTop = false, menuPoint, parentRef, onOpen, onClose },
+  ref
+) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
 
   const menuRef = useRef<HTMLDivElement>(null); // Ref to main Unordered List element
@@ -35,14 +41,19 @@ const FixedMenu: React.ForwardRefRenderFunction<
 
   useImperativeHandle(ref, () => {
     return {
+      isOpen(): boolean {
+        return isOpen;
+      },
+
       closeMenu(): void {
+        if (onClose) onClose();
         setIsOpen(false);
         setCurrentPopUp(false);
       },
 
       openMenu(event: React.MouseEvent<HTMLElement>): void {
         event.preventDefault();
-        console.log("open??");
+        if (onOpen) onOpen();
         setIsOpen(true);
         setCurrentPopUp(true);
       },
@@ -55,7 +66,7 @@ const FixedMenu: React.ForwardRefRenderFunction<
 
   const handleCloseMenu = (e: Event): void => {
     if (
-      (e.type == "click" &&
+      (e.type == "mousedown" &&
         menuRef.current != null &&
         !menuRef.current!.contains(e.target as Node) &&
         parentRef.current != null &&
@@ -69,17 +80,18 @@ const FixedMenu: React.ForwardRefRenderFunction<
     ) {
       setIsOpen(false);
       setCurrentPopUp(false);
+      if (onClose) onClose();
     }
   };
 
   useEffect(() => {
     document.addEventListener("keydown", handleCloseMenu);
-    document.addEventListener("click", handleCloseMenu);
+    document.addEventListener("mousedown", handleCloseMenu);
     document.addEventListener("contextmenu", handleCloseMenu);
 
     return () => {
       document.removeEventListener("keydown", handleCloseMenu);
-      document.removeEventListener("click", handleCloseMenu);
+      document.removeEventListener("mousedown", handleCloseMenu);
       document.removeEventListener("contextmenu", handleCloseMenu);
     };
   }, []);

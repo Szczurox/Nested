@@ -15,6 +15,7 @@
 
     .chat_input {
       color: lightgrey;
+      color: lightgrey;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -28,6 +29,18 @@
       border-top: 1px solid gray;
       background-color: #474b53;
       font-size: large;
+
+      .chat_input_icons {
+        margin-top: 5px;
+        cursor: pointer;
+        margin-left: 10px;
+        .chat_input_icon {
+          margin-left: 10px;
+          &:hover {
+            color: white;
+          }
+        }
+      }
 
       form {
         overflow-y: auto;
@@ -57,18 +70,6 @@
           line-height: 20px;
           overflow-y: auto;
           overflow-x: hidden;
-        }
-      }
-    }
-
-    .chat_input_icons {
-      margin-top: 5px;
-      cursor: pointer;
-      margin-left: 10px;
-      svg {
-        margin-left: 10px;
-        &:hover {
-          color: white;
         }
       }
     }

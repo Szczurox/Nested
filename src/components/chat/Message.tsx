@@ -33,6 +33,7 @@ interface MessageProps {
   edited?: boolean;
   children?: ReactNode;
   onImageLoad?: () => void;
+  emojiBucket?: string[];
 }
 
 export interface MessageData {
@@ -43,9 +44,10 @@ export interface MessageData {
   file?: string;
   fileType?: MediaType;
   edited?: boolean;
+  emojiBucket?: string[];
 }
 
-type ContentType = "text" | "link";
+type ContentType = "text" | "link" | "emoji";
 
 export const Message: React.FC<MessageProps> = ({
   id,
@@ -57,6 +59,7 @@ export const Message: React.FC<MessageProps> = ({
   children,
   onImageLoad,
   edited,
+  emojiBucket,
 }) => {
   const [nickname, setNickname] = useState<string>("");
   const [nickColor, setNickColor] = useState<string>("white");
@@ -79,6 +82,9 @@ export const Message: React.FC<MessageProps> = ({
   );
   // Iframes from message content links
   const [iframes, setIframes] = useState<string[]>([]);
+  const [mappedEmojiBucket, setMappedEmojiBucket] = useState<
+    [string, string][]
+  >([]); // Emoji tag and it's link array
 
   const { channel } = useChannel();
   const { user } = useUser();
@@ -148,7 +154,52 @@ export const Message: React.FC<MessageProps> = ({
         setRealTime(moment(time).local().format("MMMM Do YYYY [at] hh:mm a"));
     }
 
-    function checkForLinks() {
+    function checkForEmoji(text: string) {
+      // Check if there are <: and :> characters (special content element open and close)
+      if (emojiBucket) {
+        const emojiSplit = content.split(/(<:.*?:>+)/g);
+        emojiSplit.forEach((el) => {
+          if (el.startsWith("<:") && el.endsWith(":>") && el.includes("?")) {
+            // If emoji already addded to mapped bucket
+            if (mappedEmojiBucket.find((e) => e[0] == el))
+              setParsedContent((parsedContent) => [
+                ...parsedContent!,
+                [el, "emoji"],
+              ]);
+            else {
+              // Get emoji content and file link
+              let bucket = emojiBucket.find((el) => el.startsWith(el));
+              // If emoji exists in the bucket then add it to mapped bucket
+              if (bucket) {
+                setMappedEmojiBucket((mappedEmojiBucket) => [
+                  ...mappedEmojiBucket,
+                  [el, bucket!.slice(bucket!.indexOf("|") + 1)],
+                ]);
+                setParsedContent((parsedContent) => [
+                  ...parsedContent!,
+                  [el, "emoji"],
+                ]);
+              } else
+                setParsedContent((parsedContent) => [
+                  ...parsedContent!,
+                  [el, "text"],
+                ]);
+            }
+          } else
+            setParsedContent((parsedContent) => [
+              ...parsedContent!,
+              [el, "text"],
+            ]);
+        });
+      } else
+        setParsedContent((parsedContent) => [
+          ...parsedContent!,
+          [text, "text"],
+        ]);
+    }
+
+    // Check for special content
+    function checkForSpecial() {
       // Check if there are any links in the content
       if (content.includes("https://") || content.includes("http://")) {
         // Split content into links and non-links
@@ -191,19 +242,15 @@ export const Message: React.FC<MessageProps> = ({
               [el, "link"],
             ]);
           }
-          // Add as text
-          else
-            setParsedContent((parsedContent) => [
-              ...parsedContent!,
-              [el, "text"],
-            ]);
+          // Check for emojis
+          else checkForEmoji(el);
         });
-      } else setParsedContent([[content, "text"]]);
+      } else checkForEmoji(content); // Do next check
     }
 
     getUserData();
     setTime();
-    checkForLinks();
+    checkForSpecial();
 
     document.addEventListener("keydown", handleClick);
     document.addEventListener("contextmenu", handleClick);
@@ -287,15 +334,17 @@ export const Message: React.FC<MessageProps> = ({
   const messageContent = (
     <div className={styles.message_content}>
       <p>
-        {parsedContent.map((el) =>
-          el[1] == "text" ? (
-            <span>{el[0]}</span>
-          ) : (
-            <a href={el[0]} target="_blank" rel="noreferrer">
-              {el[0]}
-            </a>
-          )
-        )}
+        {parsedContent.map((el) => {
+          if (el[1] == "emoji") {
+            let emoji = mappedEmojiBucket.find((e) => e[0] == el[0]);
+            if (emoji) return <img src={emoji[1]}></img>;
+            else return <span>{el[0]}</span>;
+          } else if (el[1] == "text") return <span>{el[0]}</span>;
+          else if (el[1] == "link") return;
+          <a href={el[0]} target="_blank" rel="noreferrer">
+            {el[0]}
+          </a>;
+        })}
         {edited && (
           <span className={styles.message_edited_indicator}>{" (edited)"}</span>
         )}

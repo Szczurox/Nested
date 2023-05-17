@@ -11,8 +11,10 @@ import GifIcon from "@material-ui/icons/Gif";
 import { createFirebaseApp } from "../../firebase/clientApp";
 import {
   addDoc,
+  arrayUnion,
   collection,
   doc,
+  getDocs,
   getFirestore,
   limit,
   onSnapshot,
@@ -22,6 +24,7 @@ import {
   startAfter,
   Timestamp,
   updateDoc,
+  where,
 } from "firebase/firestore";
 import moment from "moment";
 import { serverTimestamp } from "firebase/firestore";
@@ -29,14 +32,15 @@ import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import { useMessage } from "context/messageContext";
 import { usePopUp } from "context/popUpContext";
-import Emoji from "./ui-icons/Emoji";
 import InformationPopUp from "./popup/InformationPopUp";
 import { wait } from "components/utils/utils";
+import Emoji from "./ui-icons/Emoji";
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState<string>(""); // Textarea input
   const [messages, setMessages] = useState<MessageData[]>([]); // Array of all messages currently loaded
   const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]); // Array of all file progress messages
+  const [emojiBucket, setEmojiBucket] = useState<string[]>([]);
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]); // Array of all unsubscribers
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0)); // Creation date of the last message fetched
   const [slowDownCount, setSlowDownCount] = useState<number>(0); // Show Slow Down pop-up if reaches 2
@@ -67,6 +71,8 @@ export const ChatMain: React.FC = ({}) => {
 
   const querySizeLimit = 20;
 
+  const textAreaSizeLimit = 2000;
+
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
     return () => {
@@ -93,10 +99,17 @@ export const ChatMain: React.FC = ({}) => {
       !popUp.isOpen &&
       document.activeElement?.tagName != "TEXTAREA"
     ) {
-      if ((input + e.clipboardData!.getData("Text")).length <= 2000)
+      if (
+        (input + e.clipboardData!.getData("Text")).length <= textAreaSizeLimit
+      )
         setInput(input + e.clipboardData!.getData("Text"));
       else
-        setInput((input + e.clipboardData!.getData("Text")).substring(0, 2000));
+        setInput(
+          (input + e.clipboardData!.getData("Text")).substring(
+            0,
+            textAreaSizeLimit
+          )
+        );
     }
   };
 
@@ -191,6 +204,7 @@ export const ChatMain: React.FC = ({}) => {
                 file: change.doc.data().file,
                 edited: change.doc.data().edited,
                 fileType: change.doc.data().fileType,
+                emojiBucket: change.doc.data().emojiBucket,
               },
             ].sort((x, y) => {
               return x.timestamp > y.timestamp ? 1 : -1;
@@ -274,8 +288,10 @@ export const ChatMain: React.FC = ({}) => {
           userid: user.uid,
           createdAt: serverTimestamp(),
           edited: false,
+          emojiBucket: arrayUnion(...emojiBucket),
         })
-          .catch((_) => {
+          .catch((err) => {
+            console.log(err);
             // Create rejection is surely caused by trying to send too many messages
             setSlowDownCount(slowDownCount + 1);
           })
@@ -307,6 +323,14 @@ export const ChatMain: React.FC = ({}) => {
     }
   };
 
+  const addedEmoji = (text: string, file: string) => {
+    if ((input + text).length <= textAreaSizeLimit) {
+      setInput(input + text);
+      if (!emojiBucket.find((el) => el[0] == text))
+        setEmojiBucket((emojiBucket) => [...emojiBucket, text + "|" + file]);
+    }
+  };
+
   return (
     <div className={styles.chat}>
       {slowDownCount > 1 ? (
@@ -326,7 +350,16 @@ export const ChatMain: React.FC = ({}) => {
         ref={listInnerRef}
       >
         {messages.map(
-          ({ id, content, timestamp, uid, file, edited, fileType }, index) => (
+          ({
+            id,
+            content,
+            timestamp,
+            uid,
+            file,
+            edited,
+            fileType,
+            emojiBucket,
+          }) => (
             <Message
               key={id}
               id={id}
@@ -337,6 +370,7 @@ export const ChatMain: React.FC = ({}) => {
               onImageLoad={onImageLoadComplete}
               edited={edited}
               fileType={fileType}
+              emojiBucket={emojiBucket}
             />
           )
         )}
@@ -387,8 +421,8 @@ export const ChatMain: React.FC = ({}) => {
           </button>
         </form>
         <div className={styles.chat_input_icons}>
-          <GifIcon fontSize="large" />
-          <Emoji enabled={channel.id != ""} />
+          <GifIcon fontSize="large" className={styles.chat_input_icon} />
+          <Emoji enabled={channel.id != ""} emojiAdded={addedEmoji} />
         </div>
       </div>
       {canScrollToBottom && (

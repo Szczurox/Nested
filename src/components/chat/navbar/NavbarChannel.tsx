@@ -17,6 +17,7 @@ import { createFirebaseApp } from "../../../firebase/clientApp";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import AddIcon from "@mui/icons-material/Add";
 import CircleIcon from "@mui/icons-material/Circle";
 import InputPopUp from "../popup/InputPopUp";
@@ -177,6 +178,10 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
       ) : null}
 
       <ContextMenu ref={menuRef} parentRef={elementRef}>
+        <ContextMenuElement type={"grey"} onClick={(_) => updateLastActive()}>
+          <VisibilityIcon />
+          Mark As Read
+        </ContextMenuElement>
         {user.permissions.includes("MANAGE_CHANNELS") ? (
           <>
             <ContextMenuElement type={"grey"} onClick={(_) => setShowPopUp(2)}>
