@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/ui-icons/Emoji.module.scss";
 import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
 import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
@@ -31,6 +31,7 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
   const [emoji, setEmoji] = useState<EmojiData[]>([]); // Array of all emotes currently loaded
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0)); // Creation date of the last emoji fetched
   const [emojiEnd, setEmojiEnd] = useState<boolean>(false); // Are there no more emojis to load
+  const [unsubs, setUnsubs] = useState<(() => void)[]>([]); // Array of all unsubscribers
 
   const { channel } = useChannel();
 
@@ -85,7 +86,16 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
         setEmojiEnd(false);
       } else setEmojiEnd(true);
     });
+
+    setUnsubs((unsubs) => [...unsubs, unsub]);
   };
+
+  useEffect(() => {
+    return () => {
+      if (unsubs.length > 0)
+        for (let i = 0; i < unsubs.length; i++) unsubs[i]();
+    };
+  }, []);
 
   const emojiClicked = (e: any, data: EmojiData) => {
     e.preventDefault();
@@ -117,7 +127,7 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
 
           <div className={styles.emoji_content}>
             {emoji.map((emoji) => (
-              <span className={styles.emoji_frame}>
+              <span className={styles.emoji_frame} key={emoji.id}>
                 <img
                   src={emoji.file}
                   key={emoji.id}

@@ -337,7 +337,7 @@ export const Message: React.FC<MessageProps> = ({
         {parsedContent.map((el) => {
           if (el[1] == "emoji") {
             let emoji = mappedEmojiBucket.find((e) => e[0] == el[0]);
-            if (emoji) return <img src={emoji[1]}></img>;
+            if (emoji) return <img src={emoji[1]} key={emoji[0]}></img>;
             else return <span>{el[0]}</span>;
           } else if (el[1] == "text") return <span>{el[0]}</span>;
           else if (el[1] == "link") return;
