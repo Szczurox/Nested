@@ -1,9 +1,10 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarHeader.module.scss";
 import FixedMenu, { FixedMenuHandle } from "../contextmenu/FixedMenu";
 import ContextMenuElement from "../contextmenu/ContextMenuElement";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import EditIcon from "@material-ui/icons/Edit";
 import { useChannel } from "context/channelContext";
 import InputPopUp from "../popup/InputPopUp";
@@ -21,6 +22,7 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
   variant = "server",
 }) => {
   const [showPopUp, setShowPopUp] = useState<boolean>(false);
+  const [showMenu, setShowMenu] = useState<boolean>(false);
 
   const elementRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<FixedMenuHandle>(null);
@@ -41,6 +43,8 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
         nickname: newName,
       });
   };
+
+  useEffect(() => {}, [menuRef.current]);
 
   return variant === "server" ? (
     <>
@@ -69,12 +73,14 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
         ref={elementRef}
       >
         <FixedMenu
-          menuPoint={{ x: 36, y: 80 }}
+          menuPoint={{ x: 18, y: 80 }}
           parentRef={elementRef}
           ref={menuRef}
           isTop={true}
           isLeft={true}
           className={styles.header_menu}
+          onOpen={() => setShowMenu(true)}
+          onClose={() => setShowMenu(false)}
         >
           <ContextMenuElement type={"grey"} onClick={(_) => setShowPopUp(true)}>
             <EditIcon />
@@ -89,7 +95,7 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
           </ContextMenuElement>
         </FixedMenu>
         <h4>Text Channels</h4>
-        <ExpandMoreIcon />
+        {showMenu ? <ExpandMoreIcon /> : <ExpandLessIcon />}
       </div>
     </>
   ) : (

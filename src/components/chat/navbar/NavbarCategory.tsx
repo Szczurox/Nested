@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import AddIcon from "@material-ui/icons/Add";
 import EditIcon from "@material-ui/icons/Edit";
@@ -6,7 +7,6 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import styles from "../../../styles/components/chat/navbar/NavbarCategory.module.scss";
 import { ChannelData, NavbarChannel } from "./NavbarChannel";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
 import { createFirebaseApp } from "../../../firebase/clientApp";
 import {
   collection,
