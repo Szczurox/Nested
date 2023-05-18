@@ -91,7 +91,7 @@ export const NavbarProfile: React.FC = ({}) => {
         />
       </div>
       <div className={styles.navbar_profileInfo}>
-        <h3>{user.username}</h3>
+        <h3>{user.nickname}</h3>
         <p onClick={(_) => navigator.clipboard.writeText("@" + user.tag)}>
           @{user.tag}
         </p>

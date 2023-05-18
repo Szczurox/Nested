@@ -36,9 +36,10 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
 
     const memberDoc = doc(db, "groups", channel.idG, "members", user.uid);
 
-    await updateDoc(memberDoc, {
-      nickname: newName,
-    });
+    if (newName.replace(/\s/g, "").length)
+      await updateDoc(memberDoc, {
+        nickname: newName,
+      });
   };
 
   return variant === "server" ? (
@@ -55,6 +56,7 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
           <p>Change nickname on this group</p>
         </InputPopUp>
       )}
+
       <div
         className={styles.sidebar_header}
         onClick={(e) =>
