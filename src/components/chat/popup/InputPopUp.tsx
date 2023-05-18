@@ -75,6 +75,7 @@ const InputPopUp: React.FC<InputPopUpProps> = ({
           <form>
             <TextareaAutosize
               value={input}
+              style={!hash ? { paddingLeft: "20px" } : {}}
               wrap="off"
               maxRows={1}
               maxLength={100}

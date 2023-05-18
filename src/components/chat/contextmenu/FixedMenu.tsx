@@ -11,9 +11,10 @@ import styles from "../../../styles/components/chat/contextmenu/FixedMenu.module
 import { usePopUp } from "context/popUpContext";
 
 interface FixedMenuProps {
-  children: ReactNode;
   isTop?: boolean;
   isLeft?: boolean;
+  className?: string;
+  children: ReactNode;
   menuPoint: { x: number; y: number };
   parentRef: RefObject<HTMLDivElement> | RefObject<HTMLSpanElement>;
   onOpen?: () => void;
@@ -32,11 +33,12 @@ const FixedMenu: React.ForwardRefRenderFunction<
   FixedMenuProps
 > = (
   {
-    children,
     isTop = false,
     isLeft = false,
+    children,
     menuPoint,
     parentRef,
+    className,
     onOpen,
     onClose,
   },
@@ -107,7 +109,7 @@ const FixedMenu: React.ForwardRefRenderFunction<
 
   return isOpen ? (
     <div
-      className={styles.menu_element}
+      className={`${styles.menu_element} ${className}`}
       style={
         isTop
           ? isLeft

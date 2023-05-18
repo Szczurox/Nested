@@ -153,9 +153,9 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
           onCancel={() => setShowPopUp(0)}
           confirmButtonName={"Create"}
           placeHolder={showPopUp == 1 ? "new-channel" : ""}
-          hash={true}
+          hash={showPopUp == 1}
         >
-          <h3>{showPopUp == 1 ? "Create Channel" : "Change Category Name"}</h3>
+          <h3>{showPopUp == 1 ? "Create Channel" : "Create Category"}</h3>
           {showPopUp == 1 ? (
             <p>Create a channel without category</p>
           ) : (
