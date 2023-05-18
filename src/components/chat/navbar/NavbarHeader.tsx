@@ -95,7 +95,7 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
           </ContextMenuElement>
         </FixedMenu>
         <h4>Text Channels</h4>
-        {showMenu ? <ExpandMoreIcon /> : <ExpandLessIcon />}
+        {showMenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
       </div>
     </>
   ) : (
