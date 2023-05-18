@@ -211,9 +211,9 @@ export const Message: React.FC<MessageProps> = ({
             const parsedLink = el.substring(0, el.indexOf("?"));
 
             // If image then add as image, if video then add as video to files
-            if (/\.(jpg|jpeg|png|webp|avif|gif)$/.test(parsedLink)) {
+            if (/\.(jpg|jpeg|png|webp|avif|gif)$/.test(el)) {
               setFilesFromLinks((files) => [...files, [el, "image"]]);
-            } else if (/\.(mp4|mov|avi|mkv|flv)$/.test(parsedLink)) {
+            } else if (/\.(mp4|mov|avi|mkv|flv)$/.test(el)) {
               setFilesFromLinks((files) => [...files, [el, "video"]]);
             }
 
@@ -236,7 +236,6 @@ export const Message: React.FC<MessageProps> = ({
                 ),
               ]);
             }
-
             // Add as link
             setParsedContent((parsedContent) => [
               ...parsedContent!,
@@ -244,7 +243,10 @@ export const Message: React.FC<MessageProps> = ({
             ]);
           }
           // Check for emojis
-          else checkForEmoji(el);
+          else if (el.replace(/^\s+|\s+$/g, "").length) {
+            checkForEmoji(el);
+            console.log(el);
+          }
         });
       } else checkForEmoji(content); // Do next check
     }
@@ -354,10 +356,12 @@ export const Message: React.FC<MessageProps> = ({
               );
             else return <span>{el[0]}</span>;
           } else if (el[1] == "text") return <span>{el[0]}</span>;
-          else if (el[1] == "link") return;
-          <a href={el[0]} target="_blank" rel="noreferrer">
-            {el[0]}
-          </a>;
+          else if (el[1] == "link")
+            return (
+              <a href={el[0]} target="_blank" rel="noreferrer">
+                {el[0]}
+              </a>
+            );
         })}
         {edited && (
           <span className={styles.message_edited_indicator}>{" (edited)"}</span>

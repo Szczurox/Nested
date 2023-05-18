@@ -13,6 +13,7 @@ import { usePopUp } from "context/popUpContext";
 interface FixedMenuProps {
   children: ReactNode;
   isTop?: boolean;
+  isLeft?: boolean;
   menuPoint: { x: number; y: number };
   parentRef: RefObject<HTMLDivElement> | RefObject<HTMLSpanElement>;
   onOpen?: () => void;
@@ -30,7 +31,15 @@ const FixedMenu: React.ForwardRefRenderFunction<
   FixedMenuHandle,
   FixedMenuProps
 > = (
-  { children, isTop = false, menuPoint, parentRef, onOpen, onClose },
+  {
+    children,
+    isTop = false,
+    isLeft = false,
+    menuPoint,
+    parentRef,
+    onOpen,
+    onClose,
+  },
   ref
 ) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -101,7 +110,11 @@ const FixedMenu: React.ForwardRefRenderFunction<
       className={styles.menu_element}
       style={
         isTop
-          ? { top: menuPoint.y, right: menuPoint.x }
+          ? isLeft
+            ? { top: menuPoint.y, left: menuPoint.x }
+            : { top: menuPoint.y, right: menuPoint.x }
+          : isLeft
+          ? { bottom: menuPoint.y, left: menuPoint.x }
           : { bottom: menuPoint.y, right: menuPoint.x }
       }
       onContextMenu={(e) => e.preventDefault()}
