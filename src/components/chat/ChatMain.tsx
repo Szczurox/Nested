@@ -325,6 +325,7 @@ export const ChatMain: React.FC = ({}) => {
 
   const addedEmoji = (text: string, file: string) => {
     if ((input + text).length <= textAreaSizeLimit) {
+      textAreaRef.current!.focus();
       setInput(input + text);
       if (!emojiBucket.find((el) => el[0] == text))
         setEmojiBucket((emojiBucket) => [...emojiBucket, text + "|" + file]);
