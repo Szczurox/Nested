@@ -181,9 +181,9 @@ export const Register: React.FC<{}> = ({}) => {
               </button>
               <div className={styles.singup_link}>
                 <span>
-                  Already have an account?
+                  Already have an account?{" "}
                   <Link href="/login">
-                    <a> Login</a>
+                    <a>Login</a>
                   </Link>
                 </span>
               </div>

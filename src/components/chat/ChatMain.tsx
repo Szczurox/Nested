@@ -14,6 +14,7 @@ import {
   arrayUnion,
   collection,
   doc,
+  documentId,
   getDocs,
   getFirestore,
   limit,
@@ -35,18 +36,26 @@ import { usePopUp } from "context/popUpContext";
 import InformationPopUp from "./popup/InformationPopUp";
 import { wait } from "components/utils/utils";
 import Emoji from "./ui-icons/Emoji";
+import { useRouter } from "next/router";
+import DotsLoading from "components/animations/DotsLoading";
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState<string>(""); // Textarea input
+  const [lastChannelId, setLastChannelId] = useState<string>(""); // Id of the last channel user was on
   const [messages, setMessages] = useState<MessageData[]>([]); // Array of all messages currently loaded
   const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]); // Array of all file progress messages
-  const [emojiBucket, setEmojiBucket] = useState<string[]>([]);
+  const [emojiBucket, setEmojiBucket] = useState<string[]>([]); // Array of all the emoji name|link used in the message
+  const [typingUsers, setTypingUsers] = useState<[string, string][]>([]); // Array of users that are currenty typing (except the user)
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]); // Array of all unsubscribers
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0)); // Creation date of the last message fetched
+  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>(
+    setTimeout(() => null, 0)
+  );
   const [slowDownCount, setSlowDownCount] = useState<number>(0); // Show Slow Down pop-up if reaches 2
   const [messagesEnd, setMessagesEnd] = useState<boolean>(false); // True if no more messages to load on the current channel
   const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false); // Show Scroll To Bottom button
   const [isLoading, setIsLoading] = useState<boolean>(false); // Are messages loading
+  const [isTyping, setIsTyping] = useState<boolean>(false);
   const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
@@ -59,6 +68,7 @@ export const ChatMain: React.FC = ({}) => {
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
+  const router = useRouter();
 
   const messagesCollection = collection(
     db,
@@ -69,9 +79,32 @@ export const ChatMain: React.FC = ({}) => {
     "messages"
   );
 
+  const participantsCollection = collection(
+    db,
+    "groups",
+    channel.idG,
+    "channels",
+    channel.id ? channel.id : "None",
+    "participants"
+  );
+
   const querySizeLimit = 20;
 
   const textAreaSizeLimit = 2000;
+
+  useEffect(() => {
+    const eventListener = () => {
+      return updateIsTyping(false);
+    };
+
+    window.addEventListener("beforeunload", eventListener);
+    window.addEventListener("unload", eventListener);
+
+    return () => {
+      window.removeEventListener("beforeunload", eventListener);
+      window.removeEventListener("unload", eventListener);
+    };
+  }, [lastChannelId]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
@@ -249,23 +282,107 @@ export const ChatMain: React.FC = ({}) => {
       return handleMessageSnapshot(qMes);
     }
 
+    async function getTypingUsersOnJoin() {
+      const qPartOnJoin = query(
+        participantsCollection,
+        where(documentId(), "!=", user.uid),
+        where("isTyping", "==", true)
+      );
+
+      const snapshot = await getDocs(qPartOnJoin);
+
+      setTypingUsers(snapshot.docs.map((el) => [el.id, el.data().nickname]));
+    }
+
+    function getTypingUsers() {
+      // Participants querry
+      const qPart = query(
+        participantsCollection,
+        where(documentId(), "!=", user.uid)
+      );
+
+      return onSnapshot(qPart, (querySnapshot) => {
+        querySnapshot.docChanges().forEach((change) => {
+          if (change.type == "modified") {
+            // User is typing
+            if (
+              change.doc.data().isTyping &&
+              typingUsers.find((el) => el[0] == change.doc.id) == undefined
+            )
+              setTypingUsers((users) => [
+                ...users.filter((el) => el[0] != change.doc.id),
+                [change.doc.id, change.doc.data().nickname],
+              ]);
+            // User stopped typing
+            else if (!change.doc.data().isTyping)
+              setTypingUsers((users) => [
+                ...users.filter((el) => el[0] != change.doc.id),
+              ]);
+          }
+        });
+      });
+    }
+
     setMessages([]);
+    setTypingUsers([]);
 
     if (channel.id != "") {
+      console.log(lastChannelId);
       textAreaRef.current!.focus();
+      getTypingUsersOnJoin();
+      setLastChannelId(channel.id);
       setAutoScroll(true);
       setCanScrollToBottom(false);
+      updateIsTyping(false);
       const unsub = getMessagesFirstBatch();
+      const unsub2 = getTypingUsers();
       scrollToBottom();
       return () => {
         if (unsubs.length > 0)
           for (let i = 0; i < unsubs.length; i++) unsubs[i]();
         unsub();
+        unsub2();
       };
     }
   }, [channel.id]);
 
+  const updateIsTyping = async (isTyping: boolean) => {
+    setIsTyping(isTyping);
+    await updateDoc(
+      doc(
+        db,
+        "groups",
+        channel.idG,
+        "channels",
+        lastChannelId == "" ? channel.id : lastChannelId,
+        "participants",
+        user.uid
+      ),
+      {
+        isTyping: isTyping,
+        nickname: user.nickname,
+      }
+    );
+  };
+
+  async function userTyping() {
+    clearTimeout(typingTimeout);
+
+    if (!isTyping) {
+      console.log("started typing");
+      updateIsTyping(true);
+    }
+
+    setTypingTimeout(
+      setTimeout(async () => {
+        console.log("done typing");
+        updateIsTyping(false);
+      }, 5000)
+    );
+  }
+
   async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    userTyping();
     if (slowDownCount > 1 || popUp.isOpen) {
       // Don't update input if sending messages too quickly or pop-up is open
       e.preventDefault();
@@ -330,6 +447,15 @@ export const ChatMain: React.FC = ({}) => {
       if (!emojiBucket.find((el) => el[0] == text))
         setEmojiBucket((emojiBucket) => [...emojiBucket, text + "|" + file]);
     }
+  };
+
+  const showTypingUsers = () => {
+    if (typingUsers.length > 3) return "many people are typing...";
+    if (typingUsers.length == 3)
+      return `${typingUsers[0][1]}, ${typingUsers[1][1]} and ${typingUsers[2][1]} are typing...`;
+    if (typingUsers.length == 2)
+      return `${typingUsers[0][1]} and ${typingUsers[1][1]} are typing...`;
+    if (typingUsers.length == 1) return `${typingUsers[0][1]} is typing...`;
   };
 
   return (
@@ -437,6 +563,23 @@ export const ChatMain: React.FC = ({}) => {
           Jump To Present
         </div>
       )}
+      <span>
+        {typingUsers && (
+          <span
+            className={
+              typingUsers.length
+                ? styles.chat_typing_users
+                : styles.chat_no_typing_users
+            }
+            onClick={(_) => {
+              setCanScrollToBottom(false);
+              scrollToBottom();
+            }}
+          >
+            {showTypingUsers()}
+          </span>
+        )}
+      </span>
     </div>
   );
 };

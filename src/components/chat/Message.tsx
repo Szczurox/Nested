@@ -169,7 +169,6 @@ export const Message: React.FC<MessageProps> = ({
             else {
               // Get emoji content and file link
               let bucket = emojiBucket.find((e) => e.startsWith(el));
-              console.log(emojiBucket, el);
               // If emoji exists in the bucket then add it to mapped bucket
               if (bucket) {
                 setMappedEmojiBucket((mappedEmojiBucket) => [
@@ -337,14 +336,14 @@ export const Message: React.FC<MessageProps> = ({
   const messageContent = (
     <div className={styles.message_content}>
       <p>
-        {parsedContent.map((el) => {
+        {parsedContent.map((el, index) => {
           if (el[1] == "emoji") {
             let emoji = mappedEmojiBucket.find((e) => e[0] == el[0]);
             if (emoji)
               return (
                 <img
                   src={emoji[1]}
-                  key={emoji[0]}
+                  key={index}
                   style={
                     parsedContent.find((e) => e[1] == "text")![0]! != ""
                       ? {
@@ -413,28 +412,28 @@ export const Message: React.FC<MessageProps> = ({
         {/*  Embeds from links  */}
         {!inPopUp ? (
           <>
-            {iframes.map((el) => {
+            {iframes.map((el, index) => {
               return (
                 <iframe
                   src={el}
                   className={styles.message_iframe}
                   onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
-                  key={el}
+                  key={index}
                 />
               );
             })}
-            {filesFromLinks.map((el) =>
+            {filesFromLinks.map((el, index) =>
               el[1] == "image" ? (
                 <img
                   src={el[0]}
                   className={styles.message_embed_link}
-                  key={el[0]}
+                  key={index}
                 ></img>
               ) : (
                 <video
                   className={styles.message_embed_link}
                   controls
-                  key={el[0]}
+                  key={index}
                   src={el[0]}
                   onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
                 ></video>
