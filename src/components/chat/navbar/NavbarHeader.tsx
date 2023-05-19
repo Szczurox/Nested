@@ -84,7 +84,7 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
         >
           <ContextMenuElement type={"grey"} onClick={(_) => setShowPopUp(true)}>
             <EditIcon />
-            Change Nickname
+            lem Change Nickname
           </ContextMenuElement>
           <ContextMenuElement
             type={"grey"}

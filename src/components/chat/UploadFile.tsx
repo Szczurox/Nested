@@ -11,8 +11,10 @@ import {
 import {
   addDoc,
   collection,
+  doc,
   getFirestore,
   serverTimestamp,
+  updateDoc,
 } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
@@ -142,6 +144,10 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 
   async function fileSubmit(url: string, input: string) {
     input.replace(/\s/g, "");
+    await updateDoc(doc(db, "groups", channel.idG, "channels", channel.id), {
+      lastMessageAt: serverTimestamp(),
+    }).catch((err) => console.log("Update lastMessagedAt Error: " + err));
+
     await addDoc(
       collection(db, "groups", channel.idG, "channels", channel.id, "messages"),
       {
