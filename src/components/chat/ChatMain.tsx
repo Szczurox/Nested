@@ -564,21 +564,20 @@ export const ChatMain: React.FC = ({}) => {
         </div>
       )}
       <span>
-        {typingUsers && (
-          <span
-            className={
-              typingUsers.length
-                ? styles.chat_typing_users
-                : styles.chat_no_typing_users
-            }
-            onClick={(_) => {
-              setCanScrollToBottom(false);
-              scrollToBottom();
-            }}
-          >
-            {showTypingUsers()}
+        {typingUsers.length != 0 && (
+          <span style={{ marginLeft: "45px" }}>
+            <DotsLoading />
           </span>
         )}
+        <span
+          className={
+            typingUsers.length
+              ? styles.chat_typing_users
+              : styles.chat_no_typing_users
+          }
+        >
+          {showTypingUsers()}
+        </span>
       </span>
     </div>
   );

@@ -3,11 +3,11 @@
   width: 10px;
   height: 10px;
   border-radius: 5px;
-  margin-left: 30px;
   background-color: #696969;
   color: #575757;
   animation: dot_flashing 1s infinite linear alternate;
   animation-delay: 0.5s;
+  display: inline-block;
 }
 
 .dot_flashing::before,
