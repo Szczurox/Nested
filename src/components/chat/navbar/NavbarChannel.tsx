@@ -98,6 +98,9 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
       } else return () => undefined;
     }
 
+    // Set channel ID to the first loaded channel
+    if (channel.id == "") setChannelData(id, name, idC, nameC);
+
     checkParticipant().then((res) => {
       return () => res();
     });

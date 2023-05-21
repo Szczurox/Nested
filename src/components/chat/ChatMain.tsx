@@ -38,6 +38,7 @@ import { wait } from "components/utils/utils";
 import Emoji from "./ui-icons/Emoji";
 import { useRouter } from "next/router";
 import DotsLoading from "components/animations/DotsLoading";
+import Members from "./Members";
 
 export const ChatMain: React.FC = ({}) => {
   const [input, setInput] = useState<string>(""); // Textarea input
@@ -56,6 +57,7 @@ export const ChatMain: React.FC = ({}) => {
   const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false); // Show Scroll To Bottom button
   const [isLoading, setIsLoading] = useState<boolean>(false); // Are messages loading
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [showMembers, setShowMembers] = useState<boolean>(false); // Show members navbar
   const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
@@ -468,9 +470,6 @@ export const ChatMain: React.FC = ({}) => {
           <p>You are trying to send messages too quickly.</p>
         </InformationPopUp>
       ) : null}
-      <div className={styles.chat_shadow}>
-        <ChatHeader />
-      </div>
       <div
         className={styles.chat_messages}
         onScroll={(e) => handleScroll(e)}

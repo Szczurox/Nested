@@ -5,11 +5,13 @@
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
-  display: flex;
   justify-content: space-between;
   color: gray;
   align-items: center;
   padding: 10px;
+  display: flex;
+  background-color: #363a3f;
+  height: 9vh;
 
   .chatHeader_hash {
     color: grey;
@@ -31,16 +33,17 @@
   }
 
   .chatHeader_right {
-    display: flex;
+    display: inline-block;
     align-items: center;
-    flex: 0.3;
     justify-content: space-between;
   }
 
   .chatHeader_right {
     svg {
-      margin-left: 10px;
+      margin-left: 7.5px;
       cursor: pointer;
+      margin-right: 7.5px;
+      margin-bottom: 1px;
 
       &:hover {
         color: white;
@@ -48,19 +51,26 @@
     }
   }
   .chatHeader_search {
-    display: flex;
+    display: inline-block;
     align-items: center;
     color: gray;
     background-color: #232528;
     border-radius: 3px;
     padding: 3px;
     margin-left: 10px;
+    margin-right: 10px;
 
     input {
       border: none;
       color: white;
       outline-width: 0;
       background: transparent;
+    }
+
+    svg {
+      margin-top: 1px;
+      margin-right: 0px;
+      float: right;
     }
   }
 }

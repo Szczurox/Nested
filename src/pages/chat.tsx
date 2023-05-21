@@ -1,6 +1,6 @@
 import styles from "../styles/Chat.module.scss";
 import { Navbar } from "../components/chat/Navbar";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useUser } from "context/userContext";
 import { useRouter } from "next/router";
 import { ChatMain } from "components/chat/ChatMain";
@@ -17,8 +17,12 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
+import Members from "components/chat/Members";
+import ChatHeader from "components/chat/ChatHeader";
 
 const Chat = () => {
+  const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
+
   const { user, loadingUser, setMemberData } = useUser();
   const { channel } = useChannel();
 
@@ -90,7 +94,15 @@ const Chat = () => {
     <div className={styles.app}>
       <Loading />
       <Navbar />
-      <ChatMain />
+      <div className={styles.full_chat_flexbox}>
+        <div className={styles.chat_shadow}>
+          <ChatHeader onMembers={() => setShowMembers(!showMembers)} />
+        </div>
+        <div className={styles.chat_flexbox}>
+          <ChatMain />
+          {showMembers && <Members />}
+        </div>
+      </div>
     </div>
   ) : null;
 };
