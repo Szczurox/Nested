@@ -29,6 +29,7 @@
       overflow-x: hidden;
       box-shadow: 0px 0.1em inset #26282c;
       padding-top: 0.5vh;
+      position: relative;
 
       .chat_input_button {
         display: none;
@@ -153,14 +154,14 @@
       }
 
       .chat_jump {
-        position: fixed;
-        transform: translate(10%, -355%);
+        position: absolute;
+        transform: translate(8%, -330%);
         bottom: 0;
         right: 0;
         height: 25px;
         margin-left: 85%;
         margin-right: 5%;
-        width: 15%;
+        width: 18vw;
         text-align: center;
         border-color: cyan;
         background-color: lightblue;
