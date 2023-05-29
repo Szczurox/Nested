@@ -15,6 +15,7 @@ import {
   getFirestore,
   onSnapshot,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import Members from "components/chat/Members";
@@ -40,11 +41,35 @@ const Chat = () => {
       if (typeof window !== "undefined") {
         const loader = document.getElementById("globalLoader");
         if (loader) {
-          await wait(500);
+          await wait(500).then(async () => {
+            // Setting user activity should work server side but here it works client side
+            // TODO: Create some proper API and server side checks (maybe ping user every few minutes)
+            if (user.uid != "") {
+              await updateDoc(doc(db, "profile", user.uid), {
+                isActive: true,
+              });
+            }
+          });
           loader.remove();
         }
       }
     }
+
+    const eventListener = async () => {
+      if (user.uid != "") {
+        await updateDoc(doc(db, "profile", user.uid), {
+          isActive: false,
+        });
+      }
+    };
+
+    window.addEventListener("beforeunload", eventListener);
+    window.addEventListener("unload", eventListener);
+
+    return () => {
+      window.removeEventListener("beforeunload", eventListener);
+      window.removeEventListener("unload", eventListener);
+    };
   }, [user.uid, loadingUser]);
 
   useEffect(() => {

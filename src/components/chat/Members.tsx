@@ -37,7 +37,7 @@ const Members: React.FC<MembersProps> = ({ variant = "server" }) => {
       const qMem = query(membersCollection);
 
       const unsub = onSnapshot(qMem, (querySnapshot) => {
-        querySnapshot.docChanges().forEach((change) => {
+        querySnapshot.docChanges().forEach(async (change) => {
           if (change.type === "removed" || change.type == "modified") {
             setMembers((members) =>
               [...members.filter((el) => el.id !== change.doc.id)].sort(
@@ -70,6 +70,8 @@ const Members: React.FC<MembersProps> = ({ variant = "server" }) => {
 
     getMembers();
   }, [channel.idG]);
+
+  const isMemberActive = (isActive: boolean) => {};
 
   return (
     <div className={styles.members}>
