@@ -42,7 +42,7 @@ const Members: React.FC<MembersProps> = ({ variant = "server" }) => {
             setMembers((members) =>
               [...members.filter((el) => el.id !== change.doc.id)].sort(
                 (x, y) => {
-                  return x.name > y.name ? 1 : -1;
+                  return x.name.localeCompare(y.name);
                 }
               )
             );
@@ -58,7 +58,7 @@ const Members: React.FC<MembersProps> = ({ variant = "server" }) => {
                   avatar: change.doc.data().avatar,
                 },
               ].sort((x, y) => {
-                return x.name > y.name ? 1 : -1;
+                return x.name.localeCompare(y.name);
               })
             );
           }
