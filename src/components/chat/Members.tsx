@@ -71,8 +71,6 @@ const Members: React.FC<MembersProps> = ({ variant = "server" }) => {
     getMembers();
   }, [channel.idG]);
 
-  const isMemberActive = (isActive: boolean) => {};
-
   return (
     <div className={styles.members}>
       {members.length != 0 && <MemberCount count={members.length} />}

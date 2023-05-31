@@ -44,7 +44,10 @@ const InputPopUp: React.FC<InputPopUpProps> = ({
   }, []);
 
   const pasted = (e: ClipboardEvent) => {
-    if (e.clipboardData!.files[0] == undefined) {
+    if (
+      e.clipboardData!.files[0] == undefined &&
+      document.activeElement?.tagName != "TEXTAREA"
+    ) {
       if ((input + e.clipboardData!.getData("Text")).length <= 40)
         setInput(input + e.clipboardData!.getData("Text"));
       else
