@@ -1,9 +1,13 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { createFirebaseApp } from "../firebase/clientApp";
+import { createFirebaseApp } from "../firebase-utils/clientApp";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 
-export type UserPermission = "MODERATE_MESSAGES" | "MANAGE_CHANNELS";
+export type MemberPermission =
+  | "MODERATE_MESSAGES"
+  | "MANAGE_CHANNELS"
+  | "SEND_MESSAGES"
+  | "VIEW_CHANNEL";
 
 export type User = {
   uid: string;
@@ -11,7 +15,7 @@ export type User = {
   avatar: string;
   tag: string;
   nickname: string;
-  permissions: UserPermission[];
+  permissions: MemberPermission[];
 };
 
 export interface UserContextType {
@@ -22,7 +26,7 @@ export interface UserContextType {
     avatar: string,
     tag: string
   ) => void;
-  setMemberData: (nickname: string, permissions: UserPermission[]) => void;
+  setMemberData: (nickname: string, permissions: MemberPermission[]) => void;
   loadingUser: boolean;
 }
 
@@ -41,7 +45,7 @@ export const UserContext = createContext<UserContextType>({
     _avatar: string,
     _tag: string
   ) => undefined,
-  setMemberData: (_nickname: string, _permissions: UserPermission[]) =>
+  setMemberData: (_nickname: string, _permissions: MemberPermission[]) =>
     undefined,
   loadingUser: false,
 });
@@ -76,7 +80,7 @@ export default function UserContextComp({ children }: any) {
     });
   };
 
-  const setMemberData = (nickname: string, permissions: UserPermission[]) => {
+  const setMemberData = (nickname: string, permissions: MemberPermission[]) => {
     setUser({
       ...user,
       permissions: permissions,

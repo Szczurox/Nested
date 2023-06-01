@@ -23,7 +23,7 @@ const DeleteChannelPopUp: React.FC<DeleteChannelPopUpProps> = ({
     return () => {
       document.removeEventListener("keydown", handler, false);
     };
-  }, []);
+  }, [onConfirm]);
 
   return (
     <ScreenPopUp>

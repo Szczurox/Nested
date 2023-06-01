@@ -84,7 +84,7 @@ const ContextMenu: React.ForwardRefRenderFunction<
       document.removeEventListener("click", handleCloseMenu);
       document.removeEventListener("contextmenu", handleCloseMenu);
     };
-  }, []);
+  }, [handleCloseMenu]);
 
   return isOpen ? (
     <ul

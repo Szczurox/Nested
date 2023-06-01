@@ -9,7 +9,7 @@ import EditIcon from "@material-ui/icons/Edit";
 import { useChannel } from "context/channelContext";
 import InputPopUp from "../popup/InputPopUp";
 import { useUser } from "context/userContext";
-import { createFirebaseApp } from "../../../firebase/clientApp";
+import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 
 export type NavbarHeaderVariant = "server" | "dms";
@@ -43,8 +43,6 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
         nickname: newName,
       });
   };
-
-  useEffect(() => {}, [menuRef.current]);
 
   return variant === "server" ? (
     <>

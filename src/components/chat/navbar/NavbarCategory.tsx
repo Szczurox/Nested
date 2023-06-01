@@ -7,7 +7,7 @@ import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import styles from "../../../styles/components/chat/navbar/NavbarCategory.module.scss";
 import { ChannelData, NavbarChannel } from "./NavbarChannel";
-import { createFirebaseApp } from "../../../firebase/clientApp";
+import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import {
   collection,
   deleteDoc,
@@ -102,7 +102,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
     }
 
     getChannel();
-  }, [idC]);
+  }, [idC, channel.idG, db]);
 
   const createChannel = async (channelName: string) => {
     setShowPopUp(0);

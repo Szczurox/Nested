@@ -19,7 +19,7 @@ import {
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import moment from "moment";
-import { createFirebaseApp } from "../../firebase/clientApp";
+import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import UploadFilePopUp from "./popup/UploadFilePopUp";
 import InformationPopUp from "./popup/InformationPopUp";
 
@@ -55,21 +55,6 @@ export const UploadFile: React.FC<UploadFileProps> = ({
   const app = createFirebaseApp();
   const db = getFirestore(app!);
 
-  useEffect(() => {
-    document.addEventListener("paste", pasted);
-    document.addEventListener("drop", dropped);
-    document.addEventListener("dragover", (e) => {
-      e.preventDefault();
-    });
-    return () => {
-      document.removeEventListener("paste", pasted);
-      document.removeEventListener("drop", dropped);
-      document.removeEventListener("dragover", (e) => {
-        e.preventDefault();
-      });
-    };
-  }, [channel.id]);
-
   const dropped = (e: DragEvent) => {
     e.preventDefault();
     console.log("hi");
@@ -84,6 +69,21 @@ export const UploadFile: React.FC<UploadFileProps> = ({
       checkFile(e.clipboardData!.files[0]);
     }
   };
+
+  useEffect(() => {
+    document.addEventListener("paste", pasted);
+    document.addEventListener("drop", dropped);
+    document.addEventListener("dragover", (e) => {
+      e.preventDefault();
+    });
+    return () => {
+      document.removeEventListener("paste", pasted);
+      document.removeEventListener("drop", dropped);
+      document.removeEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+    };
+  }, [channel.id, dropped, pasted]);
 
   async function checkFile(e: File) {
     console.log(e.type);

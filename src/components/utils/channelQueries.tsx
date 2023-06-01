@@ -1,4 +1,4 @@
-import { createFirebaseApp } from "../../firebase/clientApp";
+import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import {
   getFirestore,
   collection,

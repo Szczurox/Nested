@@ -8,7 +8,7 @@ import styles from "../../styles/Chat.module.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
 import GifIcon from "@material-ui/icons/Gif";
-import { createFirebaseApp } from "../../firebase/clientApp";
+import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import {
   addDoc,
   arrayUnion,
@@ -57,7 +57,6 @@ export const ChatMain: React.FC = ({}) => {
   const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false); // Show Scroll To Bottom button
   const [isLoading, setIsLoading] = useState<boolean>(false); // Are messages loading
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const [showMembers, setShowMembers] = useState<boolean>(false); // Show members navbar
   const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
@@ -70,7 +69,6 @@ export const ChatMain: React.FC = ({}) => {
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
-  const router = useRouter();
 
   const messagesCollection = collection(
     db,
@@ -94,26 +92,22 @@ export const ChatMain: React.FC = ({}) => {
 
   const textAreaSizeLimit = 2000;
 
-  useEffect(() => {
-    const eventListener = () => {
-      return updateIsTyping(false);
-    };
-
-    window.addEventListener("beforeunload", eventListener);
-    window.addEventListener("unload", eventListener);
-
-    return () => {
-      window.removeEventListener("beforeunload", eventListener);
-      window.removeEventListener("unload", eventListener);
-    };
-  }, [lastChannelId]);
+  const handleKeyPress = (e: KeyboardEvent) => {
+    if (
+      document.activeElement?.tagName != "TEXTAREA" &&
+      !popUp.isOpen &&
+      textAreaRef.current &&
+      ((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
+    )
+      textAreaRef.current.focus();
+  };
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     };
-  }, [popUp.isOpen]);
+  }, [popUp.isOpen, handleKeyPress]);
 
   useEffect(() => {
     document.addEventListener("paste", pasted);
@@ -146,16 +140,6 @@ export const ChatMain: React.FC = ({}) => {
           )
         );
     }
-  };
-
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (
-      document.activeElement?.tagName != "TEXTAREA" &&
-      !popUp.isOpen &&
-      textAreaRef.current &&
-      ((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
-    )
-      textAreaRef.current.focus();
   };
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -329,7 +313,6 @@ export const ChatMain: React.FC = ({}) => {
     setTypingUsers([]);
 
     if (channel.id != "") {
-      console.log(lastChannelId);
       textAreaRef.current!.focus();
       getTypingUsersOnJoin();
       setLastChannelId(channel.id);
@@ -460,6 +443,20 @@ export const ChatMain: React.FC = ({}) => {
     if (typingUsers.length == 1) return `${typingUsers[0][1]} is typing...`;
   };
 
+  useEffect(() => {
+    const eventListener = () => {
+      return updateIsTyping(false);
+    };
+
+    window.addEventListener("beforeunload", eventListener);
+    window.addEventListener("unload", eventListener);
+
+    return () => {
+      window.removeEventListener("beforeunload", eventListener);
+      window.removeEventListener("unload", eventListener);
+    };
+  }, [lastChannelId, updateIsTyping]);
+
   return (
     <div className={styles.chat}>
       {slowDownCount > 1 ? (
@@ -525,21 +522,31 @@ export const ChatMain: React.FC = ({}) => {
         <div></div>
       </div>
       <div className={styles.chat_input}>
-        <UploadFile chatInput={input} uploadCallback={fileUploading} />
+        {user.permissions.includes("SEND_MESSAGES") ? (
+          <UploadFile chatInput={input} uploadCallback={fileUploading} />
+        ) : null}
         <form>
           <TextareaAutosize
             value={input}
             wrap="soft"
             maxLength={2000}
             maxRows={10}
-            disabled={channel.id == ""}
+            disabled={
+              channel.id == "" || !user.permissions.includes("SEND_MESSAGES")
+            }
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={sendMessage}
-            placeholder={`Message #${channel.name}`}
+            placeholder={
+              user.permissions.includes("SEND_MESSAGES")
+                ? `Message #${channel.name}`
+                : `You don't have permission to message #${channel.name}`
+            }
             ref={textAreaRef}
           />
           <button
-            disabled={channel.id == ""}
+            disabled={
+              channel.id == "" || !user.permissions.includes("SEND_MESSAGES")
+            }
             className={styles.chat_input_button}
             type="submit"
           >

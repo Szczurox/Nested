@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/members/Member.module.scss";
 import { Avatar } from "@material-ui/core";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
-import { createFirebaseApp } from "../../../firebase/clientApp";
+import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 
 interface MemberProps {
   id: string;

@@ -9,7 +9,7 @@ import {
   getFirestore,
   updateDoc,
 } from "firebase/firestore";
-import { createFirebaseApp } from "../../firebase/clientApp";
+import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import ContextMenu, { ContextMenuHandle } from "./contextmenu/ContextMenu";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";

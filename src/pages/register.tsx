@@ -8,7 +8,7 @@ import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
-import { createFirebaseApp } from "../firebase/clientApp";
+import { createFirebaseApp } from "../firebase-utils/clientApp";
 
 const SignupSchema = Yup.object().shape({
   username: Yup.string()

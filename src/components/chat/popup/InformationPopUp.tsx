@@ -21,7 +21,7 @@ const InformationPopUp: React.FC<InformationPopUpProps> = ({
     return () => {
       document.removeEventListener("keydown", handler, false);
     };
-  }, []);
+  }, [onOk]);
 
   return (
     <ScreenPopUp>

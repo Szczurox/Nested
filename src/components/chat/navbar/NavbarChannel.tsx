@@ -13,7 +13,7 @@ import {
   setDoc,
   updateDoc,
 } from "firebase/firestore";
-import { createFirebaseApp } from "../../../firebase/clientApp";
+import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -23,7 +23,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 import InputPopUp from "../popup/InputPopUp";
 import BasicDeletePopUp from "../popup/DeletePopUp";
 import { addChannel } from "components/utils/channelQueries";
-import { useUser } from "context/userContext";
+import { MemberPermission, useUser } from "context/userContext";
 
 interface NavbarChannelProps {
   name: string;
@@ -49,11 +49,16 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 }) => {
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isUnread, setIsUnread] = useState<boolean>(false);
+  const [showChannel, setShowChannel] = useState<boolean>(false);
+  // Everyone permissions
+  const [everyPerms, setEveryPerms] = useState<MemberPermission[]>([]);
+  // Participant permissions
+  const [partPerms, setPartPerms] = useState<MemberPermission[]>([]);
   // 0 - None  /  1 - Delete  /  2 - Change Name  /  3 - Create
   const [showPopUp, setShowPopUp] = useState<number>(0);
 
   const { channel, setChannelData } = useChannel();
-  const { user } = useUser();
+  const { user, setMemberData } = useUser();
 
   const menuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -71,6 +76,16 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     user.uid
   );
 
+  const everyoneRef = doc(
+    db,
+    "groups",
+    channel.idG,
+    "channels",
+    id,
+    "participants",
+    "everyone"
+  );
+
   useEffect(() => {
     if (channel.id == id) setIsActive(true);
     else setIsActive(false);
@@ -82,7 +97,23 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
         if (doc.exists() && doc.data()!.lastActive != null) {
           if (doc.data()!.lastActive < lastMessageAt!) setIsUnread(true);
           else setIsUnread(false);
+          if (
+            doc.data()!.permissions != null &&
+            doc.data()!.permissions != partPerms
+          )
+            setPartPerms(doc.data().permissions);
         }
+      });
+    };
+
+    const everyoneSnapshot = () => {
+      return onSnapshot(everyoneRef, (doc) => {
+        if (
+          doc.exists() &&
+          everyPerms != doc.data().permissions &&
+          doc.data().permissions != null
+        )
+          setEveryPerms([...doc.data().permissions]);
       });
     };
 
@@ -101,10 +132,25 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     // Set channel ID to the first loaded channel
     if (channel.id == "") setChannelData(id, name, idC, nameC);
 
+    const unsub = everyoneSnapshot();
+
     checkParticipant().then((res) => {
-      return () => res();
+      return () => {
+        res();
+        unsub();
+      };
     });
   }, []);
+
+  useEffect(() => {
+    const perms = everyPerms.concat(partPerms);
+    const canChannelBeViewed =
+      everyPerms.includes("VIEW_CHANNEL") || partPerms.includes("VIEW_CHANNEL");
+    if (everyPerms.concat(partPerms).length) {
+      if (channel.id == id) setMemberData(user.nickname, perms);
+      if (canChannelBeViewed != showChannel) setShowChannel(canChannelBeViewed);
+    }
+  }, [everyPerms, partPerms, showChannel, channel.id, id]);
 
   const updateLastActive = async () => {
     await setDoc(
@@ -150,7 +196,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     await addChannel(channelName, channel.idG, idC);
   };
 
-  return (
+  return showChannel ? (
     <>
       {showPopUp ? (
         showPopUp == 1 ? (
@@ -230,5 +276,5 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
         </h4>
       </div>
     </>
-  );
+  ) : null;
 };

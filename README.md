@@ -25,10 +25,9 @@ yarn dev
 
 If you are using [Visual Studio Code](https://code.visualstudio.com/) this command should run automatically.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.   
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-
-## Firebase 
+## Firebase
 
 This project uses [Firebase](https://firebase.google.com/) for database, storage and user authentication.
 
@@ -45,6 +44,7 @@ After you are done go to the project settings, scroll down and copy firebase con
 Then you have 2 choices:
 
 1. 🟢 (Recommended) Create [.env.local](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) file with this structure
+
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=[apiKey]
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=[authDomain]
@@ -55,7 +55,7 @@ NEXT_PUBLIC_FIREBASE_APP_ID=[appId]
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=[measurementId]
 ```
 
-2. Go to [src/firebase/clientApp.tsx](https://github.com/Szczurox/Faicamp/blob/main/src/firebase/clientApp.ts) and paste the credentials into the clientCredentials object directly.
+2. Go to [src/firebase-utils/clientApp.tsx](https://github.com/Szczurox/Faicamp/blob/main/src/firebase-utils/clientApp.ts) and paste the credentials into the clientCredentials object directly.
 
 Currently Firestore and Storage rules are not included in the projects repo, if you want to create secure rules check out [Firestore security documentation](https://firebase.google.com/docs/firestore/security/get-started)
 
@@ -68,13 +68,12 @@ Check out [Next.js deployment documentation](https://nextjs.org/docs/deployment)
 ## Side notes
 
 - If you want you can deploy the app to [Firebase](https://firebase.google.com/docs/hosting) or any other host instead of Vercel, it shouldn't affect performance.
-I chose Vercel because of simplicity and better integration with GitHub as well as Next.js.   
+  I chose Vercel because of simplicity and better integration with GitHub as well as Next.js.
 
 - If you prefer [yarn](https://yarnpkg.com/) over [npm](https://www.npmjs.com/) after creating `package-lock.json` you can remove `package.json` and use:
+
 ```bash
 yarn import
 ```
+
 &emsp;&ensp;&ensp;to create `yarn.lock` file from `package-lock.json`.
-
-
-   

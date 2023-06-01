@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../styles/components/chat/Members.module.scss";
 import { useChannel } from "context/channelContext";
-import { createFirebaseApp } from "../../firebase/clientApp";
+import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import {
   getFirestore,
   collection,
@@ -69,7 +69,7 @@ const Members: React.FC<MembersProps> = ({ variant = "server" }) => {
     }
 
     getMembers();
-  }, [channel.idG]);
+  }, [channel.idG, db]);
 
   return (
     <div className={styles.members}>

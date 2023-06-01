@@ -11,7 +11,7 @@ import {
   ref,
   uploadBytesResumable,
 } from "firebase/storage";
-import { createFirebaseApp } from "../../../firebase/clientApp";
+import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 

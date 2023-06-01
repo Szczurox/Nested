@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { ChatMain } from "components/chat/ChatMain";
 import Loading from "components/Loading";
 import { wait } from "components/utils/utils";
-import { createFirebaseApp } from "../firebase/clientApp";
+import { createFirebaseApp } from "../firebase-utils/clientApp";
 import {
   DocumentData,
   DocumentSnapshot,
@@ -70,7 +70,7 @@ const Chat = () => {
       window.removeEventListener("beforeunload", eventListener);
       window.removeEventListener("unload", eventListener);
     };
-  }, [user.uid, loadingUser]);
+  }, [user.uid, loadingUser, db, router]);
 
   useEffect(() => {
     async function setUserPerms(docSnapMember: DocumentSnapshot<DocumentData>) {
@@ -107,12 +107,14 @@ const Chat = () => {
       }
       return unsub;
     }
+
     let unsub: () => void = () => undefined;
+
     if (user.uid != "") checkMember().then((result) => (unsub = result));
     return () => {
       unsub();
     };
-  }, [user.uid, channel.idG]);
+  }, [user.uid, channel.idG, db, setMemberData]);
 
   // Render only if user is authenticated
   return user.uid ? (

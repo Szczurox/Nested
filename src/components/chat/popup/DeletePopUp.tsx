@@ -23,7 +23,7 @@ const DeletePopUp: React.FC<DeletePopUpProps> = ({
     return () => {
       document.removeEventListener("keydown", handler, false);
     };
-  }, []);
+  }, [onConfirm]);
 
   return (
     <ScreenPopUp>

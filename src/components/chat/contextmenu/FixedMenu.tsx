@@ -105,7 +105,7 @@ const FixedMenu: React.ForwardRefRenderFunction<
       document.removeEventListener("mousedown", handleCloseMenu);
       document.removeEventListener("contextmenu", handleCloseMenu);
     };
-  }, []);
+  }, [handleCloseMenu]);
 
   return isOpen ? (
     <div

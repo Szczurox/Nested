@@ -13,7 +13,7 @@ import {
   Timestamp,
 } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
-import { createFirebaseApp } from "../../../firebase/clientApp";
+import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 
 export interface EmojiData {
   id: string; // Emoji ID
@@ -95,7 +95,7 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
       if (unsubs.length > 0)
         for (let i = 0; i < unsubs.length; i++) unsubs[i]();
     };
-  }, []);
+  }, [unsubs]);
 
   const emojiClicked = (e: any, data: EmojiData) => {
     e.preventDefault();
