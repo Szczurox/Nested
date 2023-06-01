@@ -57,6 +57,7 @@ export const ChatMain: React.FC = ({}) => {
   const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false); // Show Scroll To Bottom button
   const [isLoading, setIsLoading] = useState<boolean>(false); // Are messages loading
   const [isTyping, setIsTyping] = useState<boolean>(false);
+  const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
@@ -92,22 +93,33 @@ export const ChatMain: React.FC = ({}) => {
 
   const textAreaSizeLimit = 2000;
 
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (
-      document.activeElement?.tagName != "TEXTAREA" &&
-      !popUp.isOpen &&
-      textAreaRef.current &&
-      ((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
-    )
-      textAreaRef.current.focus();
-  };
+  useEffect(() => {
+    const eventListener = async () => {
+      await updateIsTyping(false);
+      await updateDoc(doc(db, "profile", user.uid), {
+        isActive: false,
+      });
+    };
+
+    window.addEventListener("beforeunload", eventListener);
+    window.addEventListener("unload", eventListener);
+
+    return () => {
+      window.removeEventListener("beforeunload", eventListener);
+      window.removeEventListener("unload", eventListener);
+    };
+  }, [lastChannelId, user.uid]);
+
+  useEffect(() => {
+    setIsDisabled(!user.partPermissions.includes("SEND_MESSAGES"));
+  }, [channel.id, user.partPermissions]);
 
   useEffect(() => {
     document.addEventListener("keydown", handleKeyPress);
     return () => {
       document.removeEventListener("keydown", handleKeyPress);
     };
-  }, [popUp.isOpen, handleKeyPress]);
+  }, [popUp.isOpen]);
 
   useEffect(() => {
     document.addEventListener("paste", pasted);
@@ -140,6 +152,16 @@ export const ChatMain: React.FC = ({}) => {
           )
         );
     }
+  };
+
+  const handleKeyPress = (e: KeyboardEvent) => {
+    if (
+      document.activeElement?.tagName != "TEXTAREA" &&
+      !popUp.isOpen &&
+      textAreaRef.current &&
+      ((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
+    )
+      textAreaRef.current.focus();
   };
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
@@ -184,7 +206,7 @@ export const ChatMain: React.FC = ({}) => {
   };
 
   const updateLastActive = async () =>
-    await setDoc(
+    await updateDoc(
       doc(
         db,
         "groups",
@@ -443,20 +465,6 @@ export const ChatMain: React.FC = ({}) => {
     if (typingUsers.length == 1) return `${typingUsers[0][1]} is typing...`;
   };
 
-  useEffect(() => {
-    const eventListener = () => {
-      return updateIsTyping(false);
-    };
-
-    window.addEventListener("beforeunload", eventListener);
-    window.addEventListener("unload", eventListener);
-
-    return () => {
-      window.removeEventListener("beforeunload", eventListener);
-      window.removeEventListener("unload", eventListener);
-    };
-  }, [lastChannelId, updateIsTyping]);
-
   return (
     <div className={styles.chat}>
       {slowDownCount > 1 ? (
@@ -522,7 +530,7 @@ export const ChatMain: React.FC = ({}) => {
         <div></div>
       </div>
       <div className={styles.chat_input}>
-        {user.permissions.includes("SEND_MESSAGES") ? (
+        {!isDisabled ? (
           <UploadFile chatInput={input} uploadCallback={fileUploading} />
         ) : null}
         <form>
@@ -531,22 +539,18 @@ export const ChatMain: React.FC = ({}) => {
             wrap="soft"
             maxLength={2000}
             maxRows={10}
-            disabled={
-              channel.id == "" || !user.permissions.includes("SEND_MESSAGES")
-            }
+            disabled={channel.id == "" || isDisabled}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={sendMessage}
             placeholder={
-              user.permissions.includes("SEND_MESSAGES")
+              !isDisabled
                 ? `Message #${channel.name}`
                 : `You don't have permission to message #${channel.name}`
             }
             ref={textAreaRef}
           />
           <button
-            disabled={
-              channel.id == "" || !user.permissions.includes("SEND_MESSAGES")
-            }
+            disabled={channel.id == "" || !isDisabled}
             className={styles.chat_input_button}
             type="submit"
           >

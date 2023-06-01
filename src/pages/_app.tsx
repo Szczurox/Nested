@@ -44,7 +44,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
       router.events.off("routeChangeComplete", routeChangeEndHandler);
       router.events.off("routeChangeError", routeChangeEndHandler);
     };
-  }, [router.events]);
+  }, []);
 
   return (
     <UserProvider>

@@ -23,7 +23,7 @@ import CircleIcon from "@mui/icons-material/Circle";
 import InputPopUp from "../popup/InputPopUp";
 import BasicDeletePopUp from "../popup/DeletePopUp";
 import { addChannel } from "components/utils/channelQueries";
-import { MemberPermission, useUser } from "context/userContext";
+import { ParticipantPermission, useUser } from "context/userContext";
 
 interface NavbarChannelProps {
   name: string;
@@ -51,14 +51,14 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   const [isUnread, setIsUnread] = useState<boolean>(false);
   const [showChannel, setShowChannel] = useState<boolean>(false);
   // Everyone permissions
-  const [everyPerms, setEveryPerms] = useState<MemberPermission[]>([]);
+  const [everyPerms, setEveryPerms] = useState<ParticipantPermission[]>([]);
   // Participant permissions
-  const [partPerms, setPartPerms] = useState<MemberPermission[]>([]);
+  const [partPerms, setPartPerms] = useState<ParticipantPermission[]>([]);
   // 0 - None  /  1 - Delete  /  2 - Change Name  /  3 - Create
   const [showPopUp, setShowPopUp] = useState<number>(0);
 
   const { channel, setChannelData } = useChannel();
-  const { user, setMemberData } = useUser();
+  const { user, addPartPerms } = useUser();
 
   const menuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -95,13 +95,14 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     const participantSnapshot = () => {
       return onSnapshot(partRef, (doc) => {
         if (doc.exists() && doc.data()!.lastActive != null) {
+          if (
+            partPerms != doc.data().permissions &&
+            doc.data().permissions != null
+          ) {
+            setPartPerms([...doc.data().permissions]);
+          }
           if (doc.data()!.lastActive < lastMessageAt!) setIsUnread(true);
           else setIsUnread(false);
-          if (
-            doc.data()!.permissions != null &&
-            doc.data()!.permissions != partPerms
-          )
-            setPartPerms(doc.data().permissions);
         }
       });
     };
@@ -144,16 +145,18 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
   useEffect(() => {
     const perms = everyPerms.concat(partPerms);
-    const canChannelBeViewed =
-      everyPerms.includes("VIEW_CHANNEL") || partPerms.includes("VIEW_CHANNEL");
-    if (everyPerms.concat(partPerms).length) {
-      if (channel.id == id) setMemberData(user.nickname, perms);
-      if (canChannelBeViewed != showChannel) setShowChannel(canChannelBeViewed);
-    }
-  }, [everyPerms, partPerms, showChannel, channel.id, id]);
+    if (everyPerms.concat(partPerms).length && perms != null)
+      if (channel.id == id) addPartPerms(perms);
+  }, [everyPerms, partPerms, channel.id, id]);
+
+  useEffect(() => {
+    const perms = everyPerms.concat(partPerms);
+    if (perms.includes("VIEW_CHANNEL")) setShowChannel(true);
+    else setShowChannel(false);
+  }, [everyPerms, partPerms]);
 
   const updateLastActive = async () => {
-    await setDoc(
+    await updateDoc(
       doc(db, "groups", channel.idG, "channels", id, "participants", user.uid),
       { lastActive: serverTimestamp() }
     );

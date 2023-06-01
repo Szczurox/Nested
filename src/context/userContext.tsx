@@ -9,6 +9,8 @@ export type MemberPermission =
   | "SEND_MESSAGES"
   | "VIEW_CHANNEL";
 
+export type ParticipantPermission = "SEND_MESSAGES" | "VIEW_CHANNEL";
+
 export type User = {
   uid: string;
   username: string;
@@ -16,6 +18,7 @@ export type User = {
   tag: string;
   nickname: string;
   permissions: MemberPermission[];
+  partPermissions: ParticipantPermission[];
 };
 
 export interface UserContextType {
@@ -27,6 +30,7 @@ export interface UserContextType {
     tag: string
   ) => void;
   setMemberData: (nickname: string, permissions: MemberPermission[]) => void;
+  addPartPerms: (permissions: ParticipantPermission[]) => void;
   loadingUser: boolean;
 }
 
@@ -38,6 +42,7 @@ export const UserContext = createContext<UserContextType>({
     tag: "",
     nickname: "",
     permissions: [],
+    partPermissions: [],
   },
   setUserData: (
     _uid: string,
@@ -47,6 +52,7 @@ export const UserContext = createContext<UserContextType>({
   ) => undefined,
   setMemberData: (_nickname: string, _permissions: MemberPermission[]) =>
     undefined,
+  addPartPerms: (_permissions: ParticipantPermission[]) => undefined,
   loadingUser: false,
 });
 
@@ -58,6 +64,7 @@ export default function UserContextComp({ children }: any) {
     tag: "",
     nickname: "",
     permissions: [],
+    partPermissions: [],
   });
   const [loadingUser, setLoadingUser] = useState(true);
 
@@ -88,6 +95,13 @@ export default function UserContextComp({ children }: any) {
     });
   };
 
+  const setPartPerms = (permissions: ParticipantPermission[]) => {
+    setUser({
+      ...user,
+      partPermissions: permissions,
+    });
+  };
+
   useEffect(() => {
     const unsubscriber = onAuthStateChanged(auth, async (user) => {
       try {
@@ -100,8 +114,9 @@ export default function UserContextComp({ children }: any) {
               username: docSnap.data().username,
               avatar: docSnap.data().avatar ? docSnap.data().avatar : "",
               tag: docSnap.data().tag ? docSnap.data().tag : "",
-              permissions: [],
               nickname: "",
+              permissions: [],
+              partPermissions: [],
             });
         } else
           setUser({
@@ -109,8 +124,9 @@ export default function UserContextComp({ children }: any) {
             username: "",
             avatar: "",
             tag: "",
-            permissions: [],
             nickname: "",
+            permissions: [],
+            partPermissions: [],
           });
       } catch (error) {
         console.log("ERROR: unable to get user");
@@ -124,7 +140,13 @@ export default function UserContextComp({ children }: any) {
 
   return (
     <UserContext.Provider
-      value={{ user, setUserData, setMemberData, loadingUser }}
+      value={{
+        user,
+        setUserData,
+        setMemberData,
+        addPartPerms: setPartPerms,
+        loadingUser,
+      }}
     >
       {children}
     </UserContext.Provider>

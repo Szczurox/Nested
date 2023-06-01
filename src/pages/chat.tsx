@@ -54,23 +54,7 @@ const Chat = () => {
         }
       }
     }
-
-    const eventListener = async () => {
-      if (user.uid != "") {
-        await updateDoc(doc(db, "profile", user.uid), {
-          isActive: false,
-        });
-      }
-    };
-
-    window.addEventListener("beforeunload", eventListener);
-    window.addEventListener("unload", eventListener);
-
-    return () => {
-      window.removeEventListener("beforeunload", eventListener);
-      window.removeEventListener("unload", eventListener);
-    };
-  }, [user.uid, loadingUser, db, router]);
+  }, [user.uid, loadingUser]);
 
   useEffect(() => {
     async function setUserPerms(docSnapMember: DocumentSnapshot<DocumentData>) {
@@ -114,7 +98,7 @@ const Chat = () => {
     return () => {
       unsub();
     };
-  }, [user.uid, channel.idG, db, setMemberData]);
+  }, [user.uid, channel.idG]);
 
   // Render only if user is authenticated
   return user.uid ? (
