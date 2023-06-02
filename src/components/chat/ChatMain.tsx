@@ -94,10 +94,17 @@ export const ChatMain: React.FC = ({}) => {
   const textAreaSizeLimit = 2000;
 
   useEffect(() => {
-    const eventListener = async () => {
-      await updateIsTyping(false);
-      await updateDoc(doc(db, "profile", user.uid), {
-        isActive: false,
+    const eventListener = () => {
+      fetch("/api/user-end-session", {
+        method: "post",
+        headers: {
+          "authorization": `${user.token}`,
+        },
+        keepalive: true,
+        body: JSON.stringify({
+          channelId: lastChannelId == "" ? channel.id : lastChannelId,
+          guildId: channel.idG,
+        }),
       });
     };
 
@@ -108,7 +115,7 @@ export const ChatMain: React.FC = ({}) => {
       window.removeEventListener("beforeunload", eventListener);
       window.removeEventListener("unload", eventListener);
     };
-  }, [lastChannelId, user.uid]);
+  }, [lastChannelId, user.uid, user.token, channel.idG, channel.id]);
 
   useEffect(() => {
     setIsDisabled(!user.partPermissions.includes("SEND_MESSAGES"));
@@ -367,7 +374,6 @@ export const ChatMain: React.FC = ({}) => {
       ),
       {
         isTyping: isTyping,
-        nickname: user.nickname,
       }
     );
   };

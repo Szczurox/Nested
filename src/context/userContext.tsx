@@ -1,5 +1,5 @@
 import { useState, useEffect, createContext, useContext } from "react";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, getIdToken, onAuthStateChanged } from "firebase/auth";
 import { createFirebaseApp } from "../firebase-utils/clientApp";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 
@@ -12,6 +12,7 @@ export type MemberPermission =
 export type ParticipantPermission = "SEND_MESSAGES" | "VIEW_CHANNEL";
 
 export type User = {
+  token: string;
   uid: string;
   username: string;
   avatar: string;
@@ -24,6 +25,7 @@ export type User = {
 export interface UserContextType {
   user: User;
   setUserData: (
+    token: string,
     uid: string,
     username: string,
     avatar: string,
@@ -36,7 +38,9 @@ export interface UserContextType {
 
 export const UserContext = createContext<UserContextType>({
   user: {
+    token: "",
     uid: "",
+
     username: "",
     avatar: "",
     tag: "",
@@ -58,6 +62,7 @@ export const UserContext = createContext<UserContextType>({
 
 export default function UserContextComp({ children }: any) {
   const [user, setUser] = useState<User>({
+    token: "",
     uid: "",
     username: "",
     avatar: "",
@@ -108,8 +113,10 @@ export default function UserContextComp({ children }: any) {
         if (user) {
           const uid = user.uid;
           const docSnap = await getDoc(doc(db, "profile", uid));
+          const token = await getIdToken(user);
           if (docSnap.exists())
             setUser({
+              token: token,
               uid: uid,
               username: docSnap.data().username,
               avatar: docSnap.data().avatar ? docSnap.data().avatar : "",
@@ -120,6 +127,7 @@ export default function UserContextComp({ children }: any) {
             });
         } else
           setUser({
+            token: "",
             uid: "",
             username: "",
             avatar: "",
