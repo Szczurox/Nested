@@ -63,6 +63,8 @@ This project uses [Vercel](https://vercel.com/new?utm_medium=default-template&fi
 
 Check out [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
+Make sure to add FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY to Vercel's enviroment variables in Settings > Environment Variables
+
 ## Side notes
 
 - If you want you can deploy the app to [Firebase](https://firebase.google.com/docs/hosting) or any other host instead of Vercel, it shouldn't affect performance.
