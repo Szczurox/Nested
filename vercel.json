@@ -1,7 +1,7 @@
 {
   "functions": {
     "pages/api/user-end-session.ts": {
-      "memory": 3008,
+      "memory": 1023,
       "maxDuration": 9
     }
   }
