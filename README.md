@@ -41,9 +41,9 @@ Then create [Firestore Database](https://firebase.google.com/docs/firestore) and
 
 After you are done go to the project settings, scroll down and copy firebase config.
 
-Then you have 2 choices:
+Then go to service accounts category in setting, get firebase service account email and generate new private key.
 
-1. 🟢 (Recommended) Create [.env.local](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) file with this structure
+After that create [.env.local](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) file with this structure
 
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=[apiKey]
@@ -53,11 +53,9 @@ NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=[storageBucket]
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=[messagingSenderId]
 NEXT_PUBLIC_FIREBASE_APP_ID=[appId]
 NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=[measurementId]
+FIREBASE_CLIENT_EMAIL=[serviceAccountEmail]
+FIREBASE_PRIVATE_KEY=[privateKey]
 ```
-
-2. Go to [src/firebase-utils/clientApp.tsx](https://github.com/Szczurox/Faicamp/blob/main/src/firebase-utils/clientApp.ts) and paste the credentials into the clientCredentials object directly.
-
-Currently Firestore and Storage rules are not included in the projects repo, if you want to create secure rules check out [Firestore security documentation](https://firebase.google.com/docs/firestore/security/get-started)
 
 ## Deploy on Vercel
 
