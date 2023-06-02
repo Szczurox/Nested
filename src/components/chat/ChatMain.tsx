@@ -395,6 +395,7 @@ export const ChatMain: React.FC = ({}) => {
   }
 
   async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    console.log("df");
     fetch("/api/user-end-session", {
       method: "post",
       headers: {
