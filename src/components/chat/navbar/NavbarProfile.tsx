@@ -69,7 +69,13 @@ export const NavbarProfile: React.FC = ({}) => {
             console.log("Avatar uploaded! ", downloadURL);
             fileSubmit(downloadURL).then(() => {
               setAvatar(downloadURL);
-              setUserData(user.uid, user.username, downloadURL, user.tag);
+              setUserData(
+                user.token,
+                user.uid,
+                user.username,
+                downloadURL,
+                user.tag
+              );
             });
           });
         }

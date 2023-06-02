@@ -379,19 +379,19 @@ export const ChatMain: React.FC = ({}) => {
   };
 
   async function userTyping() {
-    clearTimeout(typingTimeout);
-
     if (!isTyping) {
+      clearTimeout(typingTimeout);
+
       console.log("started typing");
       updateIsTyping(true);
-    }
 
-    setTypingTimeout(
-      setTimeout(async () => {
-        console.log("done typing");
-        updateIsTyping(false);
-      }, 5000)
-    );
+      setTypingTimeout(
+        setTimeout(async () => {
+          console.log("done typing");
+          updateIsTyping(false);
+        }, 5000)
+      );
+    }
   }
 
   async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {

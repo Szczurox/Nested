@@ -18,6 +18,8 @@ export default async function userEndSessionHandler(
   const decodedToken = await admin?.auth().verifyIdToken(token)!;
   const body: EndSessionHandlerBody = JSON.parse(req.body);
 
+  console.log("user went offline");
+
   await db
     .collection("profile")
     .doc(decodedToken.uid)

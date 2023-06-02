@@ -10,8 +10,6 @@ export const getAdmin = () => {
       }),
     });
 
-    console.log(admin);
-
     return admin;
   } else return adm.apps[0];
 };

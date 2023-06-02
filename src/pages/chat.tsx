@@ -20,7 +20,6 @@ import {
 import { useChannel } from "context/channelContext";
 import Members from "components/chat/Members";
 import ChatHeader from "components/chat/ChatHeader";
-import { getAuth, getIdToken, updateCurrentUser } from "firebase/auth";
 
 const Chat = () => {
   const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar

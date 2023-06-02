@@ -112,7 +112,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
         if (
           doc.exists() &&
           everyPerms != doc.data().permissions &&
-          doc.data().permissions != null
+          doc.data().permissions.length
         )
           setEveryPerms([...doc.data().permissions]);
       });
@@ -145,13 +145,17 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
   useEffect(() => {
     const perms = everyPerms.concat(partPerms);
-    if (everyPerms.concat(partPerms).length && perms != null)
+    if (perms.length && perms != null) {
       if (channel.id == id) addPartPerms(perms);
-  }, [everyPerms, partPerms, channel.id, id]);
+    }
+  }, [everyPerms, partPerms, channel.id]);
 
   useEffect(() => {
-    const perms = everyPerms.concat(partPerms);
-    if (perms.includes("VIEW_CHANNEL")) setShowChannel(true);
+    if (
+      everyPerms.includes("VIEW_CHANNEL") ||
+      partPerms.includes("VIEW_CHANNEL")
+    )
+      setShowChannel(true);
     else setShowChannel(false);
   }, [everyPerms, partPerms]);
 
