@@ -1,8 +1,8 @@
 import { Timestamp } from "firebase-admin/firestore";
-import { getAdmin } from "lib/firebase-server";
+import { getAdmin } from "firebase-utils/firebase-server";
 import { NextApiRequest, NextApiResponse } from "next";
 
-const admin = getAdmin();
+const admin = getAdmin()!;
 const db = admin?.firestore()!;
 
 interface EndSessionHandlerBody {
@@ -15,7 +15,7 @@ export default async function userEndSessionHandler(
   res: NextApiResponse
 ) {
   const token = req.headers.authorization!;
-  const decodedToken = await admin?.auth().verifyIdToken(token)!;
+  const decodedToken = await admin.auth().verifyIdToken(token)!;
   const body: EndSessionHandlerBody = JSON.parse(req.body);
 
   console.log("user went offline");

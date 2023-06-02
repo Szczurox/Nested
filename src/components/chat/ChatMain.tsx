@@ -395,17 +395,6 @@ export const ChatMain: React.FC = ({}) => {
   }
 
   async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    fetch("/api/user-end-session", {
-      method: "post",
-      headers: {
-        "authorization": `${user.token}`,
-      },
-      keepalive: true,
-      body: JSON.stringify({
-        channelId: lastChannelId == "" ? channel.id : lastChannelId,
-        guildId: channel.idG,
-      }),
-    }).then((res) => res.json().then((res) => console.log(res)));
     userTyping();
     if (slowDownCount > 1 || popUp.isOpen) {
       // Don't update input if sending messages too quickly or pop-up is open
