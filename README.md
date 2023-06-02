@@ -41,7 +41,7 @@ Then create [Firestore Database](https://firebase.google.com/docs/firestore) and
 
 After you are done go to the project settings, scroll down and copy firebase config.
 
-Then go to service accounts category in setting, get firebase service account email and generate new private key.
+Then go to service accounts category in the setting, get the firebase service account email and generate new private key.
 
 After that create [.env.local](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) file with this structure
 
