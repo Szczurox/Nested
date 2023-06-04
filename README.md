@@ -59,11 +59,11 @@ FIREBASE_PRIVATE_KEY=[privateKey]
 
 ## Deploy on Vercel
 
-This project uses [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) for hosting.
+This project uses [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) for hosting and serverless functions.
 
 Check out [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
-Make sure to add FIREBASE_CLIENT_EMAIL and FIREBASE_PRIVATE_KEY to Vercel's enviroment variables in Settings > Environment Variables
+Make sure to add `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PRIVATE_KEY` to Vercel's enviroment variables in Settings > Environment Variables
 
 ## Side notes
 
