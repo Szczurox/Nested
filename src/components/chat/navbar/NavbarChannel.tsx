@@ -175,7 +175,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   const deleteChannel = async () => {
     // It won't actually delete the channel, it's subcollections (messages) will still exist
     // Because of that for now inactive channels will need to get deleted manually using the CLI or console
-    // TODO: Server side function for deleting all channel's messages (performance issues if on client) (maybe Cron Job?)
+    // TODO: Server side function for deleting all channel's messages (performance issues if on client)
     const channelDoc = doc(db, "groups", channel.idG, "channels", id);
 
     setShowPopUp(0);

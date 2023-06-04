@@ -43,7 +43,7 @@ const Chat = () => {
         if (loader) {
           await wait(500).then(async () => {
             // Setting user activity should work server side but here it works client side
-            // TODO: Create some proper API and server side checks (maybe ping user every few minutes)
+            // TODO: Create some proper API and server side checks (maybe ping user every few minutes) (corn jobs?)
             if (user.uid != "") {
               await updateDoc(doc(db, "profile", user.uid), {
                 isActive: true,
