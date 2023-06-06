@@ -37,7 +37,6 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             ? `${styles.chatHeader} ${styles.chatHeader_members_open}`
             : styles.chatHeader
         }
-        style={isMobile ? { height: (window.innerHeight / 100) * 9 } : {}}
       >
         {isMobile ? (
           <div className={styles.chatHeader_menu_icon}>

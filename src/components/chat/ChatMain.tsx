@@ -328,7 +328,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
     setTypingUsers([]);
 
     if (channel.id != "") {
-      textAreaRef.current!.focus();
+      if (!isMobile) textAreaRef.current!.focus();
       getTypingUsersOnJoin();
       setAutoScroll(true);
       setCanScrollToBottom(false);
