@@ -1,12 +1,12 @@
 import { TextareaAutosize } from "@material-ui/core";
 import { ProgressBar } from "react-bootstrap";
 import React, { useEffect, useRef, useState } from "react";
-import ChatHeader from "./ChatHeader";
 import Message, { MessageData } from "./Message";
 import UploadFile, { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/Chat.module.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
+import SendIcon from "@mui/icons-material/Send";
 import GifIcon from "@material-ui/icons/Gif";
 import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import {
@@ -21,7 +21,6 @@ import {
   onSnapshot,
   orderBy,
   query,
-  setDoc,
   startAfter,
   Timestamp,
   updateDoc,
@@ -36,13 +35,21 @@ import { usePopUp } from "context/popUpContext";
 import InformationPopUp from "./popup/InformationPopUp";
 import { wait } from "components/utils/utils";
 import Emoji from "./ui-icons/Emoji";
-import { useRouter } from "next/router";
 import DotsLoading from "components/animations/DotsLoading";
-import Members from "./Members";
+import useMediaQuery from "@mui/material/useMediaQuery";
 
-export const ChatMain: React.FC = ({}) => {
+interface ChatMainProps {
+  isNavbarOpen: boolean;
+  isMembersOpen: boolean;
+  hideNavbar: () => void;
+}
+
+export const ChatMain: React.FC<ChatMainProps> = ({
+  isNavbarOpen,
+  isMembersOpen,
+  hideNavbar,
+}) => {
   const [input, setInput] = useState<string>(""); // Textarea input
-  const [lastChannelId, setLastChannelId] = useState<string>(""); // Id of the last channel user was on
   const [messages, setMessages] = useState<MessageData[]>([]); // Array of all messages currently loaded
   const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]); // Array of all file progress messages
   const [emojiBucket, setEmojiBucket] = useState<string[]>([]); // Array of all the emoji name|link used in the message
@@ -62,6 +69,8 @@ export const ChatMain: React.FC = ({}) => {
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
+
+  const isMobile = useMediaQuery("(max-width:700px)");
 
   const { channel } = useChannel();
   const { user } = useUser();
@@ -92,30 +101,6 @@ export const ChatMain: React.FC = ({}) => {
   const querySizeLimit = 20;
 
   const textAreaSizeLimit = 2000;
-
-  useEffect(() => {
-    const eventListener = () => {
-      fetch("/api/user-end-session", {
-        method: "post",
-        headers: {
-          "authorization": `${user.token}`,
-        },
-        keepalive: true,
-        body: JSON.stringify({
-          channelId: lastChannelId == "" ? channel.id : lastChannelId,
-          guildId: channel.idG,
-        }),
-      });
-    };
-
-    window.addEventListener("beforeunload", eventListener);
-    window.addEventListener("unload", eventListener);
-
-    return () => {
-      window.removeEventListener("beforeunload", eventListener);
-      window.removeEventListener("unload", eventListener);
-    };
-  }, [lastChannelId, user.uid, user.token, channel.idG, channel.id]);
 
   useEffect(() => {
     setIsDisabled(!user.partPermissions.includes("SEND_MESSAGES"));
@@ -344,7 +329,6 @@ export const ChatMain: React.FC = ({}) => {
     if (channel.id != "") {
       textAreaRef.current!.focus();
       getTypingUsersOnJoin();
-      setLastChannelId(channel.id);
       setAutoScroll(true);
       setCanScrollToBottom(false);
       updateIsTyping(false);
@@ -368,7 +352,7 @@ export const ChatMain: React.FC = ({}) => {
         "groups",
         channel.idG,
         "channels",
-        lastChannelId == "" ? channel.id : lastChannelId,
+        channel.id,
         "participants",
         user.uid
       ),
@@ -394,47 +378,58 @@ export const ChatMain: React.FC = ({}) => {
     }
   }
 
-  async function sendMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+  async function sendMessage() {
+    // Get current input and reset textarea instantly, before message gets fully sent
+    const chatInput = input.replace(/^\s+|\s+$/g, "");
+    setInput("");
+    if (chatInput.length) {
+      await updateDoc(doc(db, "groups", channel.idG, "channels", channel.id), {
+        lastMessageAt: serverTimestamp(),
+      }).catch((err) => console.log("Update lastMessagedAt Error: " + err));
+
+      await addDoc(messagesCollection, {
+        content: chatInput,
+        userid: user.uid,
+        createdAt: serverTimestamp(),
+        edited: false,
+        emojiBucket: arrayUnion(...emojiBucket),
+      })
+        .catch((err) => {
+          console.log(err);
+          // Create rejection is surely caused by trying to send too many messages
+          setSlowDownCount(slowDownCount + 1);
+        })
+        .then((_) => scrollToBottom());
+
+      // Update the time at which the last message was sent by the user
+      // Rate limit user
+      await updateDoc(doc(db, "profile", user.uid), {
+        lastMessagedAt: serverTimestamp(),
+      }).catch((err) => {
+        console.log(err);
+      });
+    }
+  }
+
+  async function sendMessageMobile() {
+    userTyping();
+    if (slowDownCount > 1 || popUp.isOpen) {
+      // Don't update input if sending messages too quickly or pop-up is open
+      textAreaRef.current!.blur();
+    } else if (channel.id != "") {
+      sendMessage();
+    }
+  }
+
+  async function checkMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     userTyping();
     if (slowDownCount > 1 || popUp.isOpen) {
       // Don't update input if sending messages too quickly or pop-up is open
       e.preventDefault();
       textAreaRef.current!.blur();
     } else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
-      // Get current input and reset textarea instantly, before message gets fully sent
-      const chatInput = input.replace(/^\s+|\s+$/g, "");
-      setInput("");
       e.preventDefault();
-      if (chatInput.length) {
-        await updateDoc(
-          doc(db, "groups", channel.idG, "channels", channel.id),
-          {
-            lastMessageAt: serverTimestamp(),
-          }
-        ).catch((err) => console.log("Update lastMessagedAt Error: " + err));
-
-        await addDoc(messagesCollection, {
-          content: chatInput,
-          userid: user.uid,
-          createdAt: serverTimestamp(),
-          edited: false,
-          emojiBucket: arrayUnion(...emojiBucket),
-        })
-          .catch((err) => {
-            console.log(err);
-            // Create rejection is surely caused by trying to send too many messages
-            setSlowDownCount(slowDownCount + 1);
-          })
-          .then((_) => scrollToBottom());
-
-        // Update the time at which the last message was sent by the user
-        // Rate limit user
-        await updateDoc(doc(db, "profile", user.uid), {
-          lastMessagedAt: serverTimestamp(),
-        }).catch((err) => {
-          console.log(err);
-        });
-      }
+      sendMessage();
     }
   }
 
@@ -472,7 +467,18 @@ export const ChatMain: React.FC = ({}) => {
   };
 
   return (
-    <div className={styles.chat}>
+    <div
+      className={
+        isNavbarOpen
+          ? `${styles.chat} ${styles.chat_mobile_navbar}`
+          : isMembersOpen
+          ? `${styles.chat} ${styles.chat_mobile_members}`
+          : styles.chat
+      }
+      onClick={
+        isNavbarOpen || isMembersOpen ? (_) => hideNavbar() : (_) => null
+      }
+    >
       {slowDownCount > 1 ? (
         <InformationPopUp
           onOk={() => wait(1500).then(() => setSlowDownCount(0))}
@@ -547,7 +553,7 @@ export const ChatMain: React.FC = ({}) => {
             maxRows={10}
             disabled={channel.id == "" || isDisabled}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={sendMessage}
+            onKeyDown={checkMessage}
             placeholder={
               !isDisabled
                 ? `Message #${channel.name}`
@@ -566,6 +572,12 @@ export const ChatMain: React.FC = ({}) => {
         <div className={styles.chat_input_icons}>
           <GifIcon fontSize="large" className={styles.chat_input_icon} />
           <Emoji enabled={channel.id != ""} emojiAdded={addedEmoji} />
+          {isMobile && input != "" ? (
+            <SendIcon
+              className={styles.chat_input_icon}
+              onClick={() => sendMessageMobile()}
+            />
+          ) : null}
         </div>
       </div>
       {canScrollToBottom && (

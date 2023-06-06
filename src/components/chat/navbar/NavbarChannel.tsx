@@ -31,6 +31,7 @@ interface NavbarChannelProps {
   idC: string;
   nameC?: string;
   lastMessageAt?: number;
+  hideNavbar: () => void;
 }
 
 export interface ChannelData {
@@ -46,6 +47,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   idC,
   nameC = "",
   lastMessageAt,
+  hideNavbar,
 }) => {
   const [isActive, setIsActive] = useState<boolean>(false);
   const [isUnread, setIsUnread] = useState<boolean>(false);
@@ -170,6 +172,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     updateLastActive();
     setIsActive(true);
     setChannelData(id, name, idC, nameC);
+    hideNavbar();
   };
 
   const deleteChannel = async () => {

@@ -64,6 +64,11 @@
         background-color: #474b53;
         font-size: large;
 
+        @media screen and (max-width: 700px) {
+          padding-left: 12px;
+          margin-left: 10px;
+        }
+
         .chat_input_icons {
           margin-top: 5px;
           cursor: pointer;
@@ -155,7 +160,7 @@
 
       .chat_jump {
         position: absolute;
-        transform: translate(8%, -330%);
+        transform: translate(8%, -325%);
         bottom: 0;
         right: 0;
         height: 25px;
@@ -175,8 +180,45 @@
         -ms-user-select: none;
         user-select: none;
 
+        @media screen and (max-width: 700px) {
+          width: 32vw;
+          margin-right: 32px;
+        }
+
         &:hover {
           cursor: pointer;
+        }
+      }
+    }
+
+    .chat_mobile_navbar {
+      @media screen and (max-width: 700px) {
+        position: absolute;
+        right: 0;
+        z-index: 100;
+        width: 100%;
+        transform: translate(85%, 0px);
+      }
+
+      .chat_messages {
+        @media screen and (max-width: 700px) {
+          overflow-y: hidden;
+        }
+      }
+    }
+
+    .chat_mobile_members {
+      @media screen and (max-width: 700px) {
+        position: absolute;
+        left: 0;
+        z-index: 100;
+        width: 100%;
+        transform: translate(-85%, 0px);
+      }
+
+      .chat_messages {
+        @media screen and (max-width: 700px) {
+          overflow-y: hidden;
         }
       }
     }

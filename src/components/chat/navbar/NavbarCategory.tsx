@@ -32,6 +32,7 @@ interface NavbarCategoryProps {
   idC: string;
   variant?: NavbarCategoryVariant;
   name: string;
+  hideNavbar: () => void;
 }
 
 export interface CategoryData {
@@ -44,6 +45,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
   idC,
   name,
   variant = "server",
+  hideNavbar,
 }) => {
   const [showChannels, setShowChannels] = useState<boolean>(true);
   const [showPopUp, setShowPopUp] = useState<number>(0);
@@ -234,6 +236,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
               name={channel.name}
               nameC={name}
               lastMessageAt={channel.lastMessageAt}
+              hideNavbar={hideNavbar}
             />
           ))}
         </div>

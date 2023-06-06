@@ -23,10 +23,12 @@ export type NavbarCategoriesVariant = "server" | "dms";
 
 export interface NavbarCategoriesProps {
   variant?: NavbarCategoriesVariant;
+  hideNavbar: () => void;
 }
 
 export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
   variant = "server",
+  hideNavbar,
 }) => {
   const [categories, setCategories] = useState<CategoryData[]>([]);
   // Channels with category None
@@ -182,14 +184,24 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
                 idC="none"
                 name={name}
                 lastMessageAt={lastMessageAt}
+                hideNavbar={hideNavbar}
               />
             ))}
             {categories.map(({ id, name }) => (
-              <NavbarCategory key={id} idC={id} name={name} />
+              <NavbarCategory
+                key={id}
+                idC={id}
+                name={name}
+                hideNavbar={hideNavbar}
+              />
             ))}
           </>
         ) : (
-          <NavbarCategory name="DIRECT MESSAGES" idC="" />
+          <NavbarCategory
+            name="DIRECT MESSAGES"
+            idC=""
+            hideNavbar={hideNavbar}
+          />
         )}
       </div>
     </>

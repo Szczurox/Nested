@@ -1,3 +1,19 @@
+.chatHeader_navbar_open {
+  @media screen and (max-width: 700px) {
+    z-index: 10;
+    width: 100%;
+    transform: translate(85%, 0px);
+  }
+}
+
+.chatHeader_members_open {
+  @media screen and (max-width: 700px) {
+    z-index: 10;
+    width: 100%;
+    transform: translate(-85%, 0px);
+  }
+}
+
 .chatHeader {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -13,11 +29,29 @@
   background-color: #363a3f;
   height: 9vh;
 
+  .chatHeader_menu_icon {
+    svg {
+      margin-left: 7.5px;
+      cursor: pointer;
+      margin-bottom: 1px;
+      width: 30px;
+      height: 30px;
+      margin-bottom: 5px;
+
+      &:hover {
+        color: white;
+      }
+    }
+  }
+
   .chatHeader_hash {
     color: grey;
     font-size: 32px;
     padding: 10px;
     padding-top: 11px;
+    @media screen and (max-width: 700px) {
+      padding-left: 0px;
+    }
   }
 
   .chatHeader_left {
@@ -44,6 +78,11 @@
       cursor: pointer;
       margin-right: 7.5px;
       margin-bottom: 1px;
+      @media screen and (max-width: 700px) {
+        &:not(.chatHeader_people) {
+          display: none;
+        }
+      }
 
       &:hover {
         color: white;
@@ -59,6 +98,10 @@
     padding: 3px;
     margin-left: 10px;
     margin-right: 10px;
+
+    @media screen and (max-width: 900px) {
+      display: none;
+    }
 
     input {
       border: none;

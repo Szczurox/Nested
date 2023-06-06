@@ -10,4 +10,12 @@
   flex: 0.25;
   height: 100vh;
   background-color: #2f3135;
+
+  @media screen and (max-width: 700px) {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    width: 85%;
+  }
 }

@@ -9,14 +9,19 @@ export type NavbarVariant = "server" | "dms";
 
 interface NavbarProps {
   variant?: NavbarVariant;
+  hideNavbar: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ variant = "server" }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  variant = "server",
+  hideNavbar,
+}) => {
   const [isVoiceConnected, setIsVoiceConnected] = useState(false);
+
   return (
     <div className={styles.navbar}>
       <NavbarHeader variant={variant === "server" ? "server" : "dms"} />
-      <NavbarCategories />
+      <NavbarCategories hideNavbar={hideNavbar} />
       {isVoiceConnected ? <NavbarVoice /> : null}
       <NavbarProfile />
     </div>

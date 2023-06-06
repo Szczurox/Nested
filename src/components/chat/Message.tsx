@@ -82,9 +82,14 @@ export const Message: React.FC<MessageProps> = ({
   );
   // Iframes from message content links
   const [iframes, setIframes] = useState<string[]>([]);
+  // Emoji tag and it's link array
   const [mappedEmojiBucket, setMappedEmojiBucket] = useState<
     [string, string][]
-  >([]); // Emoji tag and it's link array
+  >([]);
+  // Timeout that allows mobile hold detection
+  const [touchTimeout, setTouchTimeout] = useState<NodeJS.Timeout>(
+    setTimeout(() => null, 0)
+  );
 
   const { channel } = useChannel();
   const { user } = useUser();
