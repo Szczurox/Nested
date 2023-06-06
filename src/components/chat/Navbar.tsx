@@ -22,10 +22,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
 
   return (
-    <div
-      className={styles.navbar}
-      style={isMobile ? { height: window.innerHeight } : {}}
-    >
+    <div className={styles.navbar}>
       <NavbarHeader variant={variant === "server" ? "server" : "dms"} />
       <NavbarCategories hideNavbar={hideNavbar} />
       {isVoiceConnected ? <NavbarVoice /> : null}
