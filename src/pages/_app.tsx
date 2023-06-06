@@ -8,7 +8,8 @@ import { useEffect, useState } from "react";
 import Loading from "components/Loading";
 
 function MyApp({ Component, pageProps, router }: AppProps) {
-  const [isRouteChanging, setIsRouteChanging] = useState(false);
+  const [isRouteChanging, setIsRouteChanging] = useState<boolean>(false);
+  const [windowHeight, setWindowHeight] = useState<number>(0);
 
   useEffect(() => {
     const routeChangeStartHandler = () => setIsRouteChanging(true);
@@ -46,6 +47,19 @@ function MyApp({ Component, pageProps, router }: AppProps) {
     };
   }, [router.events]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
   return (
     <>
       <meta
@@ -56,7 +70,9 @@ function MyApp({ Component, pageProps, router }: AppProps) {
         <ChannelProvider>
           <MessageProvider>
             <PopUpProvider>
-              {isRouteChanging ? <Loading /> : <Component {...pageProps} />}
+              <div style={{ height: windowHeight }}>
+                {isRouteChanging ? <Loading /> : <Component {...pageProps} />}
+              </div>
             </PopUpProvider>
           </MessageProvider>
         </ChannelProvider>
@@ -66,6 +82,3 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 }
 
 export default MyApp;
-function setIsRouteChanging(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}

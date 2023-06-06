@@ -19,8 +19,6 @@ export const Navbar: React.FC<NavbarProps> = ({
 }) => {
   const [isVoiceConnected, setIsVoiceConnected] = useState(false);
 
-  const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
-
   return (
     <div className={styles.navbar}>
       <NavbarHeader variant={variant === "server" ? "server" : "dms"} />
