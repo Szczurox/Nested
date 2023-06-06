@@ -478,6 +478,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
       onClick={
         isNavbarOpen || isMembersOpen ? (_) => hideNavbar() : (_) => null
       }
+      style={isMobile ? { height: (window.innerHeight / 100) * 91 } : {}}
     >
       {slowDownCount > 1 ? (
         <InformationPopUp
