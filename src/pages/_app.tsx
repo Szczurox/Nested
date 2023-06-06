@@ -47,15 +47,21 @@ function MyApp({ Component, pageProps, router }: AppProps) {
   }, [router.events]);
 
   return (
-    <UserProvider>
-      <ChannelProvider>
-        <MessageProvider>
-          <PopUpProvider>
-            {isRouteChanging ? <Loading /> : <Component {...pageProps} />}
-          </PopUpProvider>
-        </MessageProvider>
-      </ChannelProvider>
-    </UserProvider>
+    <>
+      <meta
+        name="viewport"
+        content="initial-scale=1, maximum-scale=1.0, user-scalable=no"
+      />
+      <UserProvider>
+        <ChannelProvider>
+          <MessageProvider>
+            <PopUpProvider>
+              {isRouteChanging ? <Loading /> : <Component {...pageProps} />}
+            </PopUpProvider>
+          </MessageProvider>
+        </ChannelProvider>
+      </UserProvider>
+    </>
   );
 }
 
