@@ -12,6 +12,19 @@ function MyApp({ Component, pageProps, router }: AppProps) {
   const [windowHeight, setWindowHeight] = useState<number>(0);
 
   useEffect(() => {
+    const handleResize = () => {
+      setWindowHeight(window.innerHeight);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
     const routeChangeStartHandler = () => setIsRouteChanging(true);
 
     const routeChangeEndHandler = () => setIsRouteChanging(false);
@@ -46,20 +59,6 @@ function MyApp({ Component, pageProps, router }: AppProps) {
       router.events.off("routeChangeError", routeChangeEndHandler);
     };
   }, [router.events]);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowHeight(window.innerHeight);
-    };
-
-    handleResize();
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
   return (
     <>
       <meta
