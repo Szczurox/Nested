@@ -38,6 +38,7 @@ const Chat = () => {
   const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
 
   useEffect(() => {
+    console.log(isMobile);
     if (isMobile) setShowMembers(false);
   }, [isMobile]);
 

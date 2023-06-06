@@ -14,9 +14,9 @@
   }
 
   .chat_flexbox {
-    display: inline-block;
-    width: 100%;
+    display: flex;
     height: 91%;
+    width: 100%;
     box-shadow: 0px 0.1em inset #26282c;
 
     .chat {
@@ -25,7 +25,6 @@
       flex: 1.5;
       background-color: #363a3f;
       height: 100%;
-      width: 100%;
       overflow-y: auto;
       overflow-x: hidden;
       box-shadow: 0px 0.1em inset #26282c;
