@@ -70,7 +70,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
   const listInnerRef = useRef<HTMLHeadingElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
-  const isMobile = useMediaQuery("(max-width:700px)");
+  const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
 
   const { channel } = useChannel();
   const { user } = useUser();

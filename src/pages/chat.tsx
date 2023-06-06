@@ -35,7 +35,7 @@ const Chat = () => {
   const app = createFirebaseApp();
   const db = getFirestore(app!);
 
-  const isMobile = useMediaQuery("(max-width:700px)");
+  const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
 
   useEffect(() => {
     if (isMobile) setShowMembers(false);

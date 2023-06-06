@@ -1,5 +1,5 @@
 .chatHeader_navbar_open {
-  @media screen and (max-width: 700px) {
+  @media (pointer: none), (pointer: coarse) {
     z-index: 10;
     width: 100%;
     transform: translate(85%, 0px);
@@ -7,7 +7,7 @@
 }
 
 .chatHeader_members_open {
-  @media screen and (max-width: 700px) {
+  @media (pointer: none), (pointer: coarse) {
     z-index: 10;
     width: 100%;
     transform: translate(-85%, 0px);
@@ -49,7 +49,7 @@
     font-size: 32px;
     padding: 10px;
     padding-top: 11px;
-    @media screen and (max-width: 700px) {
+    @media (pointer: none), (pointer: coarse) {
       padding-left: 0px;
     }
   }
@@ -78,7 +78,7 @@
       cursor: pointer;
       margin-right: 7.5px;
       margin-bottom: 1px;
-      @media screen and (max-width: 700px) {
+      @media (pointer: none), (pointer: coarse) {
         &:not(.chatHeader_people) {
           display: none;
         }
@@ -99,7 +99,7 @@
     margin-left: 10px;
     margin-right: 10px;
 
-    @media screen and (max-width: 900px) {
+    @media (pointer: none), (pointer: coarse) {
       display: none;
     }
 

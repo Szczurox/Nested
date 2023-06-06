@@ -7,7 +7,7 @@
   color: white;
   background-color: #363a3f;
 
-  @media screen and (max-width: 700px) {
+  @media (pointer: none), (pointer: coarse) {
     padding-left: 0px;
     margin-left: 0px;
   }
@@ -80,7 +80,7 @@
 .message_info {
   margin-left: 20px;
   margin-right: 60px;
-  @media screen and (max-width: 700px) {
+  @media (pointer: none), (pointer: coarse) {
     margin-right: 0px;
   }
 
@@ -147,7 +147,7 @@
     border-radius: 10px;
     margin-left: 60px;
 
-    @media screen and (max-width: 700px) {
+    @media (pointer: none), (pointer: coarse) {
       padding-left: 10px;
     }
   }
@@ -183,7 +183,7 @@
     height: auto;
     border-radius: 10px;
 
-    @media screen and (max-width: 700px) {
+    @media (pointer: none), (pointer: coarse) {
       max-width: 95%;
       max-height: 95%;
       min-width: 85%;

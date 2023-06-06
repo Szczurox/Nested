@@ -25,7 +25,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 }) => {
   const { channel } = useChannel();
 
-  const isMobile = useMediaQuery("(max-width:700px)");
+  const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
 
   return (
     <div className={styles.shadow}>

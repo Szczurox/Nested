@@ -64,7 +64,7 @@
         background-color: #474b53;
         font-size: large;
 
-        @media screen and (max-width: 700px) {
+        @media (pointer: none), (pointer: coarse) {
           padding-left: 12px;
           margin-left: 10px;
         }
@@ -180,7 +180,7 @@
         -ms-user-select: none;
         user-select: none;
 
-        @media screen and (max-width: 700px) {
+        @media (pointer: none), (pointer: coarse) {
           width: 32vw;
           margin-right: 32px;
         }
@@ -192,7 +192,7 @@
     }
 
     .chat_mobile_navbar {
-      @media screen and (max-width: 700px) {
+      @media (pointer: none), (pointer: coarse) {
         position: absolute;
         right: 0;
         z-index: 100;
@@ -201,14 +201,14 @@
       }
 
       .chat_messages {
-        @media screen and (max-width: 700px) {
+        @media (pointer: none), (pointer: coarse) {
           overflow-y: hidden;
         }
       }
     }
 
     .chat_mobile_members {
-      @media screen and (max-width: 700px) {
+      @media (pointer: none), (pointer: coarse) {
         position: absolute;
         left: 0;
         z-index: 100;
@@ -217,7 +217,7 @@
       }
 
       .chat_messages {
-        @media screen and (max-width: 700px) {
+        @media (pointer: none), (pointer: coarse) {
           overflow-y: hidden;
         }
       }
