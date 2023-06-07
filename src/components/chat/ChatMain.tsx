@@ -556,7 +556,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
             value={input}
             wrap="soft"
             maxLength={2000}
-            maxRows={10}
+            maxRows={input ? 10 : 1}
             disabled={channel.id == "" || isDisabled}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={checkMessage}

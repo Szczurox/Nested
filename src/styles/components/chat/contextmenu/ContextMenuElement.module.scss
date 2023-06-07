@@ -1,6 +1,9 @@
 .contextmenu_element {
   display: table-row;
   min-width: 14.6vw;
+  @media (pointer: none), (pointer: coarse) {
+    min-width: 50%;
+  }
   padding: 0.8vh 0.8vw 0.8vh 0.8vw;
   margin-left: 0.4vw;
   margin-right: 0.4vw;

@@ -15,7 +15,8 @@
 
   .chat_flexbox {
     display: flex;
-    height: 91%;
+    max-height: 91%;
+    min-height: 91%;
     width: 100%;
     box-shadow: 0px 0.1em inset #26282c;
 
@@ -24,12 +25,16 @@
       flex-direction: column;
       flex: 1.5;
       background-color: #363a3f;
-      height: 100%;
+      height: auto;
       overflow-y: auto;
       overflow-x: hidden;
       box-shadow: 0px 0.1em inset #26282c;
-      padding-top: 0.5vh;
+      padding-top: 3px;
       position: relative;
+
+      @media (pointer: none), (pointer: coarse) {
+        padding-bottom: 5%;
+      }
 
       .chat_input_button {
         display: none;
@@ -37,14 +42,14 @@
 
       .chat_typing_users {
         color: white;
-        margin-bottom: 6px;
-        margin-left: 24px;
+        margin-left: 2%;
+        min-height: 2%;
       }
 
       .chat_no_typing_users {
         color: white;
-        margin-bottom: 30px;
-        margin-left: 24px;
+        margin-left: 2%;
+        min-height: 2%;
       }
 
       .chat_input {
@@ -109,6 +114,21 @@
             line-height: 20px;
             overflow-y: auto;
             overflow-x: hidden;
+
+            @media (pointer: none), (pointer: coarse) {
+              padding-right: 0px;
+              line-height: 22px;
+            }
+
+            &::placeholder {
+              text-overflow: ellipsis;
+              white-space: nowrap;
+              overflow: hidden;
+            }
+
+            &:placeholder-shown {
+              text-overflow: ellipsis;
+            }
           }
         }
       }
@@ -120,7 +140,6 @@
         background-color: #363a3f;
         overflow-y: auto;
         overflow-x: hidden;
-        height: 100%;
       }
 
       .chat_file_uploading {

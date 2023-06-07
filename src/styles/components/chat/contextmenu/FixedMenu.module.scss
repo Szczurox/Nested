@@ -23,4 +23,7 @@
   box-shadow: 0 10px 20px rgba(46, 46, 46, 0.5);
   user-select: none;
   font-size: large;
+  @media (pointer: none), (pointer: coarse) {
+    min-width: 80%;
+  }
 }

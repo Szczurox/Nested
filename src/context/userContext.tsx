@@ -108,6 +108,21 @@ export default function UserContextComp({ children }: any) {
   };
 
   useEffect(() => {
+    const interval = setInterval(async () => {
+      const auth = await getAuth().currentUser;
+      if (auth) {
+        const token = await getIdToken(auth);
+        setUser({
+          ...user,
+          token: token,
+        });
+      }
+    }, 1800000);
+
+    return () => clearInterval(interval); // This represents the unmount function, in which you need to clear your interval to prevent memory leaks.
+  }, []);
+
+  useEffect(() => {
     const unsubscriber = onAuthStateChanged(auth, async (user) => {
       try {
         if (user) {
