@@ -428,7 +428,12 @@ export const ChatMain: React.FC<ChatMainProps> = ({
       // Don't update input if sending messages too quickly or pop-up is open
       e.preventDefault();
       textAreaRef.current!.blur();
-    } else if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
+    } else if (
+      e.key == "Enter" &&
+      e.shiftKey == false &&
+      channel.id != "" &&
+      !isMobile
+    ) {
       e.preventDefault();
       sendMessage();
     }
