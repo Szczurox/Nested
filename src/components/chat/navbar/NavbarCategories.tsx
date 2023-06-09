@@ -43,6 +43,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
 
   const menuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
+  const channelsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function categoriesGet() {
@@ -108,6 +109,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
                   createdAt: change.doc.data().createdAt,
                   name: change.doc.data().name,
                   lastMessageAt: change.doc.data().lastMessageAt,
+                  type: change.doc.data().type,
                 },
               ].sort((x, y) => {
                 return x.createdAt > y.createdAt ? 1 : -1;
@@ -124,6 +126,14 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
     getChannel();
   }, [db, channel.idG]);
 
+  useEffect(() => {
+    document.addEventListener("contextmenu", handleClick);
+
+    return () => {
+      document.removeEventListener("contextmenu", handleClick);
+    };
+  }, []);
+
   const createCategory = (name: string) => {
     setShowPopUp(0);
     addCategory(name, channel.idG);
@@ -132,6 +142,11 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
   const createChannel = (name: string) => {
     setShowPopUp(0);
     addChannel(name, channel.idG);
+  };
+
+  const handleClick = (e: Event) => {
+    if (channelsRef.current?.contains(e.target as Node))
+      menuRef.current?.closeMenu();
   };
 
   return (
@@ -176,13 +191,14 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
         }
       >
         {variant == "server" ? (
-          <>
-            {nCategoryChannels.map(({ id, name, lastMessageAt }) => (
+          <div ref={channelsRef}>
+            {nCategoryChannels.map(({ id, name, lastMessageAt, type }) => (
               <NavbarChannel
                 key={id}
                 id={id}
                 idC="none"
                 name={name}
+                channelType={type}
                 lastMessageAt={lastMessageAt}
                 hideNavbar={hideNavbar}
               />
@@ -195,7 +211,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
                 hideNavbar={hideNavbar}
               />
             ))}
-          </>
+          </div>
         ) : (
           <NavbarCategory
             name="DIRECT MESSAGES"

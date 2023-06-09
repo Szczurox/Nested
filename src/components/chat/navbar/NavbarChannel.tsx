@@ -1,4 +1,4 @@
-import { useChannel } from "context/channelContext";
+import { ChannelType, useChannel } from "context/channelContext";
 import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarChannel.module.scss";
 import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
@@ -29,6 +29,7 @@ interface NavbarChannelProps {
   name: string;
   id: string;
   idC: string;
+  channelType: ChannelType;
   nameC?: string;
   lastMessageAt?: number;
   hideNavbar: () => void;
@@ -39,6 +40,7 @@ export interface ChannelData {
   name: string;
   createdAt: string;
   lastMessageAt: number;
+  type: ChannelType;
 }
 
 export const NavbarChannel: React.FC<NavbarChannelProps> = ({
@@ -46,6 +48,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   id,
   idC,
   nameC = "",
+  channelType = "text",
   lastMessageAt,
   hideNavbar,
 }) => {
@@ -64,6 +67,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
   const menuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
+  const popUpRef = useRef<HTMLDivElement>(null);
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -133,7 +137,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     }
 
     // Set channel ID to the first loaded channel
-    if (channel.id == "") setChannelData(id, name, idC, nameC);
+    if (channel.id == "") setChannelData(id, name, idC, nameC, channelType);
 
     const unsub = everyoneSnapshot();
 
@@ -171,7 +175,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   const handleToggle = () => {
     updateLastActive();
     setIsActive(true);
-    setChannelData(id, name, idC, nameC);
+    setChannelData(id, name, idC, nameC, channelType);
     hideNavbar();
   };
 
@@ -184,7 +188,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     setShowPopUp(0);
 
     // Kick user out of the channel so that messages can't be seen anymore
-    if (channel.id == id) setChannelData("", "", "", "");
+    if (channel.id == id) setChannelData("", "", "", "", "text");
 
     await deleteDoc(channelDoc);
   };
@@ -206,36 +210,13 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     await addChannel(channelName, channel.idG, idC);
   };
 
+  const handleClick = (e: Event): void => {
+    if (popUpRef.current?.contains(e.target as Node))
+      menuRef.current?.closeMenu();
+  };
+
   return showChannel ? (
     <>
-      {showPopUp ? (
-        showPopUp == 1 ? (
-          <BasicDeletePopUp
-            onCancel={() => setShowPopUp(0)}
-            onConfirm={deleteChannel}
-          >
-            <h3>Delete Channel</h3>
-            <p>Are you sure u want to delete #{name} channel?</p>
-          </BasicDeletePopUp>
-        ) : (
-          <InputPopUp
-            onConfirm={showPopUp == 3 ? createChannel : changeChannelName}
-            onCancel={() => setShowPopUp(0)}
-            confirmButtonName={showPopUp == 3 ? "Create" : "Confirm"}
-            value={showPopUp == 3 ? "" : name}
-            placeHolder={showPopUp == 3 ? "new-channel" : name}
-            hash={true}
-          >
-            <h3>{showPopUp == 3 ? "Create Channel" : "Change Channel Name"}</h3>
-            {showPopUp == 3 ? (
-              <p>Create channel in {nameC}</p>
-            ) : (
-              <p>Change name for #{name}</p>
-            )}
-          </InputPopUp>
-        )
-      ) : null}
-
       <ContextMenu ref={menuRef} parentRef={elementRef}>
         <ContextMenuElement type={"grey"} onClick={(_) => updateLastActive()}>
           <VisibilityIcon />
@@ -265,6 +246,34 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
           Copy Channel ID
         </ContextMenuElement>
       </ContextMenu>
+
+      {showPopUp ? (
+        showPopUp == 1 ? (
+          <BasicDeletePopUp
+            onCancel={() => setShowPopUp(0)}
+            onConfirm={deleteChannel}
+          >
+            <h3>Delete Channel</h3>
+            <p>Are you sure u want to delete #{name} channel?</p>
+          </BasicDeletePopUp>
+        ) : (
+          <InputPopUp
+            onConfirm={showPopUp == 3 ? createChannel : changeChannelName}
+            onCancel={() => setShowPopUp(0)}
+            confirmButtonName={showPopUp == 3 ? "Create" : "Confirm"}
+            value={showPopUp == 3 ? "" : name}
+            placeHolder={showPopUp == 3 ? "new-channel" : name}
+            hash={true}
+          >
+            <h3>{showPopUp == 3 ? "Create Channel" : "Change Channel Name"}</h3>
+            {showPopUp == 3 ? (
+              <p>Create channel in {nameC}</p>
+            ) : (
+              <p>Change name for #{name}</p>
+            )}
+          </InputPopUp>
+        )
+      ) : null}
 
       <div
         className={

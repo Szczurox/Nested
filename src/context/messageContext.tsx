@@ -9,7 +9,7 @@ export interface MessageContextType {
 
 export const MessageContext = createContext<MessageContextType>({
   message: { id: "" },
-  setCurrentMessage: (id: string) => undefined,
+  setCurrentMessage: (_id: string) => undefined,
 });
 
 export default function MessageContextComp({ children }: any) {

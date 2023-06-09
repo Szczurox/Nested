@@ -66,7 +66,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false);
   const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
-  const [windowHeight, setWindowHeight] = useState<number>(window.innerHeight);
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
@@ -328,7 +327,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
     setMessages([]);
     setTypingUsers([]);
 
-    if (channel.id != "") {
+    if (channel.id != "" && channel.channelType == "text") {
       if (!isMobile) textAreaRef.current!.focus();
       getTypingUsersOnJoin();
       setAutoScroll(true);

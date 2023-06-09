@@ -25,14 +25,15 @@ export default async function userEndSessionHandler(
     .doc(decodedToken.uid)
     .update({ isActive: false });
 
-  await db
-    .collection("groups")
-    .doc(body.guildId)
-    .collection("channels")
-    .doc(body.channelId)
-    .collection("participants")
-    .doc(decodedToken.uid)
-    .update({ isTyping: false });
+  if (body.channelId != "")
+    await db
+      .collection("groups")
+      .doc(body.guildId)
+      .collection("channels")
+      .doc(body.channelId)
+      .collection("participants")
+      .doc(decodedToken.uid)
+      .update({ isTyping: false });
 
   res.status(200).json({ uid: token, id: body.channelId });
 }

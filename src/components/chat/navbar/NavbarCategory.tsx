@@ -25,6 +25,7 @@ import ContextMenuElement from "../contextmenu/ContextMenuElement";
 import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
 import DeletePopUp from "../popup/DeletePopUp";
 import { addChannel } from "components/utils/channelQueries";
+import PopUpSwitch from "../popup/PopUpSwitch";
 
 export type NavbarCategoryVariant = "server" | "dms";
 
@@ -48,6 +49,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
   hideNavbar,
 }) => {
   const [showChannels, setShowChannels] = useState<boolean>(true);
+  const [isVoice, setIsVoice] = useState<boolean>(true);
   const [showPopUp, setShowPopUp] = useState<number>(0);
   const [channels, setChannels] = useState<ChannelData[]>([]);
 
@@ -91,6 +93,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
                   createdAt: change.doc.data().createdAt,
                   name: change.doc.data().name,
                   lastMessageAt: change.doc.data().lastMessageAt,
+                  type: change.doc.data().type,
                 },
               ].sort((x, y) => {
                 return x.createdAt > y.createdAt ? 1 : -1;
@@ -108,7 +111,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 
   const createChannel = async (channelName: string) => {
     setShowPopUp(0);
-    await addChannel(channelName, channel.idG, idC);
+    await addChannel(channelName, channel.idG, idC, isVoice ? "voice" : "text");
   };
 
   const changeCategoryName = async (newName: string) => {
@@ -185,7 +188,14 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
               {showPopUp == 1 ? "Create Channel" : "Change Category Name"}
             </h3>
             {showPopUp == 1 ? (
-              <p>Create channel in {name}</p>
+              <p>
+                <p>Create channel in {name}</p>
+                <div className={styles.channel_toggle_text}>Text</div>
+                <div className={styles.channel_toggle}>
+                  <PopUpSwitch onChange={(isOn) => setIsVoice(isOn)} />
+                </div>
+                <div className={styles.channel_toggle_text}>Voice</div>
+              </p>
             ) : (
               <p>Change name for {name}</p>
             )}
@@ -235,6 +245,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
               idC={idC}
               name={channel.name}
               nameC={name}
+              channelType={channel.type}
               lastMessageAt={channel.lastMessageAt}
               hideNavbar={hideNavbar}
             />
