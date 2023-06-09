@@ -133,6 +133,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
       !popUp.isOpen &&
       document.activeElement?.tagName != "TEXTAREA"
     ) {
+      textAreaRef.current!.focus();
       if (
         (input + e.clipboardData!.getData("Text")).length <= textAreaSizeLimit
       )

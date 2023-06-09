@@ -130,7 +130,7 @@
   .message_delete_embed {
     margin-top: -10px;
     max-width: 400px;
-    max-height: 500px;
+    max-height: 40%;
     width: auto;
     height: auto;
     border-radius: 10px;
@@ -140,7 +140,7 @@
   .message_embed_text {
     margin-top: 0px;
     max-width: 95%;
-    max-height: 500px;
+    max-height: 40%;
     width: auto;
     height: auto;
     border-radius: 10px;
@@ -153,17 +153,15 @@
 
   .message_embed {
     margin-top: 4px;
-    width: 90%;
+    width: auto;
+    max-height: 90%;
     padding-left: 44px;
     margin-left: -44px;
-    max-height: 500px;
     border-radius: 10px;
   }
 
   .message_embed_link {
     margin-top: 4px;
-    max-width: 95%;
-    max-height: 500px;
     width: auto;
     height: auto;
     border-radius: 10px;

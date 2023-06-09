@@ -159,7 +159,7 @@ const Chat = () => {
             isNavbarOpen={showNavbar}
             hideNavbar={() => {
               setShowNavbar(false);
-              setShowMembers(false);
+              if (isMobile) setShowMembers(false);
             }}
             isMembersOpen={showMembers}
           />
