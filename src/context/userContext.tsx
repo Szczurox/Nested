@@ -110,10 +110,12 @@ export default function UserContextComp({ children }: any) {
   useEffect(() => {
     const interval = setInterval(async () => {
       const auth = await getAuth().currentUser;
+      console.log("hi");
       if (auth) {
         const token = await getIdToken(auth);
         setUser({
           ...user,
+          uid: user.uid,
           token: token,
         });
       }

@@ -1,4 +1,3 @@
-import { Timestamp } from "firebase-admin/firestore";
 import { getAdmin } from "firebase-utils/firebase-server";
 import { NextApiRequest, NextApiResponse } from "next";
 

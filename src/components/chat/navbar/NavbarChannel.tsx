@@ -1,4 +1,4 @@
-import { ChannelType, useChannel } from "context/channelContext";
+import { useChannel } from "context/channelContext";
 import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarChannel.module.scss";
 import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
@@ -35,6 +35,8 @@ interface NavbarChannelProps {
   hideNavbar: () => void;
 }
 
+export type ChannelType = "voice" | "text";
+
 export interface ChannelData {
   id: string;
   name: string;
@@ -62,12 +64,11 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   // 0 - None  /  1 - Delete  /  2 - Change Name  /  3 - Create
   const [showPopUp, setShowPopUp] = useState<number>(0);
 
-  const { channel, setChannelData } = useChannel();
+  const { channel, setChannelData, setChannelVoice } = useChannel();
   const { user, addPartPerms } = useUser();
 
   const menuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
-  const popUpRef = useRef<HTMLDivElement>(null);
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -137,7 +138,8 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     }
 
     // Set channel ID to the first loaded channel
-    if (channel.id == "") setChannelData(id, name, idC, nameC, channelType);
+    if (channel.id == "" && channelType == "text")
+      setChannelData(id, name, idC, nameC);
 
     const unsub = everyoneSnapshot();
 
@@ -174,8 +176,11 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
   const handleToggle = () => {
     updateLastActive();
-    setIsActive(true);
-    setChannelData(id, name, idC, nameC, channelType);
+    if (channelType == "voice") setChannelVoice(id);
+    else {
+      setIsActive(true);
+      setChannelData(id, name, idC, nameC);
+    }
     hideNavbar();
   };
 
@@ -188,7 +193,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     setShowPopUp(0);
 
     // Kick user out of the channel so that messages can't be seen anymore
-    if (channel.id == id) setChannelData("", "", "", "", "text");
+    if (channel.id == id) setChannelData("", "", "", "");
 
     await deleteDoc(channelDoc);
   };
@@ -208,11 +213,6 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   const createChannel = async (channelName: string) => {
     setShowPopUp(0);
     await addChannel(channelName, channel.idG, idC);
-  };
-
-  const handleClick = (e: Event): void => {
-    if (popUpRef.current?.contains(e.target as Node))
-      menuRef.current?.closeMenu();
   };
 
   return showChannel ? (
