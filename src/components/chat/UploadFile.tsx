@@ -189,6 +189,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
           <input
             type="file"
             value=""
+            name=""
             className={styles.upload_file_upload_file}
             onChange={(e) => {
               if (e.target.files) checkFile(e.target.files[0]);

@@ -368,11 +368,43 @@ export const ChatMain: React.FC<ChatMainProps> = ({
     }
   }
 
+  async function getEmojis(text: string) {
+    const emojiCollection = collection(db, "groups", channel.idG, "emoji");
+    const emojiSplit = text.split(/(<:.*?:>+)/g);
+    let emojis: string[] = [""];
+    emojiSplit.forEach(async (el) => {
+      if (
+        el.startsWith("<:") &&
+        el.endsWith(":>") &&
+        el.includes("?") &&
+        !emojis.includes(el)
+      ) {
+        if (!emojiBucket.find((e) => e.split("|")[0] == el)) {
+          const name = el.split("?")[0].slice(2);
+          const doc = await getDocs(
+            query(emojiCollection, where("name", "==", name))
+          );
+          const file = doc.docs[0].data().file;
+          console.log(
+            el,
+            file,
+            emojiBucket,
+            emojiBucket.find((e) => e[0] == el)
+          );
+          if (!doc.empty && file)
+            setEmojiBucket((emojiBucket) => [...emojiBucket, el + "|" + file]);
+          else emojis = [...emojis, el];
+        }
+      }
+    });
+  }
+
   async function sendMessage() {
     // Get current input and reset textarea instantly, before message gets fully sent
     const chatInput = input.replace(/^\s+|\s+$/g, "");
     setInput("");
     if (chatInput.length) {
+      setInput("");
       await updateDoc(doc(db, "groups", channel.idG, "channels", channel.id), {
         lastMessageAt: serverTimestamp(),
       }).catch((err) => console.log("Update lastMessagedAt Error: " + err));
@@ -398,6 +430,8 @@ export const ChatMain: React.FC<ChatMainProps> = ({
       }).catch((err) => {
         console.log(err);
       });
+
+      setEmojiBucket([]);
     }
   }
 
@@ -413,6 +447,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 
   async function checkMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     userTyping();
+    if (input.includes(":>") && input.includes("<:")) await getEmojis(input);
     if (slowDownCount > 1 || popUp.isOpen) {
       // Don't update input if sending messages too quickly or pop-up is open
       e.preventDefault();
@@ -426,6 +461,11 @@ export const ChatMain: React.FC<ChatMainProps> = ({
       e.preventDefault();
       sendMessage();
     }
+  }
+
+  async function checkPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
+    console.log(e.clipboardData.getData("text"));
+    await getEmojis(e.clipboardData.getData("text"));
   }
 
   // Message at the bottom that show file upload progress
@@ -549,6 +589,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
             disabled={channel.id == "" || isDisabled}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={checkMessage}
+            onPasteCapture={checkPaste}
             placeholder={
               !isDisabled
                 ? `Message #${channel.name}`
@@ -560,9 +601,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
             disabled={channel.id == "" || !isDisabled}
             className={styles.chat_input_button}
             type="submit"
-          >
-            Send Message
-          </button>
+          ></button>
         </form>
         <div className={styles.chat_input_icons}>
           <GifIcon fontSize="large" className={styles.chat_input_icon} />

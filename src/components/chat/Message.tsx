@@ -86,10 +86,6 @@ export const Message: React.FC<MessageProps> = ({
   const [mappedEmojiBucket, setMappedEmojiBucket] = useState<
     [string, string][]
   >([]);
-  // Timeout that allows mobile hold detection
-  const [touchTimeout, setTouchTimeout] = useState<NodeJS.Timeout>(
-    setTimeout(() => null, 0)
-  );
 
   const { channel } = useChannel();
   const { user } = useUser();
@@ -102,6 +98,7 @@ export const Message: React.FC<MessageProps> = ({
   const userMenuRef = useRef<ContextMenuHandle>(null);
   const elementRef = useRef<HTMLDivElement>(null);
   const avatarRef = useRef<HTMLImageElement>(null);
+  const messageContentRef = useRef<HTMLDivElement>(null);
 
   const allowedIFrames: string[] = [
     "https://youtube.com",
@@ -259,10 +256,12 @@ export const Message: React.FC<MessageProps> = ({
     setTime();
     checkForSpecial();
 
+    document.addEventListener("copy", handleCopy);
     document.addEventListener("keydown", handleClick);
     document.addEventListener("contextmenu", handleClick);
 
     return () => {
+      document.removeEventListener("copy", handleCopy);
       document.removeEventListener("keydown", handleClick);
       document.removeEventListener("contextmenu", handleClick);
     };
@@ -272,6 +271,29 @@ export const Message: React.FC<MessageProps> = ({
     // If another message is getting edited stop editing this message
     if (message.id != id) setIsEditing(false);
   }, [message.id]);
+
+  const handleCopy = (e: ClipboardEvent): void => {
+    let selection = document.getSelection();
+    let range = selection!.getRangeAt(0);
+    let contents = range.cloneContents();
+    let copiedText = "";
+
+    if (
+      range.startContainer.parentElement!.parentElement!.parentElement ==
+      messageContentRef.current!
+    ) {
+      for (let node of contents.childNodes.values()) {
+        if (node.nodeType === 1 && node.nodeName === "IMG") {
+          copiedText += (node as HTMLImageElement).alt;
+        } else {
+          copiedText += node.textContent;
+        }
+      }
+
+      e.clipboardData!.setData("text/plain", copiedText);
+      e.preventDefault();
+    }
+  };
 
   const handleClick = (e: Event): void => {
     // Close message content menu if contextmenu used on avatar
@@ -339,7 +361,7 @@ export const Message: React.FC<MessageProps> = ({
   };
 
   const messageContent = (
-    <div className={styles.message_content}>
+    <div className={styles.message_content} ref={messageContentRef}>
       <p>
         {parsedContent.map((el, index) => {
           if (el[1] == "emoji") {
@@ -349,8 +371,11 @@ export const Message: React.FC<MessageProps> = ({
                 <img
                   src={emoji[1]}
                   key={index}
+                  className={".emoji"}
+                  alt={el[0]}
                   style={
-                    parsedContent.find((e) => e[1] == "text")![0]! != ""
+                    parsedContent.find((e) => e[1] == "text" && e[0] != "")! ||
+                    parsedContent.length > 20
                       ? {
                           width: "24px",
                         }
