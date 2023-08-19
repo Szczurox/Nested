@@ -9,7 +9,10 @@
 
   @media (pointer: none), (pointer: coarse) {
     padding-left: 0px;
+    padding-right: 0px;
     margin-left: 0px;
+    margin-right: 0px;
+    flex: 1;
   }
 
   .message_edit_text_event {
@@ -129,44 +132,67 @@
 
   .message_delete_embed {
     margin-top: -10px;
-    max-width: 400px;
-    max-height: 40%;
-    width: auto;
-    height: auto;
-    border-radius: 10px;
-    margin-left: 60px;
-  }
-
-  .message_embed_text {
-    margin-top: 0px;
     max-width: 95%;
     max-height: 40%;
     width: auto;
     height: auto;
     border-radius: 10px;
     margin-left: 60px;
+    @media (pointer: none), (pointer: coarse) {
+      margin-top: 2px;
+      margin-left: 30px;
+    }
+  }
+
+  .message_embed_wrapper {
+    position: relative;
+    margin-top: 4px;
+    max-width: 95%;
+    max-height: 50%;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
 
     @media (pointer: none), (pointer: coarse) {
-      padding-left: 10px;
+      max-width: 82%;
+      margin-left: 60px;
+      margin-top: 2px;
+      margin-bottom: 0px;
     }
   }
 
   .message_embed {
+    position: relative;
     margin-top: 4px;
+    max-width: 95%;
+    max-height: 50%;
     width: auto;
-    max-height: 90%;
-    padding-left: 44px;
-    margin-left: -44px;
+    height: auto;
     border-radius: 10px;
   }
 
-  .message_embed_link {
-    margin-top: 4px;
+  .message_embed_text {
+    margin-top: 0px;
+    max-width: 95%;
+    max-height: 50%;
     width: auto;
     height: auto;
     border-radius: 10px;
     margin-left: 60px;
-    max-width: 90%;
+
+    @media (pointer: none), (pointer: coarse) {
+      margin-left: 0px;
+    }
+  }
+
+  .message_embed_link {
+    margin-top: 2px;
+    max-width: 95%;
+    max-height: 50%;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    margin-left: 60px;
   }
 
   .message_iframe {

@@ -133,17 +133,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
       document.activeElement?.tagName != "TEXTAREA"
     ) {
       textAreaRef.current!.focus();
-      if (
-        (input + e.clipboardData!.getData("Text")).length <= textAreaSizeLimit
-      )
-        setInput(input + e.clipboardData!.getData("Text"));
-      else
-        setInput(
-          (input + e.clipboardData!.getData("Text")).substring(
-            0,
-            textAreaSizeLimit
-          )
-        );
     }
   };
 

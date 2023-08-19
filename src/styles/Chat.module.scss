@@ -140,6 +140,12 @@
         background-color: #363a3f;
         overflow-y: auto;
         overflow-x: hidden;
+
+        @media (pointer: none), (pointer: coarse) {
+          &::-webkit-scrollbar {
+            display: none;
+          }
+        }
       }
 
       .chat_file_uploading {

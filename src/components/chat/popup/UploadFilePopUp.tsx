@@ -46,10 +46,7 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 
   const pasted = (e: ClipboardEvent) => {
     if (e.clipboardData!.files[0] == undefined && channel.id != "") {
-      if ((input + e.clipboardData!.getData("Text")).length <= 2000)
-        setInput(input + e.clipboardData!.getData("Text"));
-      else
-        setInput((input + e.clipboardData!.getData("Text")).substring(0, 2000));
+      textAreaRef.current!.focus();
     }
   };
 

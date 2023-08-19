@@ -115,11 +115,10 @@ export default function UserContextComp({ children }: any) {
         const token = await getIdToken(auth);
         setUser({
           ...user,
-          uid: user.uid,
           token: token,
         });
       }
-    }, 1800000);
+    }, 18000000);
 
     return () => clearInterval(interval); // This represents the unmount function, in which you need to clear your interval to prevent memory leaks.
   }, []);

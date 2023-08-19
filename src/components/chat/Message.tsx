@@ -378,7 +378,7 @@ export const Message: React.FC<MessageProps> = ({
     return (
       <>
         {file ? (
-          <div className={styles.message_embed}>
+          <div className={styles.message_embed_wrapper}>
             {fileType == "image" ? (
               <a href={file} target="_blank" rel="noreferrer">
                 <img
