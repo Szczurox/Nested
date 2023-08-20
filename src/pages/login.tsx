@@ -31,7 +31,7 @@ export const Login: React.FC<{}> = ({}) => {
   useEffect(() => {
     // Route to chat if user is already authenticated
     if (user.uid != "" && !loadingUser) router.push("/chat");
-  });
+  }, [user.uid, loadingUser]);
 
   return (
     <motion.div

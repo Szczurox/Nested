@@ -14,6 +14,7 @@ import {
   getDoc,
   getFirestore,
   onSnapshot,
+  serverTimestamp,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
@@ -38,23 +39,40 @@ const Chat = () => {
   const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
 
   useEffect(() => {
-    console.log(isMobile);
+    console.log("isMobile: " + isMobile);
     if (isMobile) setShowMembers(false);
   }, [isMobile]);
 
   useEffect(() => {
+    if (user.uid != "") {
+      // Ping server with activity update every 2.5 minutes
+      const interval = setInterval(async () => {
+        await updateDoc(doc(db, "profile", user.uid), {
+          lastActive: serverTimestamp(),
+        });
+      }, 150000);
+
+      return () => clearInterval(interval);
+    }
+  }, [user.uid]);
+
+  // Not the best solution for now but should mostly work
+  useEffect(() => {
     const eventListener = () => {
-      fetch("/api/user-end-session", {
-        method: "post",
-        headers: {
-          "authorization": `${user.token}`,
-        },
-        keepalive: true,
-        body: JSON.stringify({
-          channelId: lastChannelId == "" ? channel.id : lastChannelId,
-          guildId: channel.idG,
-        }),
-      });
+      return updateDoc(
+        doc(
+          db,
+          "groups",
+          channel.idG,
+          "channels",
+          channel.id,
+          "participants",
+          user.uid
+        ),
+        {
+          isTyping: false,
+        }
+      );
     };
 
     window.addEventListener("beforeunload", eventListener);
@@ -80,11 +98,10 @@ const Chat = () => {
         const loader = document.getElementById("globalLoader");
         if (loader) {
           await wait(600).then(async () => {
-            // Setting user activity should work server side but here it works client side
-            // TODO: Create some proper API and server side checks (maybe ping user every few minutes) (corn jobs?)
+            // Notify server that user is active
             if (user.uid != "") {
               await updateDoc(doc(db, "profile", user.uid), {
-                isActive: true,
+                lastActive: serverTimestamp(),
               });
             }
           });
@@ -106,25 +123,22 @@ const Chat = () => {
 
     // Adds user to members of the group if isn't one yet (temp till multiple groups)
     async function checkMember() {
-      const docSnapMember = await getDoc(
-        doc(db, "groups", channel.idG, "members", user.uid)
-      );
+      const memberDoc = doc(db, "groups", channel.idG, "members", user.uid);
+      const docSnapMember = await getDoc(memberDoc);
       let unsub: () => void;
       if (docSnapMember.exists()) {
-        unsub = onSnapshot(
-          doc(db, "groups", channel.idG, "members", user.uid),
-          (docSnapMember) => setUserPerms(docSnapMember)
+        unsub = onSnapshot(memberDoc, (docSnapMember) =>
+          setUserPerms(docSnapMember)
         );
       } else {
-        await setDoc(doc(db, "groups", channel.idG, "members", user.uid), {
+        await setDoc(memberDoc, {
           nickname: user.username,
           avatar: user.avatar,
           nameColor: "",
           permissions: [],
         });
-        unsub = onSnapshot(
-          doc(db, "groups", channel.idG, "members", user.uid),
-          (docSnapMember) => setUserPerms(docSnapMember)
+        unsub = onSnapshot(memberDoc, (docSnapMember) =>
+          setUserPerms(docSnapMember)
         );
       }
       return unsub;

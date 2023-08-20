@@ -1,3 +1,6 @@
+//? Currently unused
+
+/*
 import { getAdmin } from "firebase-utils/firebase-server";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -36,3 +39,4 @@ export default async function userEndSessionHandler(
 
   res.status(200).json({ uid: token, id: body.channelId });
 }
+*/

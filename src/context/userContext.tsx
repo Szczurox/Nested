@@ -118,9 +118,9 @@ export default function UserContextComp({ children }: any) {
           token: token,
         });
       }
-    }, 18000000);
+    }, 3500000);
 
-    return () => clearInterval(interval); // This represents the unmount function, in which you need to clear your interval to prevent memory leaks.
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {

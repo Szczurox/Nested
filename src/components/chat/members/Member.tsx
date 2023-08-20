@@ -3,6 +3,7 @@ import styles from "../../../styles/components/chat/members/Member.module.scss";
 import { Avatar } from "@material-ui/core";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
+import moment from "moment";
 
 interface MemberProps {
   id: string;
@@ -32,7 +33,12 @@ export const Member: React.FC<MemberProps> = ({
   useEffect(() => {
     function onMemberLoad() {
       return onSnapshot(doc(db, "profile", id), (doc) => {
-        if (doc.exists()) setIsActive(doc.data().isActive);
+        if (doc.exists() && doc.data().lastActive)
+          setIsActive(
+            moment(doc.data().lastActive).add(5, "minutes").format() >
+              moment().format()
+          );
+        else setIsActive(false);
       });
     }
 
