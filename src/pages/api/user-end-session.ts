@@ -1,9 +1,9 @@
 //? Currently unused
 
-/*
 import { getAdmin } from "firebase-utils/firebase-server";
 import { NextApiRequest, NextApiResponse } from "next";
 
+/*
 const admin = getAdmin()!;
 const db = admin?.firestore()!;
 
