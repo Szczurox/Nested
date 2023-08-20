@@ -85,8 +85,29 @@ const Chat = () => {
   }, [lastChannelId, user.uid, user.token, channel.idG, channel.id]);
 
   useEffect(() => {
+    const id = lastChannelId;
+
+    async function isNotTyping() {
+      await updateDoc(
+        doc(
+          db,
+          "groups",
+          channel.idG,
+          "channels",
+          id,
+          "participants",
+          user.uid
+        ),
+        {
+          isTyping: false,
+        }
+      );
+    }
+
+    isNotTyping();
+
     setLastChannelId(channel.id);
-  }, [channel.id]);
+  }, [channel.id, user.uid]);
 
   // Route to login if user is not authenticated
   useEffect(() => {
