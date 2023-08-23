@@ -3,7 +3,7 @@ import styles from "../../../styles/components/chat/members/Member.module.scss";
 import { Avatar } from "@material-ui/core";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
-import moment from "moment";
+import moment, { Moment } from "moment";
 
 interface MemberProps {
   id: string;
@@ -26,6 +26,7 @@ export const Member: React.FC<MemberProps> = ({
   avatar,
 }) => {
   const [isActive, setIsActive] = useState<boolean>(false);
+  const [lastActive, setLastActive] = useState<Moment>();
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -33,18 +34,30 @@ export const Member: React.FC<MemberProps> = ({
   useEffect(() => {
     function onMemberLoad() {
       return onSnapshot(doc(db, "profile", id), (doc) => {
-        if (doc.exists() && doc.data().lastActive)
+        if (doc.exists() && doc.data().lastActive) {
+          setLastActive(moment(doc.data().lastActive.toMillis()).add(3, "m"));
           setIsActive(
-            moment(doc.data().lastActive).add(5, "minutes").format() >
-              moment().format()
+            moment(doc.data().lastActive.toMillis())
+              .add(3, "m")
+              .isAfter(moment())
           );
-        else setIsActive(false);
+        }
       });
     }
 
     const unsub = onMemberLoad();
     return () => unsub();
   }, []);
+
+  useEffect(() => {
+    const interval = setInterval(async () => {
+      if (lastActive) {
+        setIsActive(lastActive.isAfter(moment()));
+      } else setIsActive(false);
+    }, 1500);
+
+    return () => clearInterval(interval);
+  });
 
   return (
     <div className={styles.member} id={id}>

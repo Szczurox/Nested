@@ -15,9 +15,10 @@ export type MembersVariant = "server" | "dms";
 
 interface MembersProps {
   variant?: MembersVariant;
+  isMobile: boolean;
 }
 
-const Members: React.FC<MembersProps> = ({ variant = "server" }) => {
+const Members: React.FC<MembersProps> = ({ variant = "server", isMobile }) => {
   const [members, setMembers] = useState<MemberData[]>([]);
 
   const { channel } = useChannel();
@@ -73,6 +74,14 @@ const Members: React.FC<MembersProps> = ({ variant = "server" }) => {
 
   return (
     <div className={styles.members}>
+      {isMobile ? (
+        <div className={styles.members_header}>
+          <h3>
+            <span className={styles.members_header_hash}>#</span>
+            {channel.name}
+          </h3>
+        </div>
+      ) : null}
       {members.length != 0 && <MemberCount count={members.length} />}
       {members.map((member) => (
         <Member

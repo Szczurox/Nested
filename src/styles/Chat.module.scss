@@ -33,7 +33,7 @@
       position: relative;
 
       @media (pointer: none), (pointer: coarse) {
-        padding-bottom: 5%;
+        padding-bottom: 25px;
       }
 
       .chat_input_button {
@@ -71,7 +71,8 @@
 
         @media (pointer: none), (pointer: coarse) {
           padding-left: 12px;
-          margin-left: 10px;
+          margin-left: 0px;
+          margin-right: 0px;
         }
 
         .chat_input_icons {
@@ -208,7 +209,8 @@
 
         @media (pointer: none), (pointer: coarse) {
           width: 32vw;
-          margin-right: 32px;
+          margin-right: 34px;
+          margin-bottom: 27px;
         }
 
         &:hover {

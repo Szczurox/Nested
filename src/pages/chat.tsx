@@ -26,7 +26,6 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 const Chat = () => {
   const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
   const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
-  const [lastChannelId, setLastChannelId] = useState<string>(""); // Id of the last channel user was on
 
   const { user, loadingUser, setMemberData } = useUser();
   const { channel } = useChannel();
@@ -44,83 +43,32 @@ const Chat = () => {
   }, [isMobile]);
 
   useEffect(() => {
-    if (user.uid != "") {
-      // Ping server with activity update every 2.5 minutes
-      const interval = setInterval(async () => {
-        await updateDoc(doc(db, "profile", user.uid), {
-          lastActive: serverTimestamp(),
-        });
-      }, 150000);
+    // Ping server with activity update every 2.5 minutes
+    const interval = setInterval(async () => {
+      console.log("ping!");
+      await updateDoc(doc(db, "profile", user.uid), {
+        lastActive: serverTimestamp(),
+      });
+    }, 150000);
 
-      return () => clearInterval(interval);
-    }
-  }, [user.uid]);
-
-  // Not the best solution for now but should mostly work
-  useEffect(() => {
-    const eventListener = () => {
-      return updateDoc(
-        doc(
-          db,
-          "groups",
-          channel.idG,
-          "channels",
-          channel.id,
-          "participants",
-          user.uid
-        ),
-        {
-          isTyping: false,
-        }
-      );
-    };
-
-    window.addEventListener("beforeunload", eventListener);
-    window.addEventListener("unload", eventListener);
-
-    return () => {
-      window.removeEventListener("beforeunload", eventListener);
-      window.removeEventListener("unload", eventListener);
-    };
-  }, [lastChannelId, user.uid, user.token, channel.idG, channel.id]);
-
-  useEffect(() => {
-    const id = lastChannelId;
-
-    async function isNotTyping() {
-      await updateDoc(
-        doc(
-          db,
-          "groups",
-          channel.idG,
-          "channels",
-          id,
-          "participants",
-          user.uid
-        ),
-        {
-          isTyping: false,
-        }
-      );
-    }
-
-    isNotTyping();
-
-    setLastChannelId(channel.id);
-  }, [channel.id, user.uid]);
+    return () => clearInterval(interval);
+  });
 
   // Route to login if user is not authenticated
   useEffect(() => {
-    if (user.uid == "" && !loadingUser) router.push("/login");
+    if (user.uid == "" && !loadingUser && user.token == "")
+      router.push("/login");
     else loading();
 
     async function loading() {
+      console.log("logged out");
       if (typeof window !== "undefined") {
         const loader = document.getElementById("globalLoader");
         if (loader) {
           await wait(600).then(async () => {
             // Notify server that user is active
             if (user.uid != "") {
+              console.log("hi");
               await updateDoc(doc(db, "profile", user.uid), {
                 lastActive: serverTimestamp(),
               });
@@ -198,7 +146,7 @@ const Chat = () => {
             }}
             isMembersOpen={showMembers}
           />
-          {showMembers && <Members />}
+          {showMembers && <Members isMobile={isMobile} />}
         </div>
       </div>
     </div>

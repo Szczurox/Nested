@@ -13,9 +13,11 @@ import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import ContextMenu, { ContextMenuHandle } from "./contextmenu/ContextMenu";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
+import SendIcon from "@mui/icons-material/Send";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import OpenInNewIcon from "@material-ui/icons/OpenInNew";
 import LinkIcon from "@material-ui/icons/Link";
+import CopyAllIcon from "@mui/icons-material/CopyAll";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import { useMessage } from "context/messageContext";
@@ -34,6 +36,7 @@ interface MessageProps {
   children?: ReactNode;
   onImageLoad?: () => void;
   emojiBucket?: string[];
+  isMobile: boolean;
 }
 
 export interface MessageData {
@@ -60,6 +63,7 @@ export const Message: React.FC<MessageProps> = ({
   onImageLoad,
   edited,
   emojiBucket,
+  isMobile,
 }) => {
   const [nickname, setNickname] = useState<string>("");
   const [nickColor, setNickColor] = useState<string>("white");
@@ -344,18 +348,25 @@ export const Message: React.FC<MessageProps> = ({
     });
   };
 
+  const completeEdit = () => {
+    // Edit Message
+    setIsEditing(false);
+    if (input != content) {
+      if (input.replace(/\s/g, "").length) updateMessage();
+      else {
+        // Ask if user wants to delete the message if input is set to empty
+        setShowPopUp(true);
+      }
+    }
+  };
+
   const editMessage = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key == "Escape") setIsEditing(false);
-    if (e.key == "Enter" && e.shiftKey == false) {
-      // Edit Message
-      setIsEditing(false);
-      e.preventDefault();
-      if (input != content) {
-        if (input.replace(/\s/g, "").length) updateMessage();
-        else {
-          // Ask if user wants to delete the message if input is set to empty
-          setShowPopUp(true);
-        }
+    if (!isMobile) {
+      if (e.key == "Escape") setIsEditing(false);
+      if (e.key == "Enter" && e.shiftKey == false) {
+        // Edit Message
+        e.preventDefault();
+        completeEdit();
       }
     }
   };
@@ -509,6 +520,12 @@ export const Message: React.FC<MessageProps> = ({
             </ContextMenuElement>
           </>
         )}
+        <ContextMenuElement
+          onClick={() => navigator.clipboard.writeText(content)}
+        >
+          <CopyAllIcon style={{ fontSize: "25px" }} />
+          Copy Message Content
+        </ContextMenuElement>
         {(userid == user.uid ||
           user.permissions.includes("MODERATE_MESSAGES")) && (
           <ContextMenuElement type="red" onClick={deleteBegin}>
@@ -533,7 +550,7 @@ export const Message: React.FC<MessageProps> = ({
           </>
         )}
         <ContextMenuElement onClick={() => navigator.clipboard.writeText(id)}>
-          <ContentCopyIcon />
+          <ContentCopyIcon style={{ fontSize: "21px" }} />
           Copy Message ID
         </ContextMenuElement>
       </ContextMenu>
@@ -577,7 +594,6 @@ export const Message: React.FC<MessageProps> = ({
                     value={input}
                     wrap="soft"
                     maxLength={2000}
-                    maxRows={10}
                     disabled={channel.id == ""}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={editMessage}
@@ -598,23 +614,44 @@ export const Message: React.FC<MessageProps> = ({
                     Send Message
                   </button>
                 </form>
+
+                {isMobile && input != "" ? (
+                  <div className={styles.message_edit_icon}>
+                    <SendIcon
+                      className={styles.chat_input_icon}
+                      onClick={() => completeEdit()}
+                    />
+                  </div>
+                ) : null}
               </div>
-              <p>
-                Press Escape to{" "}
-                <a
-                  className={styles.message_edit_text_event}
-                  onClick={() => setIsEditing(false)}
-                >
-                  Cancel
-                </a>{" "}
-                / Press Enter to{" "}
-                <a
-                  className={styles.message_edit_text_event}
-                  onClick={() => updateMessage()}
-                >
-                  Save
-                </a>
-              </p>
+              {!isMobile ? (
+                <p>
+                  Press Escape to{" "}
+                  <a
+                    className={styles.message_edit_text_event}
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </a>{" "}
+                  / Press Enter to{" "}
+                  <a
+                    className={styles.message_edit_text_event}
+                    onClick={() => updateMessage()}
+                  >
+                    Save
+                  </a>
+                </p>
+              ) : null}
+              {isMobile ? (
+                <p>
+                  <a
+                    className={styles.message_edit_text_event}
+                    onClick={() => setIsEditing(false)}
+                  >
+                    Cancel
+                  </a>
+                </p>
+              ) : null}
             </div>
           )}
           {fileContent(false)}

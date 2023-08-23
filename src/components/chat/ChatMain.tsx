@@ -121,8 +121,13 @@ export const ChatMain: React.FC<ChatMainProps> = ({
   }, [input, popUp.isOpen, channel.id]);
 
   useEffect(() => {
-    const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
-    if (scrollTop >= scrollHeight - clientHeight - 60) scrollToBottom();
+    if (!isMobile) {
+      const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
+      if (scrollTop >= scrollHeight - clientHeight - 60) scrollToBottom();
+    } else {
+      var msg = document.getElementById(message.id);
+      wait(100).then(() => (msg ? msg.scrollIntoView(false) : null));
+    }
   }, [message]);
 
   const pasted = (e: ClipboardEvent) => {
@@ -188,18 +193,9 @@ export const ChatMain: React.FC<ChatMainProps> = ({
   };
 
   const updateLastActive = async () =>
-    await updateDoc(
-      doc(
-        db,
-        "groups",
-        channel.idG,
-        "channels",
-        channel.id,
-        "participants",
-        user.uid
-      ),
-      { lastActive: serverTimestamp() }
-    );
+    await updateDoc(doc(participantsCollection, user.uid), {
+      lastActive: serverTimestamp(),
+    });
 
   const handleMessageSnapshot = (qMes: any) => {
     return onSnapshot(qMes, (querySnapshot: any) => {
@@ -273,10 +269,14 @@ export const ChatMain: React.FC<ChatMainProps> = ({
     }
 
     async function getTypingUsersOnJoin() {
+      var nowDate = new Date(new Date().toUTCString());
+      var tenSecsAgoDate = moment(nowDate).subtract(10, "s").toDate();
+      var tenSecsAgo = Timestamp.fromDate(tenSecsAgoDate).valueOf();
+
+      // Only get users that typed in chat within past 10 seconds
       const qPartOnJoin = query(
         participantsCollection,
-        where(documentId(), "!=", user.uid),
-        where("isTyping", "==", true)
+        where("lastTyping", ">", tenSecsAgo)
       );
 
       const snapshot = await getDocs(qPartOnJoin);
@@ -321,7 +321,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
       getTypingUsersOnJoin();
       setAutoScroll(true);
       setCanScrollToBottom(false);
-      updateIsTyping(false);
+      setIsTyping(false);
       const unsub = getMessagesFirstBatch();
       const unsub2 = getTypingUsers();
       scrollToBottom();
@@ -334,35 +334,20 @@ export const ChatMain: React.FC<ChatMainProps> = ({
     }
   }, [channel.id]);
 
-  const updateIsTyping = async (isTyping: boolean) => {
-    setIsTyping(isTyping);
-    await updateDoc(
-      doc(
-        db,
-        "groups",
-        channel.idG,
-        "channels",
-        channel.id,
-        "participants",
-        user.uid
-      ),
-      {
-        isTyping: isTyping,
-      }
-    );
-  };
-
   async function userTyping() {
     if (!isTyping) {
       clearTimeout(typingTimeout);
 
       console.log("started typing");
-      updateIsTyping(true);
+      setIsTyping(true);
+      await updateDoc(doc(participantsCollection, user.uid), {
+        lastTyping: serverTimestamp(),
+      });
 
       setTypingTimeout(
         setTimeout(async () => {
           console.log("done typing");
-          updateIsTyping(false);
+          setIsTyping(false);
         }, 5000)
       );
     }
@@ -549,6 +534,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
               edited={edited}
               fileType={fileType}
               emojiBucket={emojiBucket}
+              isMobile={isMobile}
             />
           )
         )}
@@ -560,6 +546,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
               content={""}
               time={moment().utcOffset("+00:00").valueOf()}
               userid={user.uid}
+              isMobile={isMobile}
             >
               <div className={styles.chat_file_uploading}>
                 <InsertDriveFileIcon className={styles.chat_upload_icon} />
@@ -585,7 +572,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
             value={input}
             wrap="soft"
             maxLength={2000}
-            maxRows={input ? 10 : 1}
+            maxRows={input ? (isMobile ? 4 : 10) : 1}
             disabled={channel.id == "" || isDisabled}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={checkMessage}
