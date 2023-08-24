@@ -8,6 +8,8 @@ import React, {
   useState,
 } from "react";
 import styles from "../../../styles/components/chat/contextmenu/ContextMenu.module.scss";
+import { useMediaQuery } from "@material-ui/core";
+import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 
 interface ContextMenuProps {
   children: ReactNode;
@@ -20,10 +22,13 @@ export type ContextMenuHandle = {
   getListRef: () => RefObject<HTMLUListElement>;
 };
 
+// TODO: Special ContextMenu for mobile devices
 const ContextMenu: React.ForwardRefRenderFunction<
   ContextMenuHandle,
   ContextMenuProps
 > = ({ children, parentRef }, ref) => {
+  const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
+
   const [isOpen, setIsOpen] = useState(false);
   const [menuPoint, setMenuPoint] = useState<{ x: number; y: number }>({
     x: 0,
@@ -41,16 +46,17 @@ const ContextMenu: React.ForwardRefRenderFunction<
       handleContextMenu(event: React.MouseEvent<HTMLElement>): void {
         event.preventDefault();
 
-        setMenuPoint({
-          x:
-            event.pageX < window.innerWidth - (window.innerWidth / 100) * 20
-              ? event.pageX
-              : event.pageX - window.innerWidth / 5,
-          y:
-            event.pageY < window.innerHeight - (window.innerHeight / 100) * 20
-              ? event.pageY
-              : event.pageY - window.innerHeight / 10,
-        });
+        if (!isMobile)
+          setMenuPoint({
+            x:
+              event.pageX < window.innerWidth - (window.innerWidth / 100) * 20
+                ? event.pageX
+                : event.pageX - window.innerWidth / 5,
+            y:
+              event.pageY < window.innerHeight - (window.innerHeight / 100) * 20
+                ? event.pageY
+                : event.pageY - window.innerHeight / 10,
+          });
 
         setIsOpen(true);
       },
@@ -87,14 +93,32 @@ const ContextMenu: React.ForwardRefRenderFunction<
   }, [handleCloseMenu]);
 
   return isOpen ? (
-    <ul
-      className={styles.contextmenu}
-      style={{ top: menuPoint.y, left: menuPoint.x }}
-      onContextMenu={(e) => e.preventDefault()}
-      ref={listRef}
-    >
-      {children}
-    </ul>
+    isMobile ? (
+      <div className={styles.contextmenu_background_mobile}>
+        <ul
+          className={styles.contextmenu}
+          onContextMenu={(e) => e.preventDefault()}
+          ref={listRef}
+          style={{
+            bottom: 0,
+            left: 0,
+            paddingBottom: 100,
+          }}
+        >
+          <ExpandMoreIcon className={styles.contextmenu_icon} />
+          {children}
+        </ul>
+      </div>
+    ) : (
+      <ul
+        className={styles.contextmenu}
+        style={{ top: menuPoint.y, left: menuPoint.x }}
+        onContextMenu={(e) => e.preventDefault()}
+        ref={listRef}
+      >
+        {children}
+      </ul>
+    )
   ) : null;
 };
 
