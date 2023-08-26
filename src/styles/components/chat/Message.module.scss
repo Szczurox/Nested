@@ -170,16 +170,22 @@
   .message_embed {
     position: relative;
     margin-top: 4px;
-    max-width: 95%;
+    max-width: 60%;
     max-height: 50%;
     width: auto;
     height: auto;
     border-radius: 10px;
+
+    @media (pointer: none), (pointer: coarse) {
+      max-width: 95%;
+      margin-top: 2px;
+      margin-bottom: 0px;
+    }
   }
 
   .message_embed_text {
     margin-top: 0px;
-    max-width: 95%;
+    max-width: 60%;
     max-height: 50%;
     width: auto;
     height: auto;
@@ -187,6 +193,7 @@
     margin-left: 60px;
 
     @media (pointer: none), (pointer: coarse) {
+      max-width: 95%;
       margin-left: 0px;
     }
   }
