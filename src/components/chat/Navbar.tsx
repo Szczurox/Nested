@@ -4,7 +4,6 @@ import { NavbarVoice } from "./navbar/NavbarVoice";
 import { NavbarProfile } from "./navbar/NavbarProfile";
 import styles from "../../styles/components/chat/Navbar.module.scss";
 import { NavbarCategories } from "./navbar/NavbarCategories";
-import { useMediaQuery } from "@material-ui/core";
 import { useChannel } from "context/channelContext";
 
 export type NavbarVariant = "server" | "dms";
@@ -21,10 +20,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [isVoiceConnected, setIsVoiceConnected] = useState(false);
 
   const { channel } = useChannel();
-
-  useEffect(() => {
-    setIsVoiceConnected(channel.voiceId != "");
-  }, [channel.voiceId]);
 
   return (
     <div className={styles.navbar}>

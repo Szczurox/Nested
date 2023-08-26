@@ -64,7 +64,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   // 0 - None  /  1 - Delete  /  2 - Change Name  /  3 - Create
   const [showPopUp, setShowPopUp] = useState<number>(0);
 
-  const { channel, setChannelData, setChannelVoice } = useChannel();
+  const { channel, setChannelData } = useChannel();
   const { user, addPartPerms } = useUser();
 
   const menuRef = useRef<ContextMenuHandle>(null);
@@ -179,11 +179,8 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
   const handleToggle = () => {
     updateLastActive();
-    if (channelType == "voice") setChannelVoice(id);
-    else {
-      setIsActive(true);
-      setChannelData(id, name, idC, nameC);
-    }
+    setIsActive(true);
+    setChannelData(id, name, idC, nameC);
     hideNavbar();
   };
 

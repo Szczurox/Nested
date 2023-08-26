@@ -7,7 +7,6 @@ export interface ChannelContextType {
     idC: string; // Category ID
     nameC: string; // Category name
     idG: string; // Group ID
-    voiceId: string; // Voice or text channel
   };
   setChannelData: (
     id: string,
@@ -15,8 +14,6 @@ export interface ChannelContextType {
     idC: string,
     nameC: string
   ) => void;
-
-  setChannelVoice: (_voiceId: string) => void;
 }
 
 export const ChannelContext = createContext<ChannelContextType>({
@@ -26,12 +23,9 @@ export const ChannelContext = createContext<ChannelContextType>({
     idC: "",
     nameC: "",
     idG: "",
-    voiceId: "",
   },
   setChannelData: (_id: string, _name: string, _idC: string, _nameC: string) =>
     undefined,
-
-  setChannelVoice: (_voiceId: string) => undefined,
 });
 
 export default function ChannelContextComp({ children }: any) {
@@ -41,7 +35,6 @@ export default function ChannelContextComp({ children }: any) {
     idC: "",
     nameC: "",
     idG: "H8cO2zBjCyJYsmM4g5fv",
-    voiceId: "",
   });
 
   const setChannelData = (
@@ -56,25 +49,11 @@ export default function ChannelContextComp({ children }: any) {
       idC: idC,
       nameC: nameC,
       idG: channel.idG,
-      voiceId: channel.voiceId,
-    });
-  };
-
-  const setChannelVoice = (voiceId: string) => {
-    setChannel({
-      id: channel.id,
-      name: channel.name,
-      idC: channel.idC,
-      nameC: channel.nameC,
-      idG: channel.idG,
-      voiceId: voiceId,
     });
   };
 
   return (
-    <ChannelContext.Provider
-      value={{ channel, setChannelData, setChannelVoice }}
-    >
+    <ChannelContext.Provider value={{ channel, setChannelData }}>
       {children}
     </ChannelContext.Provider>
   );

@@ -1,0 +1,25 @@
+.navbar_group {
+  display: block;
+  margin-left: 10px;
+  margin-right: 10px;
+  background-color: #363a3f;
+  max-width: 50px;
+  max-height: 50px;
+  min-height: 50px;
+  margin-top: 10px;
+  font-size: 28px;
+  color: white;
+  text-align: center;
+  border-radius: 8px;
+  cursor: pointer;
+
+  img {
+    max-width: 100%;
+  }
+
+  .navbar_group_icon {
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+  }
+}

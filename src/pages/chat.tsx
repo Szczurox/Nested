@@ -22,6 +22,7 @@ import { useChannel } from "context/channelContext";
 import Members from "components/chat/Members";
 import ChatHeader from "components/chat/ChatHeader";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { NavbarGroups } from "components/chat/NavbarGroups";
 
 const Chat = () => {
   const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
@@ -62,6 +63,8 @@ const Chat = () => {
 
     async function loading() {
       console.log("logged out");
+      setShowNavbar(true);
+      setShowMembers(true);
       if (typeof window !== "undefined") {
         const loader = document.getElementById("globalLoader");
         if (loader) {
@@ -72,6 +75,8 @@ const Chat = () => {
               await updateDoc(doc(db, "profile", user.uid), {
                 lastActive: serverTimestamp(),
               });
+              setShowNavbar(false);
+              setShowMembers(false);
             }
           });
           loader.remove();
@@ -126,7 +131,10 @@ const Chat = () => {
     <div className={styles.app}>
       <Loading />
       {!isMobile || showNavbar ? (
-        <Navbar hideNavbar={() => setShowNavbar(false)} />
+        <div className={styles.full_navbar_flexbox}>
+          <NavbarGroups isMobile={isMobile} />
+          <Navbar hideNavbar={() => setShowNavbar(false)} />
+        </div>
       ) : null}
       <div className={styles.full_chat_flexbox}>
         <div className={styles.chat_shadow}>

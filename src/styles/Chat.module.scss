@@ -5,6 +5,19 @@
   width: 100%;
   height: 100%;
 
+  .full_navbar_flexbox {
+    display: flex;
+    flex-direction: row;
+    @media (pointer: none), (pointer: coarse) {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1000;
+      width: 85%;
+      height: 100%;
+    }
+  }
+
   .full_chat_flexbox {
     width: 80%;
     display: flex;
@@ -71,8 +84,8 @@
 
         @media (pointer: none), (pointer: coarse) {
           padding-left: 12px;
-          margin-left: 0px;
-          margin-right: 0px;
+          margin-left: 5px;
+          margin-right: 5px;
         }
 
         .chat_input_icons {
