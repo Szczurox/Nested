@@ -212,8 +212,10 @@ export const Message: React.FC<MessageProps> = ({
         content.split(/([http|https]+:\/\/[\w\S(\.|:|/)]+)/g).forEach((el) => {
           // If element is link
           if (el.startsWith("https://") || el.startsWith("http://")) {
+            console.log(el);
             // Remove all metadata from possible image/vide
-            const parsedLink = el.substring(0, el.indexOf("?"));
+            const parsedLink =
+              el.indexOf("?") == -1 ? el : el.substring(0, el.indexOf("?"));
 
             // If image then add as image, if video then add as video to files
             if (/\.(jpg|jpeg|png|webp|avif|gif)$/.test(parsedLink)) {

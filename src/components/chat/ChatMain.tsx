@@ -338,7 +338,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
     if (!isTyping) {
       clearTimeout(typingTimeout);
 
-      console.log("started typing");
       setIsTyping(true);
       await updateDoc(doc(participantsCollection, user.uid), {
         lastTyping: serverTimestamp(),
@@ -346,7 +345,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 
       setTypingTimeout(
         setTimeout(async () => {
-          console.log("done typing");
           setIsTyping(false);
         }, 5000)
       );
