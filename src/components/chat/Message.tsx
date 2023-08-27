@@ -468,11 +468,13 @@ export const Message: React.FC<MessageProps> = ({
             })}
             {filesFromLinks.map((el, index) =>
               el[1] == "image" ? (
-                <img
-                  src={el[0]}
-                  className={styles.message_embed_link}
-                  key={index}
-                ></img>
+                <a href={el[0]} target="_blank" rel="noreferrer">
+                  <img
+                    src={el[0]}
+                    className={styles.message_embed_link}
+                    key={index}
+                  />
+                </a>
               ) : (
                 <video
                   className={styles.message_embed_link}
