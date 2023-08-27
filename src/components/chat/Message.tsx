@@ -281,22 +281,24 @@ export const Message: React.FC<MessageProps> = ({
   const handleCopy = (e: ClipboardEvent): void => {
     let selection = document.getSelection();
     let range = selection!.getRangeAt(0);
+
     let contents = range.cloneContents();
     let copiedText = "";
 
-    if (
-      range.startContainer.parentElement!.parentElement!.parentElement ==
-      messageContentRef.current!
-    ) {
+    if (range.startContainer.parentElement?.closest(styles.message_content)) {
       for (let node of contents.childNodes.values()) {
         if (node.nodeType === 1 && node.nodeName === "IMG") {
+          console.log(node as HTMLImageElement);
           copiedText += (node as HTMLImageElement).alt;
         } else {
           copiedText += node.textContent;
         }
       }
 
-      e.clipboardData!.setData("text/plain", copiedText);
+      e.clipboardData!.setData(
+        "text/plain",
+        copiedText.replace(/^\s+|\s+$/g, "")
+      );
       e.preventDefault();
     }
   };
