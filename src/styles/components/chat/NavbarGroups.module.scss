@@ -21,11 +21,12 @@
     font-size: 30px;
     color: white;
     text-align: center;
+    transition: border-radius 0.1s;
     cursor: pointer;
 
     &:hover {
       border-radius: 8px;
-      background-color: #6b7478;
+      background-color: #52595c;
     }
   }
 

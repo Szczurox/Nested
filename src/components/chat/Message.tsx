@@ -482,7 +482,7 @@ export const Message: React.FC<MessageProps> = ({
                   key={index}
                   src={el[0]}
                   onLoad={(_) => (onImageLoad ? onImageLoad() : null)}
-                ></video>
+                />
               )
             )}
           </>
