@@ -2,7 +2,10 @@ import styles from "../../../styles/components/chat/navbar/NavbarGroup.module.sc
 import { useChannel } from "context/channelContext";
 import GroupsIcon from "@mui/icons-material/Groups";
 import { Avatar } from "@material-ui/core";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { useUser } from "context/userContext";
+import { createFirebaseApp } from "firebase-utils/clientApp";
 
 interface NavbarGroupProps {
   isMobile: boolean;
@@ -15,14 +18,32 @@ export const NavbarGroup: React.FC<NavbarGroupProps> = ({
   icon = "https://pbs.twimg.com/profile_images/949787136030539782/LnRrYf6e_400x400.jpg",
   isMobile,
 }) => {
-  const { channel } = useChannel();
+  const { channel, setGroupData } = useChannel();
   const [isSelected, setIsSelected] = useState<boolean>(false);
   const [isHover, setIsHover] = useState<boolean>(false);
 
-  const handleToggle = () => {
-    if (isSelected && isMobile) setIsHover(false);
-    setIsSelected(!isSelected);
+  const { user } = useUser();
+
+  const app = createFirebaseApp();
+  const db = getFirestore(app!);
+
+  const getLastViewed = async () => {
+    const memberDoc = doc(db, "groups", id, "members", user.uid);
+    const docSnapMember = await getDoc(memberDoc);
+    if (docSnapMember.exists())
+      setGroupData(id, docSnapMember.data().lastViewed);
   };
+
+  const handleToggle = () => {
+    console.log(id);
+    if (!isSelected) getLastViewed();
+    if (isSelected && isMobile) setIsHover(false);
+  };
+
+  useEffect(() => {
+    if (channel.idG == id) setIsSelected(true);
+    else setIsSelected(false);
+  }, [channel.idG]);
 
   return (
     <div

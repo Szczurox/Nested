@@ -288,7 +288,6 @@ export const Message: React.FC<MessageProps> = ({
     if (range.startContainer.parentElement?.closest(styles.message_content)) {
       for (let node of contents.childNodes.values()) {
         if (node.nodeType === 1 && node.nodeName === "IMG") {
-          console.log(node as HTMLImageElement);
           copiedText += (node as HTMLImageElement).alt;
         } else {
           copiedText += node.textContent;

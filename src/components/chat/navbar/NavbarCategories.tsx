@@ -18,11 +18,11 @@ import { useUser } from "context/userContext";
 import InputPopUp from "../popup/InputPopUp";
 import { addCategory } from "components/utils/categoryQueries";
 import { addChannel } from "components/utils/channelQueries";
-
-export type NavbarCategoriesVariant = "server" | "dms";
+import { NavbarVariant } from "../Navbar";
+import { NavbarDm } from "./NavbarDm";
 
 export interface NavbarCategoriesProps {
-  variant?: NavbarCategoriesVariant;
+  variant?: NavbarVariant;
   hideNavbar: () => void;
 }
 
@@ -213,11 +213,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
             ))}
           </div>
         ) : (
-          <NavbarCategory
-            name="DIRECT MESSAGES"
-            idC=""
-            hideNavbar={hideNavbar}
-          />
+          <NavbarDm />
         )}
       </div>
     </>

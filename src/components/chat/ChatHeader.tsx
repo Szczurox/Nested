@@ -9,10 +9,12 @@ import HelpRoundedIcon from "@material-ui/icons/HelpRounded";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import styles from "../../styles/components/chat/ChatHeader.module.scss";
 import { useChannel } from "context/channelContext";
+import { NavbarVariant } from "./Navbar";
 
 interface ChatHeaderProps {
   isNavbarOpen: boolean;
   isMembersOpen: boolean;
+  variant: NavbarVariant;
   onMembers: () => void;
   setShowNavbar: (show: boolean) => void;
 }
@@ -20,6 +22,7 @@ interface ChatHeaderProps {
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
   isNavbarOpen,
   isMembersOpen,
+  variant,
   onMembers,
   setShowNavbar,
 }) => {
@@ -49,21 +52,23 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
             {channel.name}
           </h3>
         </div>
-        <div className={styles.chatHeader_right}>
-          <NotificationsIcon />
-          <EditLocationRoundedIcon />
-          <PeopleAltRoundedIcon
-            onClick={(_) => onMembers()}
-            className={styles.chatHeader_people}
-          />
+        {variant != "dms" ? (
+          <div className={styles.chatHeader_right}>
+            <NotificationsIcon />
+            <EditLocationRoundedIcon />
+            <PeopleAltRoundedIcon
+              onClick={(_) => onMembers()}
+              className={styles.chatHeader_people}
+            />
 
-          <div className={styles.chatHeader_search}>
-            <input placeholder="Search" />
-            <SearchRoundedIcon />
+            <div className={styles.chatHeader_search}>
+              <input placeholder="Search" />
+              <SearchRoundedIcon />
+            </div>
+            <MarkunreadMailboxRoundedIcon />
+            <HelpRoundedIcon />
           </div>
-          <MarkunreadMailboxRoundedIcon />
-          <HelpRoundedIcon />
-        </div>
+        ) : null}
       </div>
     </div>
   );

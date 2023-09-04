@@ -1,5 +1,5 @@
 import styles from "../styles/Chat.module.scss";
-import { Navbar } from "../components/chat/Navbar";
+import { Navbar, NavbarVariant } from "../components/chat/Navbar";
 import React, { useEffect, useState } from "react";
 import { useUser } from "context/userContext";
 import { useRouter } from "next/router";
@@ -27,9 +27,10 @@ import { NavbarGroups } from "components/chat/NavbarGroups";
 const Chat = () => {
   const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
   const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
+  const [variant, setVariant] = useState<NavbarVariant>("server");
 
   const { user, loadingUser, setMemberData } = useUser();
-  const { channel } = useChannel();
+  const { channel, setChannelData } = useChannel();
 
   const router = useRouter();
 
@@ -101,6 +102,7 @@ const Chat = () => {
       const docSnapMember = await getDoc(memberDoc);
       let unsub: () => void;
       if (docSnapMember.exists()) {
+        setChannelData(docSnapMember.data().lastViewed);
         unsub = onSnapshot(memberDoc, (docSnapMember) =>
           setUserPerms(docSnapMember)
         );
@@ -132,8 +134,11 @@ const Chat = () => {
       <Loading />
       {!isMobile || showNavbar ? (
         <div className={styles.full_navbar_flexbox}>
-          <NavbarGroups isMobile={isMobile} />
-          <Navbar hideNavbar={() => setShowNavbar(false)} />
+          <NavbarGroups
+            isMobile={isMobile}
+            variantChange={(variant: NavbarVariant) => setVariant(variant)}
+          />
+          <Navbar hideNavbar={() => setShowNavbar(false)} variant={variant} />
         </div>
       ) : null}
       <div className={styles.full_chat_flexbox}>
@@ -143,6 +148,7 @@ const Chat = () => {
             isMembersOpen={showMembers}
             isNavbarOpen={showNavbar ? true : false}
             setShowNavbar={(show) => setShowNavbar(show)}
+            variant={variant}
           />
         </div>
         <div className={styles.chat_flexbox}>
@@ -154,7 +160,9 @@ const Chat = () => {
             }}
             isMembersOpen={showMembers}
           />
-          {showMembers && <Members isMobile={isMobile} />}
+          {showMembers && variant === "server" && (
+            <Members isMobile={isMobile} />
+          )}
         </div>
       </div>
     </div>

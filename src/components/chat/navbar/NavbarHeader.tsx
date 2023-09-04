@@ -97,8 +97,10 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
       </div>
     </>
   ) : (
-    <div className="search">
-      <input placeholder="Search" />
+    <div className={styles.sidebar_header_search}>
+      <div className={styles.sidebar_header_input}>
+        <input placeholder="Search" />
+      </div>
     </div>
   );
 };

@@ -94,9 +94,11 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
   );
 
   useEffect(() => {
-    if (channel.id == id) setIsActive(true);
-    else setIsActive(false);
-  }, [channel.id, id]);
+    if (channel.id == id) {
+      setIsActive(true);
+      if (channel.name != name) setChannelData(id, name, idC, nameC);
+    } else setIsActive(false);
+  }, [id, channel]);
 
   useEffect(() => {
     const participantSnapshot = () => {
@@ -140,10 +142,6 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
       } else return () => undefined;
     }
 
-    // Set channel ID to the first loaded channel
-    if (channel.id == "" && channelType == "text")
-      setChannelData(id, name, idC, nameC);
-
     const unsub = everyoneSnapshot();
 
     checkParticipant().then((res) => {
@@ -177,11 +175,18 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
     );
   };
 
+  const updateLastViewed = async () => {
+    await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
+      lastViewed: id,
+    });
+  };
+
   const handleToggle = () => {
     updateLastActive();
     setIsActive(true);
     setChannelData(id, name, idC, nameC);
     hideNavbar();
+    updateLastViewed();
   };
 
   const deleteChannel = async () => {

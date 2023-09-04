@@ -10,9 +10,16 @@ export interface ChannelContextType {
   };
   setChannelData: (
     id: string,
-    name: string,
-    idC: string,
-    nameC: string
+    name?: string,
+    idC?: string,
+    nameC?: string
+  ) => void;
+  setGroupData: (
+    idG: string,
+    id?: string,
+    name?: string,
+    idC?: string,
+    nameC?: string
   ) => void;
 }
 
@@ -24,8 +31,19 @@ export const ChannelContext = createContext<ChannelContextType>({
     nameC: "",
     idG: "",
   },
-  setChannelData: (_id: string, _name: string, _idC: string, _nameC: string) =>
-    undefined,
+  setChannelData: (
+    _id: string,
+    _name?: string,
+    _idC?: string,
+    _nameC?: string
+  ) => undefined,
+  setGroupData: (
+    _idG: string,
+    _id?: string,
+    _name?: string,
+    _idC?: string,
+    _nameC?: string
+  ) => undefined,
 });
 
 export default function ChannelContextComp({ children }: any) {
@@ -39,21 +57,37 @@ export default function ChannelContextComp({ children }: any) {
 
   const setChannelData = (
     id: string,
-    name: string,
-    idC: string,
-    nameC: string
+    name?: string,
+    idC?: string,
+    nameC?: string
   ) => {
     setChannel({
       id: id,
-      name: name,
-      idC: idC,
-      nameC: nameC,
+      name: name ? name : channel.name,
+      idC: idC ? idC : channel.idC,
+      nameC: nameC ? nameC : channel.nameC,
       idG: channel.idG,
     });
   };
 
+  const setGroupData = (
+    idG: string,
+    id?: string,
+    name?: string,
+    idC?: string,
+    nameC?: string
+  ) => {
+    setChannel({
+      id: id ? id : channel.id,
+      name: name ? name : channel.name,
+      idC: idC ? idC : channel.idC,
+      nameC: nameC ? nameC : channel.nameC,
+      idG: idG,
+    });
+  };
+
   return (
-    <ChannelContext.Provider value={{ channel, setChannelData }}>
+    <ChannelContext.Provider value={{ channel, setChannelData, setGroupData }}>
       {children}
     </ChannelContext.Provider>
   );

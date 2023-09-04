@@ -332,7 +332,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
         unsub2();
       };
     }
-  }, [channel.id]);
+  }, [channel.id, channel.idG]);
 
   async function userTyping() {
     if (!isTyping) {
@@ -571,7 +571,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
             wrap="soft"
             maxLength={2000}
             maxRows={input ? (isMobile ? 4 : 10) : 1}
-            disabled={channel.id == "" || isDisabled}
+            disabled={channel.id == "" || isDisabled || channel.idG == "@dms"}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={checkMessage}
             onPasteCapture={checkPaste}
