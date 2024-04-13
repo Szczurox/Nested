@@ -146,7 +146,7 @@
   .message_delete_embed {
     margin-top: -10px;
     max-width: 95%;
-    max-height: 40%;
+    max-height: 50vh;
     width: auto;
     height: auto;
     border-radius: 10px;
@@ -160,7 +160,7 @@
   .message_embed_wrapper {
     position: relative;
     max-width: 60%;
-    max-height: 50%;
+    max-height: 50vh;
     width: auto;
     height: auto;
     border-radius: 10px;
@@ -178,7 +178,7 @@
     position: relative;
     margin-top: 4px;
     max-width: 60%;
-    max-height: 20%;
+    max-height: 50vh;
     width: auto;
     height: auto;
     border-radius: 10px;
@@ -193,7 +193,7 @@
   .message_embed_text {
     margin-top: 4px;
     max-width: 60%;
-    max-height: 50%;
+    max-height: 60vh;
     width: auto;
     height: auto;
     border-radius: 10px;
@@ -207,12 +207,16 @@
 
   .message_embed_link {
     margin-top: 2px;
-    max-width: 95%;
-    max-height: 50%;
+    max-width: 40%;
+    max-height: 50vh;
     width: auto;
     height: auto;
     border-radius: 10px;
     margin-left: 60px;
+
+    @media (pointer: none), (pointer: coarse) {
+      max-width: 76%;
+    }
   }
 
   .message_iframe {
