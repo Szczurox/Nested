@@ -78,6 +78,7 @@ export default function UserContextComp({ children }: any) {
   const db = getFirestore(app!);
 
   const setUserData = (
+    token: string,
     uid: string,
     username: string,
     avatar: string,
@@ -85,6 +86,7 @@ export default function UserContextComp({ children }: any) {
   ) => {
     setUser({
       ...user,
+      token: token,
       uid: uid,
       username: username,
       avatar: avatar,

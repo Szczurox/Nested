@@ -28,6 +28,7 @@
   }
 
   .navbar_avatar {
+    position: relative;
     .navbar_upload_avatar {
       opacity: 0;
       -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
@@ -35,14 +36,12 @@
       -moz-opacity: 0;
       -khtml-opacity: 0;
       position: absolute;
+      top: 0;
       left: 0;
       bottom: 0;
       right: 0;
-      width: 3%;
-      height: 4%;
-      margin-left: 20px;
-      margin-right: 20px;
-      margin-bottom: 25px;
+      width: 100%;
+      height: 100%;
       cursor: pointer;
     }
   }

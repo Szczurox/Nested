@@ -150,7 +150,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
         unsub();
       };
     });
-  }, []);
+  }, [id, channel]);
 
   useEffect(() => {
     const perms = everyPerms.concat(partPerms);

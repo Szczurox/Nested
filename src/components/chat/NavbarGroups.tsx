@@ -54,7 +54,11 @@ export const NavbarGroups: React.FC<NavbarGroupsProps> = ({
       </div>
       <hr className={styles.navbar_groups_separator} />
       <div className={styles.navbar_groups_groups}>
-        <NavbarGroup id="H8cO2zBjCyJYsmM4g5fv" isMobile={isMobile} />
+        <NavbarGroup
+          id="H8cO2zBjCyJYsmM4g5fv"
+          isMobile={isMobile}
+          icon="https://firebasestorage.googleapis.com/v0/b/faicamp-chat.appspot.com/o/media%2FH8cO2zBjCyJYsmM4g5fv%2Ficon%2F94be048d6c8fb2e759ea2fc0f42e42bb.png?alt=media&token=8adaa6b9-ef54-4858-b17f-ef478d959a85"
+        />
       </div>
     </div>
   );

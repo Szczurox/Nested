@@ -86,15 +86,17 @@ export const NavbarProfile: React.FC = ({}) => {
   return (
     <div className={styles.navbar_profile}>
       <div className={styles.navbar_avatar}>
-        <Avatar src={avatar} />
-        <input
-          type="file"
-          value=""
-          className={styles.navbar_upload_avatar}
-          onChange={(e) => {
-            if (e.target.files) uploadAvatar(e.target.files[0]);
-          }}
-        />
+        <label>
+          <input
+            type="file"
+            value=""
+            className={styles.navbar_upload_avatar}
+            onChange={(e) => {
+              if (e.target.files) uploadAvatar(e.target.files[0]);
+            }}
+          />
+          <Avatar src={avatar} />
+        </label>
       </div>
       <div className={styles.navbar_profileInfo}>
         <h3>{user.nickname}</h3>

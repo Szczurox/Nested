@@ -15,7 +15,7 @@ interface NavbarGroupProps {
 
 export const NavbarGroup: React.FC<NavbarGroupProps> = ({
   id,
-  icon = "https://pbs.twimg.com/profile_images/949787136030539782/LnRrYf6e_400x400.jpg",
+  icon = "",
   isMobile,
 }) => {
   const { channel, setGroupData } = useChannel();
