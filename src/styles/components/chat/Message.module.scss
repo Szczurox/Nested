@@ -150,6 +150,20 @@
     height: auto;
     border-radius: 10px;
     margin-left: 60px;
+    margin-top: -20px;
+    @media (pointer: none), (pointer: coarse) {
+      margin-top: 2px;
+      margin-left: 0px;
+    }
+  }
+
+  .message_delete_embed_text {
+    max-width: 95%;
+    max-height: 50%;
+    width: auto;
+    height: auto;
+    border-radius: 10px;
+    margin-left: 60px;
     @media (pointer: none), (pointer: coarse) {
       margin-top: 2px;
       margin-left: 0px;

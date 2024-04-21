@@ -64,7 +64,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
   const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false); // Show Scroll To Bottom button
   const [isLoading, setIsLoading] = useState<boolean>(false); // Are messages loading
   const [isTyping, setIsTyping] = useState<boolean>(false);
-  const [isDisabled, setIsDisabled] = useState<boolean>(false);
+  const [isDisabled, setIsDisabled] = useState<boolean>(false); // Is chatting disabled
   const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);

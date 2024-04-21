@@ -423,7 +423,9 @@ export const Message: React.FC<MessageProps> = ({
                 <img
                   className={
                     inPopUp
-                      ? styles.message_delete_embed
+                      ? content == ""
+                        ? styles.message_delete_embed
+                        : styles.message_delete_embed_text
                       : content != "" || isEditing
                       ? styles.message_embed_text
                       : styles.message_embed

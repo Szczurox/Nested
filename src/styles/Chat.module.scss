@@ -149,14 +149,14 @@
       }
 
       .chat_messages {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
         flex: 1;
         background-color: #363a3f;
         overflow-y: auto;
         overflow-x: hidden;
 
         @media (pointer: none), (pointer: coarse) {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
           &::-webkit-scrollbar {
             display: none;
           }
