@@ -50,10 +50,6 @@
         padding-bottom: 25px;
       }
 
-      .chat_input_button {
-        display: none;
-      }
-
       .chat_typing_users {
         color: white;
         margin-left: 2%;
@@ -64,88 +60,6 @@
         color: white;
         margin-left: 2%;
         min-height: 2%;
-      }
-
-      .chat_input {
-        color: lightgrey;
-        color: lightgrey;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding-left: 20px;
-        padding-right: 20px;
-        border-radius: 10px;
-        padding-bottom: 10px;
-        margin: 20px;
-        margin-bottom: 0px;
-        margin-top: 0px;
-        border-top: 1px solid gray;
-        background-color: #474b53;
-        font-size: large;
-
-        @media (pointer: none), (pointer: coarse) {
-          padding-left: 12px;
-          margin-left: 5px;
-          margin-right: 5px;
-        }
-
-        .chat_input_icons {
-          margin-top: 5px;
-          cursor: pointer;
-          margin-left: 10px;
-          .chat_input_icon {
-            margin-left: 10px;
-            &:hover {
-              color: white;
-            }
-          }
-        }
-
-        form {
-          overflow-y: auto;
-          overflow-x: hidden;
-          flex: 1;
-
-          ::-webkit-scrollbar-track {
-            background: none;
-          }
-
-          ::-webkit-scrollbar-thumb {
-            background: #2f3135;
-          }
-
-          textarea {
-            white-space: pre-wrap;
-            width: 100%;
-            resize: none;
-            padding: 15px;
-            padding-top: 16px;
-            padding-bottom: 4px;
-            border: none;
-            outline-width: 0;
-            color: white;
-            background: transparent;
-            font-size: large;
-            line-height: 20px;
-            overflow-y: auto;
-            overflow-x: hidden;
-
-            @media (pointer: none), (pointer: coarse) {
-              padding-right: 0px;
-              line-height: 22px;
-            }
-
-            &::placeholder {
-              text-overflow: ellipsis;
-              white-space: nowrap;
-              overflow: hidden;
-            }
-
-            &:placeholder-shown {
-              text-overflow: ellipsis;
-            }
-          }
-        }
       }
 
       .chat_messages {

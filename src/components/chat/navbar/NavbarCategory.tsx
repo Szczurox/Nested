@@ -75,7 +75,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 
       const unsub = onSnapshot(qCha, (querySnapshot) => {
         querySnapshot.docChanges().forEach((change) => {
-          if (change.type === "removed" || change.type == "modified") {
+          if (change.type === "removed" || change.type === "modified") {
             setChannels((channels) =>
               [...channels.filter((el) => el.id !== change.doc.id)].sort(
                 (x, y) => {

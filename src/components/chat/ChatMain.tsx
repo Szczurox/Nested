@@ -37,6 +37,7 @@ import { wait } from "components/utils/utils";
 import Emoji from "./ui-icons/Emoji";
 import DotsLoading from "components/animations/DotsLoading";
 import useMediaQuery from "@mui/material/useMediaQuery";
+import { ChatInput } from "./ChatInput";
 
 interface ChatMainProps {
   isNavbarOpen: boolean;
@@ -49,33 +50,26 @@ export const ChatMain: React.FC<ChatMainProps> = ({
   isMembersOpen,
   hideNavbar,
 }) => {
-  const [input, setInput] = useState<string>(""); // Textarea input
   const [messages, setMessages] = useState<MessageData[]>([]); // Array of all messages currently loaded
   const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>([]); // Array of all file progress messages
-  const [emojiBucket, setEmojiBucket] = useState<string[]>([]); // Array of all the emoji name|link used in the message
   const [typingUsers, setTypingUsers] = useState<[string, string][]>([]); // Array of users that are currenty typing (except the user)
   const [unsubs, setUnsubs] = useState<(() => void)[]>([]); // Array of all unsubscribers
   const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0)); // Creation date of the last message fetched
-  const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>(
-    setTimeout(() => null, 0)
-  );
   const [slowDownCount, setSlowDownCount] = useState<number>(0); // Show Slow Down pop-up if reaches 2
   const [messagesEnd, setMessagesEnd] = useState<boolean>(false); // True if no more messages to load on the current channel
   const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false); // Show Scroll To Bottom button
-  const [isLoading, setIsLoading] = useState<boolean>(false); // Are messages loading
+  const [isLoading, setIsLoading] = useState<boolean>(false); // Are new messages loading
   const [isTyping, setIsTyping] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(false); // Is chatting disabled
   const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
   const listInnerRef = useRef<HTMLHeadingElement>(null);
-  const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
   const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
 
   const { channel } = useChannel();
   const { user } = useUser();
   const { message } = useMessage();
-  const { popUp } = usePopUp();
 
   const app = createFirebaseApp();
   const db = getFirestore(app!);
@@ -100,25 +94,9 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 
   const querySizeLimit = 20;
 
-  const textAreaSizeLimit = 2000;
-
   useEffect(() => {
     setIsDisabled(!user.partPermissions.includes("SEND_MESSAGES"));
   }, [channel.id, user.partPermissions]);
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyPress);
-    return () => {
-      document.removeEventListener("keydown", handleKeyPress);
-    };
-  }, [popUp.isOpen]);
-
-  useEffect(() => {
-    document.addEventListener("paste", pasted);
-    return () => {
-      document.removeEventListener("paste", pasted);
-    };
-  }, [input, popUp.isOpen, channel.id]);
 
   useEffect(() => {
     if (!isMobile) {
@@ -129,27 +107,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
       wait(100).then(() => (msg ? msg.scrollIntoView(false) : null));
     }
   }, [message]);
-
-  const pasted = (e: ClipboardEvent) => {
-    if (
-      e.clipboardData!.files[0] == undefined &&
-      channel.id != "" &&
-      !popUp.isOpen &&
-      document.activeElement?.tagName != "TEXTAREA"
-    ) {
-      textAreaRef.current!.focus();
-    }
-  };
-
-  const handleKeyPress = (e: KeyboardEvent) => {
-    if (
-      document.activeElement?.tagName != "TEXTAREA" &&
-      !popUp.isOpen &&
-      textAreaRef.current &&
-      ((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
-    )
-      textAreaRef.current.focus();
-  };
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
@@ -317,7 +274,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
     setTypingUsers([]);
 
     if (channel.id != "") {
-      if (!isMobile) textAreaRef.current!.focus();
       getTypingUsersOnJoin();
       setAutoScroll(true);
       setCanScrollToBottom(false);
@@ -334,126 +290,8 @@ export const ChatMain: React.FC<ChatMainProps> = ({
     }
   }, [channel.id, channel.idG]);
 
-  async function userTyping() {
-    if (!isTyping) {
-      clearTimeout(typingTimeout);
-
-      setIsTyping(true);
-      await updateDoc(doc(participantsCollection, user.uid), {
-        lastTyping: serverTimestamp(),
-      });
-
-      setTypingTimeout(
-        setTimeout(async () => {
-          setIsTyping(false);
-        }, 5000)
-      );
-    }
-  }
-
-  async function getEmojis(text: string) {
-    const emojiCollection = collection(db, "groups", channel.idG, "emoji");
-    const emojiSplit = text.split(/(<:.*?:>+)/g);
-    let emojis: string[] = [""];
-    emojiSplit.forEach(async (el) => {
-      if (
-        el.startsWith("<:") &&
-        el.endsWith(":>") &&
-        el.includes("?") &&
-        !emojis.includes(el)
-      ) {
-        if (!emojiBucket.find((e) => e.split("|")[0] == el)) {
-          const name = el.split("?")[0].slice(2);
-          const doc = await getDocs(
-            query(emojiCollection, where("name", "==", name))
-          );
-          const file = doc.docs[0].data().file;
-          console.log(
-            el,
-            file,
-            emojiBucket,
-            emojiBucket.find((e) => e[0] == el)
-          );
-          if (!doc.empty && file)
-            setEmojiBucket((emojiBucket) => [...emojiBucket, el + "|" + file]);
-          else emojis = [...emojis, el];
-        }
-      }
-    });
-  }
-
-  async function sendMessage() {
-    // Get current input and reset textarea instantly, before message gets fully sent
-    const chatInput = input.replace(/^\s+|\s+$/g, "");
-    setInput("");
-    if (chatInput.length) {
-      setInput("");
-      await updateDoc(doc(db, "groups", channel.idG, "channels", channel.id), {
-        lastMessageAt: serverTimestamp(),
-      }).catch((err) => console.log("Update lastMessagedAt Error: " + err));
-
-      await addDoc(messagesCollection, {
-        content: chatInput,
-        userid: user.uid,
-        createdAt: serverTimestamp(),
-        edited: false,
-        emojiBucket: arrayUnion(...emojiBucket),
-      })
-        .catch((err) => {
-          console.log(err);
-          // Create rejection is surely caused by trying to send too many messages
-          setSlowDownCount(slowDownCount + 1);
-        })
-        .then((_) => scrollToBottom());
-
-      // Update the time at which the last message was sent by the user
-      // Rate limit user
-      await updateDoc(doc(db, "profile", user.uid), {
-        lastMessagedAt: serverTimestamp(),
-      }).catch((err) => {
-        console.log(err);
-      });
-
-      setEmojiBucket([]);
-    }
-  }
-
-  async function sendMessageMobile() {
-    userTyping();
-    if (slowDownCount > 1 || popUp.isOpen) {
-      // Don't update input if sending messages too quickly or pop-up is open
-      textAreaRef.current!.blur();
-    } else if (channel.id != "") {
-      sendMessage();
-    }
-  }
-
-  async function checkMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
-    userTyping();
-    if (input.includes(":>") && input.includes("<:")) await getEmojis(input);
-    if (slowDownCount > 1 || popUp.isOpen) {
-      // Don't update input if sending messages too quickly or pop-up is open
-      e.preventDefault();
-      textAreaRef.current!.blur();
-    } else if (
-      e.key == "Enter" &&
-      e.shiftKey == false &&
-      channel.id != "" &&
-      !isMobile
-    ) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }
-
-  async function checkPaste(e: React.ClipboardEvent<HTMLTextAreaElement>) {
-    console.log(e.clipboardData.getData("text"));
-    await getEmojis(e.clipboardData.getData("text"));
-  }
-
   // Message at the bottom that show file upload progress
   const fileUploading = (fileData: FileUploadingData) => {
-    if (fileData.percent == 0) setInput("");
     if (fileData.percent != 101)
       setFilesUploading((files) => [
         ...files.filter((el) => el.id != fileData.id),
@@ -463,15 +301,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
       setFilesUploading((files) => files.filter((el) => el.id != fileData.id));
     if (autoScroll) {
       scrollToBottom();
-    }
-  };
-
-  const addedEmoji = (text: string, file: string) => {
-    if ((input + text).length <= textAreaSizeLimit) {
-      textAreaRef.current!.focus();
-      setInput(input + text);
-      if (!emojiBucket.find((el) => el[0] == text))
-        setEmojiBucket((emojiBucket) => [...emojiBucket, text + "|" + file]);
     }
   };
 
@@ -497,14 +326,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
         isNavbarOpen || isMembersOpen ? (_) => hideNavbar() : (_) => null
       }
     >
-      {slowDownCount > 1 ? (
-        <InformationPopUp
-          onOk={() => wait(1500).then(() => setSlowDownCount(0))}
-        >
-          <h3>Slow down!</h3>
-          <p>You are trying to send messages too quickly.</p>
-        </InformationPopUp>
-      ) : null}
       <div
         className={styles.chat_messages}
         onScroll={(e) => handleScroll(e)}
@@ -561,44 +382,14 @@ export const ChatMain: React.FC<ChatMainProps> = ({
         })}
         <div></div>
       </div>
-      <div className={styles.chat_input}>
-        {!isDisabled ? (
-          <UploadFile chatInput={input} uploadCallback={fileUploading} />
-        ) : null}
-        <form>
-          <TextareaAutosize
-            value={input}
-            wrap="soft"
-            maxLength={2000}
-            maxRows={input ? (isMobile ? 4 : 10) : 1}
-            disabled={channel.id == "" || isDisabled || channel.idG == "@dms"}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={checkMessage}
-            onPasteCapture={checkPaste}
-            placeholder={
-              !isDisabled
-                ? `Message #${channel.name}`
-                : `You don't have permission to message #${channel.name}`
-            }
-            ref={textAreaRef}
-          />
-          <button
-            disabled={channel.id == "" || !isDisabled}
-            className={styles.chat_input_button}
-            type="submit"
-          ></button>
-        </form>
-        <div className={styles.chat_input_icons}>
-          <GifIcon fontSize="large" className={styles.chat_input_icon} />
-          <Emoji enabled={channel.id != ""} emojiAdded={addedEmoji} />
-          {isMobile && input != "" ? (
-            <SendIcon
-              className={styles.chat_input_icon}
-              onClick={() => sendMessageMobile()}
-            />
-          ) : null}
-        </div>
-      </div>
+      <ChatInput
+        isDisabled={isDisabled}
+        isMobile={isMobile}
+        isTyping={isTyping}
+        fileUploading={fileUploading}
+        scrollToBottom={scrollToBottom}
+        setIsTyping={(typing: boolean) => setIsTyping(typing)}
+      />
       {canScrollToBottom && (
         <div
           className={styles.chat_jump}

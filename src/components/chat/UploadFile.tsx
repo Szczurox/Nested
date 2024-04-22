@@ -57,14 +57,12 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 
   const dropped = (e: DragEvent) => {
     e.preventDefault();
-    console.log("hi");
     if (e.dataTransfer!.files[0] != undefined && channel.id != "") {
       checkFile(e.dataTransfer!.files[0]);
     }
   };
 
   const pasted = (e: ClipboardEvent) => {
-    console.log(e.clipboardData!.files[0], channel.id);
     if (e.clipboardData!.files[0] != undefined && channel.id != "") {
       checkFile(e.clipboardData!.files[0]);
     }
