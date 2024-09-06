@@ -8,22 +8,18 @@ import { NavbarCategories } from "./navbar/NavbarCategories";
 export type NavbarVariant = "server" | "dms";
 
 interface NavbarProps {
-  variant?: NavbarVariant;
-  hideNavbar: () => void;
+	variant?: NavbarVariant;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-  variant = "server",
-  hideNavbar,
-}) => {
-  const [isVoiceConnected, setIsVoiceConnected] = useState(false);
+export const Navbar: React.FC<NavbarProps> = ({ variant = "server" }) => {
+	const [isVoiceConnected, setIsVoiceConnected] = useState(false);
 
-  return (
-    <div className={styles.navbar}>
-      <NavbarHeader variant={variant} />
-      <NavbarCategories hideNavbar={hideNavbar} variant={variant} />
-      {isVoiceConnected ? <NavbarVoice /> : null}
-      <NavbarProfile />
-    </div>
-  );
+	return (
+		<div className={styles.navbar}>
+			<NavbarHeader variant={variant} />
+			<NavbarCategories variant={variant} />
+			{isVoiceConnected ? <NavbarVoice /> : null}
+			<NavbarProfile />
+		</div>
+	);
 };

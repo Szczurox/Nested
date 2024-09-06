@@ -1,38 +1,38 @@
 .navbar_groups {
-  align-items: center;
-  flex: 0.25;
-  @media (pointer: none), (pointer: coarse) {
-    flex: 0.15;
-  }
-  min-width: 70px;
-  max-width: 70px;
-  background-color: #242528;
+	align-items: center;
+	flex: 0.25;
+	@media (pointer: none), (pointer: coarse) {
+		flex: 0.15;
+	}
+	min-width: 70px;
+	max-width: 70px;
+	background-color: #242528;
 
-  .navbar_groups_chat {
-    display: block;
-    margin-left: 10px;
-    margin-right: 10px;
-    background-color: #363a3f;
-    border-radius: 32px;
-    max-width: 50px;
-    max-height: 50px;
-    min-height: 50px;
-    margin-top: 10px;
-    font-size: 30px;
-    color: white;
-    text-align: center;
-    transition: border-radius 0.1s;
-    cursor: pointer;
+	.navbar_groups_chat {
+		display: block;
+		margin-left: 10px;
+		margin-right: 10px;
+		background-color: #363a3f;
+		border-radius: 32px;
+		max-width: 50px;
+		max-height: 50px;
+		min-height: 50px;
+		margin-top: 10px;
+		font-size: 30px;
+		color: white;
+		text-align: center;
+		transition: border-radius 0.1s;
+		cursor: pointer;
 
-    &:hover {
-      border-radius: 8px;
-      background-color: #52595c;
-    }
-  }
+		&:hover {
+			border-radius: 8px;
+			background-color: #52595c;
+		}
+	}
 
-  .navbar_groups_separator {
-    border: 1px solid grey;
-    width: 54px;
-    margin-left: 8px;
-  }
+	.navbar_groups_separator {
+		border: 1px solid grey;
+		width: 54px;
+		margin-left: 8px;
+	}
 }

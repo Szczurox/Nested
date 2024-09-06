@@ -4,44 +4,47 @@ import ScreenPopUp from "./ScreenPopUp";
 import PopUpButton, { buttonColors } from "./PopUpButton";
 
 export interface DeleteConfirmPopUpProps {
-  onConfirm: () => void;
-  onCancel: () => void;
-  children?: ReactNode;
+	onConfirm: () => void;
+	onCancel: () => void;
+	children?: ReactNode;
 }
 
 const DeleteConfirmPopUp: React.FC<DeleteConfirmPopUpProps> = ({
-  onConfirm,
-  onCancel,
-  children,
+	onConfirm,
+	onCancel,
+	children,
 }) => {
-  useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key == "Enter") onConfirm();
-    };
+	useEffect(() => {
+		const handler = (e: KeyboardEvent) => {
+			if (e.key == "Enter") onConfirm();
+		};
 
-    document.addEventListener("keydown", handler, false);
-    return () => {
-      document.removeEventListener("keydown", handler, false);
-    };
-  }, []);
+		document.addEventListener("keydown", handler, false);
+		return () => {
+			document.removeEventListener("keydown", handler, false);
+		};
+	}, []);
 
-  return (
-    <ScreenPopUp>
-      <div className={styles.popup_text}>
-        <h3>Delete Message</h3>
-        <p>Are you sure u want to delete this message?</p>
-      </div>
-      <div className={styles.message_preview}>{children}</div>
-      <div className={styles.popup_buttons}>
-        <div className={styles.popup_cancel} onClick={(_) => onCancel()}>
-          Cancel
-        </div>
-        <PopUpButton onClick={(_) => onConfirm()} color={"red"}>
-          Delete
-        </PopUpButton>
-      </div>
-    </ScreenPopUp>
-  );
+	return (
+		<ScreenPopUp>
+			<div className={styles.popup_text}>
+				<h3>Delete Message</h3>
+				<p>Are you sure u want to delete this message?</p>
+			</div>
+			<div className={styles.message_preview}>{children}</div>
+			<div className={styles.popup_buttons}>
+				<div
+					className={styles.popup_cancel}
+					onClick={(_) => onCancel()}
+				>
+					Cancel
+				</div>
+				<PopUpButton onClick={(_) => onConfirm()} color={"red"}>
+					Delete
+				</PopUpButton>
+			</div>
+		</ScreenPopUp>
+	);
 };
 
 export default DeleteConfirmPopUp;

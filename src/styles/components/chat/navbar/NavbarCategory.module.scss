@@ -1,51 +1,51 @@
 .navbar_channels_header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px;
-  padding-bottom: 0px;
-  color: gray;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px;
+	padding-bottom: 0px;
+	color: gray;
 
-  .navbar_header {
-    cursor: pointer;
-    display: flex;
-    flex: 1;
-    align-items: center;
-    padding-bottom: 10px;
+	.navbar_header {
+		cursor: pointer;
+		display: flex;
+		flex: 1;
+		align-items: center;
+		padding-bottom: 10px;
 
-    &:hover {
-      color: #d4d4d4;
-    }
+		&:hover {
+			color: #d4d4d4;
+		}
 
-    h4 {
-      font-size: large;
-      margin-bottom: 0px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-  }
+		h4 {
+			font-size: large;
+			margin-bottom: 0px;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+	}
 
-  .navbar_add_channel {
-    cursor: pointer;
-    display: flex;
-    &:hover {
-      color: #d4d4d4;
-    }
-    margin-bottom: 8px;
-  }
+	.navbar_add_channel {
+		cursor: pointer;
+		display: flex;
+		&:hover {
+			color: #d4d4d4;
+		}
+		margin-bottom: 8px;
+	}
 }
 
 .channel_toggle {
-  display: inline;
-  padding: none;
-  text-align: center;
+	display: inline;
+	padding: none;
+	text-align: center;
 }
 
 .channel_toggle_text {
-  display: inline;
-  font-size: large;
-  margin: 10px;
-  text-align: center;
-  vertical-align: middle;
+	display: inline;
+	font-size: large;
+	margin: 10px;
+	text-align: center;
+	vertical-align: middle;
 }

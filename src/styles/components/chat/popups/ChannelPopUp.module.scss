@@ -1,74 +1,74 @@
 .popup_buttons {
-  white-space: nowrap;
-  text-align: right;
+	white-space: nowrap;
+	text-align: right;
 }
 
 .popup_cancel {
-  color: lightgrey;
-  display: inline-block;
-  padding: 10px;
-  margin-right: 10px;
+	color: lightgrey;
+	display: inline-block;
+	padding: 10px;
+	margin-right: 10px;
 
-  &:hover {
-    text-decoration: underline;
-    cursor: pointer;
-  }
+	&:hover {
+		text-decoration: underline;
+		cursor: pointer;
+	}
 }
 
 .popup_text {
-  color: white;
-  p {
-    color: lightgrey;
-  }
+	color: white;
+	p {
+		color: lightgrey;
+	}
 }
 
 .hash {
-  margin-left: 15px;
-  font-size: x-large;
-  margin-right: 15px;
+	margin-left: 15px;
+	font-size: x-large;
+	margin-right: 15px;
 }
 
 .popup_input {
-  color: lightgrey;
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  padding-bottom: 6px;
-  margin-top: 10px;
-  border-radius: 8px;
-  background-color: #474b53;
+	color: lightgrey;
+	display: flex;
+	width: 100%;
+	align-items: center;
+	justify-content: space-between;
+	padding-bottom: 6px;
+	margin-top: 10px;
+	border-radius: 8px;
+	background-color: #474b53;
 
-  form {
-    margin-right: 10px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    flex: 1;
+	form {
+		margin-right: 10px;
+		overflow-y: auto;
+		overflow-x: hidden;
+		flex: 1;
 
-    ::-webkit-scrollbar-track {
-      background: none;
-    }
+		::-webkit-scrollbar-track {
+			background: none;
+		}
 
-    ::-webkit-scrollbar-thumb {
-      background: #2f3135;
-    }
+		::-webkit-scrollbar-thumb {
+			background: #2f3135;
+		}
 
-    textarea {
-      white-space: pre-wrap;
-      width: 100%;
-      resize: none;
-      padding: 15px;
-      padding-left: 0px;
-      padding-top: 16px;
-      padding-bottom: 4px;
-      border: none;
-      outline-width: 0;
-      color: white;
-      background: transparent;
-      font-size: large;
-      line-height: 20px;
-      overflow-y: auto;
-      overflow-x: hidden;
-    }
-  }
+		textarea {
+			white-space: pre-wrap;
+			width: 100%;
+			resize: none;
+			padding: 15px;
+			padding-left: 0px;
+			padding-top: 16px;
+			padding-bottom: 4px;
+			border: none;
+			outline-width: 0;
+			color: white;
+			background: transparent;
+			font-size: large;
+			line-height: 20px;
+			overflow-y: auto;
+			overflow-x: hidden;
+		}
+	}
 }

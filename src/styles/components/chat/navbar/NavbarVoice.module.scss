@@ -1,46 +1,46 @@
 $connected: #4fb185;
 
 .voice {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: grey;
-  padding: 10px;
-  padding-bottom: 0px;
-  border-top: 1px solid grey;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: grey;
+	padding: 10px;
+	padding-bottom: 0px;
+	border-top: 1px solid grey;
 
-  .info {
-    flex: 1;
-    padding: 10px;
-    h4 {
-      font-size: large;
-      color: $connected;
-    }
-    p {
-      font-size: smaller;
-    }
-  }
+	.info {
+		flex: 1;
+		padding: 10px;
+		h4 {
+			font-size: large;
+			color: $connected;
+		}
+		p {
+			font-size: smaller;
+		}
+	}
 
-  svg {
-    font-size: xx-large;
-  }
+	svg {
+		font-size: xx-large;
+	}
 
-  .connection_icon {
-    color: $connected;
-    margin-bottom: 10px;
-  }
+	.connection_icon {
+		color: $connected;
+		margin-bottom: 10px;
+	}
 
-  .icons {
-    .icon {
-      margin: 10px;
-      margin-bottom: 25px;
-      cursor: pointer;
+	.icons {
+		.icon {
+			margin: 10px;
+			margin-bottom: 25px;
+			cursor: pointer;
 
-      &:hover {
-        color: white;
-        background-color: #3c3f42;
-        border-radius: 8px;
-      }
-    }
-  }
+			&:hover {
+				color: white;
+				background-color: #3c3f42;
+				border-radius: 8px;
+			}
+		}
+	}
 }

@@ -1,119 +1,119 @@
 .chatHeader_navbar_open {
-  @media (pointer: none), (pointer: coarse) {
-    z-index: 10;
-    width: 100%;
-    transform: translate(85%, 0px);
-  }
+	@media (pointer: none), (pointer: coarse) {
+		z-index: 10;
+		width: 100%;
+		transform: translate(85%, 0px);
+	}
 }
 
 .chatHeader_members_open {
-  @media (pointer: none), (pointer: coarse) {
-    z-index: 10;
-    width: 100%;
-    transform: translate(-85%, 0px);
-  }
+	@media (pointer: none), (pointer: coarse) {
+		z-index: 10;
+		width: 100%;
+		transform: translate(-85%, 0px);
+	}
 }
 
 .chatHeader {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  justify-content: space-between;
-  color: gray;
-  align-items: center;
-  padding: 10px;
-  display: flex;
-  background-color: #363a3f;
-  height: 9%;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	justify-content: space-between;
+	color: gray;
+	align-items: center;
+	padding: 10px;
+	display: flex;
+	background-color: #363a3f;
+	height: 9%;
 
-  .chatHeader_menu_icon {
-    svg {
-      margin-left: 7.5px;
-      cursor: pointer;
-      margin-bottom: 1px;
-      width: 30px;
-      height: 30px;
-      margin-bottom: 5px;
+	.chatHeader_menu_icon {
+		svg {
+			margin-left: 7.5px;
+			cursor: pointer;
+			margin-bottom: 1px;
+			width: 30px;
+			height: 30px;
+			margin-bottom: 5px;
 
-      &:hover {
-        color: white;
-      }
-    }
-  }
+			&:hover {
+				color: white;
+			}
+		}
+	}
 
-  .chatHeader_hash {
-    color: grey;
-    font-size: 32px;
-    padding: 10px;
-    padding-top: 11px;
-    @media (pointer: none), (pointer: coarse) {
-      padding-left: 0px;
-    }
-  }
+	.chatHeader_hash {
+		color: grey;
+		font-size: 32px;
+		padding: 10px;
+		padding-top: 11px;
+		@media (pointer: none), (pointer: coarse) {
+			padding-left: 0px;
+		}
+	}
 
-  .chatHeader_left {
-    h3 {
-      display: flex;
-      align-items: center;
-      color: white;
-      font-size: x-large;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-    }
-  }
+	.chatHeader_left {
+		h3 {
+			display: flex;
+			align-items: center;
+			color: white;
+			font-size: x-large;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+	}
 
-  .chatHeader_right {
-    display: inline-block;
-    align-items: center;
-    justify-content: space-between;
-  }
+	.chatHeader_right {
+		display: inline-block;
+		align-items: center;
+		justify-content: space-between;
+	}
 
-  .chatHeader_right {
-    svg {
-      margin-left: 7.5px;
-      cursor: pointer;
-      margin-right: 7.5px;
-      margin-bottom: 1px;
-      @media (pointer: none), (pointer: coarse) {
-        &:not(.chatHeader_people) {
-          display: none;
-        }
-      }
+	.chatHeader_right {
+		svg {
+			margin-left: 7.5px;
+			cursor: pointer;
+			margin-right: 7.5px;
+			margin-bottom: 1px;
+			@media (pointer: none), (pointer: coarse) {
+				&:not(.chatHeader_people) {
+					display: none;
+				}
+			}
 
-      &:hover {
-        color: white;
-      }
-    }
-  }
-  .chatHeader_search {
-    display: inline-block;
-    align-items: center;
-    color: gray;
-    background-color: #232528;
-    border-radius: 3px;
-    padding: 3px;
-    margin-left: 10px;
-    margin-right: 10px;
+			&:hover {
+				color: white;
+			}
+		}
+	}
+	.chatHeader_search {
+		display: inline-block;
+		align-items: center;
+		color: gray;
+		background-color: #232528;
+		border-radius: 3px;
+		padding: 3px;
+		margin-left: 10px;
+		margin-right: 10px;
 
-    @media (pointer: none), (pointer: coarse) {
-      display: none;
-    }
+		@media (pointer: none), (pointer: coarse) {
+			display: none;
+		}
 
-    input {
-      border: none;
-      color: white;
-      outline-width: 0;
-      background: transparent;
-    }
+		input {
+			border: none;
+			color: white;
+			outline-width: 0;
+			background: transparent;
+		}
 
-    svg {
-      margin-top: 1px;
-      margin-right: 0px;
-      float: right;
-    }
-  }
+		svg {
+			margin-top: 1px;
+			margin-right: 0px;
+			float: right;
+		}
+	}
 }

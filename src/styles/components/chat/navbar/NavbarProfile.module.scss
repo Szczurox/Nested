@@ -1,61 +1,61 @@
 .navbar_profile {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  color: grey;
-  padding: 10px 20px 10px 20px;
-  border-top: 1px solid grey;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: grey;
+	padding: 10px 20px 10px 20px;
+	border-top: 1px solid grey;
 
-  .navbar_profileInfo {
-    flex: 1;
-    padding: 10px;
-    padding-bottom: 0px;
+	.navbar_profileInfo {
+		flex: 1;
+		padding: 10px;
+		padding-bottom: 0px;
 
-    h3 {
-      color: white;
-      margin-bottom: 0px;
-      font-size: large;
-    }
+		h3 {
+			color: white;
+			margin-bottom: 0px;
+			font-size: large;
+		}
 
-    p {
-      -webkit-touch-callout: all;
-      -webkit-user-select: all;
-      -khtml-user-select: all;
-      -moz-user-select: all;
-      -ms-user-select: all;
-      user-select: all;
-    }
-  }
+		p {
+			-webkit-touch-callout: all;
+			-webkit-user-select: all;
+			-khtml-user-select: all;
+			-moz-user-select: all;
+			-ms-user-select: all;
+			user-select: all;
+		}
+	}
 
-  .navbar_avatar {
-    position: relative;
-    .navbar_upload_avatar {
-      opacity: 0;
-      -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
-      filter: alpha(opacity=0);
-      -moz-opacity: 0;
-      -khtml-opacity: 0;
-      position: absolute;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      right: 0;
-      width: 100%;
-      height: 100%;
-      cursor: pointer;
-    }
-  }
+	.navbar_avatar {
+		position: relative;
+		.navbar_upload_avatar {
+			opacity: 0;
+			-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+			filter: alpha(opacity=0);
+			-moz-opacity: 0;
+			-khtml-opacity: 0;
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			width: 100%;
+			height: 100%;
+			cursor: pointer;
+		}
+	}
 
-  .navbar_profileIcons {
-    svg {
-      margin: 10px;
-      cursor: pointer;
+	.navbar_profileIcons {
+		svg {
+			margin: 10px;
+			cursor: pointer;
 
-      &:hover {
-        color: white;
-        background-color: #3c3f42;
-        border-radius: 6px;
-      }
-    }
-  }
+			&:hover {
+				color: white;
+				background-color: #3c3f42;
+				border-radius: 6px;
+			}
+		}
+	}
 }

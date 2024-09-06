@@ -4,35 +4,35 @@ import ScreenPopUp from "./ScreenPopUp";
 import PopUpButton from "./PopUpButton";
 
 interface InformationPopUpProps {
-  onOk: () => void;
-  children: ReactNode;
+	onOk: () => void;
+	children: ReactNode;
 }
 
 const InformationPopUp: React.FC<InformationPopUpProps> = ({
-  onOk,
-  children,
+	onOk,
+	children,
 }) => {
-  useEffect(() => {
-    const handler = async (e: KeyboardEvent) => {
-      if (e.key == "Enter") onOk();
-    };
+	useEffect(() => {
+		const handler = async (e: KeyboardEvent) => {
+			if (e.key == "Enter") onOk();
+		};
 
-    document.addEventListener("keydown", handler, false);
-    return () => {
-      document.removeEventListener("keydown", handler, false);
-    };
-  }, [onOk]);
+		document.addEventListener("keydown", handler, false);
+		return () => {
+			document.removeEventListener("keydown", handler, false);
+		};
+	}, [onOk]);
 
-  return (
-    <ScreenPopUp>
-      <div className={styles.popup_text}>{children}</div>
-      <div className={styles.popup_buttons}>
-        <PopUpButton color="grey" onClick={(_) => onOk()}>
-          OK
-        </PopUpButton>
-      </div>
-    </ScreenPopUp>
-  );
+	return (
+		<ScreenPopUp>
+			<div className={styles.popup_text}>{children}</div>
+			<div className={styles.popup_buttons}>
+				<PopUpButton color="grey" onClick={(_) => onOk()}>
+					OK
+				</PopUpButton>
+			</div>
+		</ScreenPopUp>
+	);
 };
 
 export default InformationPopUp;

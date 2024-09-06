@@ -1,46 +1,46 @@
 .member {
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 10px;
-  margin-left: 10px;
-  margin-right: 10px;
-  border-radius: 10px;
-  &:hover {
-    background-color: #35373b;
-  }
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-top: 10px;
+	margin-left: 10px;
+	margin-right: 10px;
+	border-radius: 10px;
+	&:hover {
+		background-color: #35373b;
+	}
 
-  .member_avatar {
-    float: left;
-    margin-right: 15px;
-  }
+	.member_avatar {
+		float: left;
+		margin-right: 15px;
+	}
 
-  img {
-    width: 48px;
-  }
+	img {
+		width: 48px;
+	}
 
-  h4 {
-    margin-top: 2px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-  }
+	h4 {
+		margin-top: 2px;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+	}
 
-  .member_activity_background {
-    height: 14px;
-    width: 14px;
-    position: relative;
-    background-color: #2f3135;
-    border-radius: 50%;
-    display: inline-block;
-    transform: translate(-220%, -30%);
-  }
+	.member_activity_background {
+		height: 14px;
+		width: 14px;
+		position: relative;
+		background-color: #2f3135;
+		border-radius: 50%;
+		display: inline-block;
+		transform: translate(-220%, -30%);
+	}
 
-  .member_activity {
-    height: 10px;
-    width: 10px;
-    position: relative;
-    border-radius: 50%;
-    display: inline-block;
-    transform: translate(-425%, -60%);
-  }
+	.member_activity {
+		height: 10px;
+		width: 10px;
+		position: relative;
+		border-radius: 50%;
+		display: inline-block;
+		transform: translate(-425%, -60%);
+	}
 }

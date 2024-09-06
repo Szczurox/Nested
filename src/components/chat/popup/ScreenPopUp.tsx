@@ -3,18 +3,18 @@ import styles from "../../../styles/components/chat/popups/ScreenPopUp.module.sc
 import { usePopUp } from "context/popUpContext";
 
 const ScreenPopUp: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const { setCurrentPopUp } = usePopUp();
+	const { setCurrentPopUp } = usePopUp();
 
-  useEffect(() => {
-    setCurrentPopUp(true);
-    return () => setCurrentPopUp(false);
-  }, []);
+	useEffect(() => {
+		setCurrentPopUp(true);
+		return () => setCurrentPopUp(false);
+	}, []);
 
-  return (
-    <div className={styles.screen_popup}>
-      <div className={styles.screen_popup_box}>{children}</div>
-    </div>
-  );
+	return (
+		<div className={styles.screen_popup}>
+			<div className={styles.screen_popup_box}>{children}</div>
+		</div>
+	);
 };
 
 export default ScreenPopUp;

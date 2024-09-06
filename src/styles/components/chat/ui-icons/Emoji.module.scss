@@ -1,74 +1,74 @@
 .emoji_icon {
-  svg:hover {
-    color: white;
-  }
+	svg:hover {
+		color: white;
+	}
 }
 
 .emoji_menu {
-  min-width: 30vw;
-  min-height: 40vh;
-  max-width: 30vw;
-  max-height: 40vh;
-  background-color: #2f3135;
-  padding-top: 20px;
-  border-width: 2px;
-  border-radius: 10px;
-  cursor: auto;
+	min-width: 30vw;
+	min-height: 40vh;
+	max-width: 30vw;
+	max-height: 40vh;
+	background-color: #2f3135;
+	padding-top: 20px;
+	border-width: 2px;
+	border-radius: 10px;
+	cursor: auto;
 
-  @media (pointer: none), (pointer: coarse) {
-    max-width: 100%;
-  }
+	@media (pointer: none), (pointer: coarse) {
+		max-width: 100%;
+	}
 
-  .emoji_header {
-    padding-bottom: 8px;
-    padding-left: 20px;
-    padding-right: 10px;
-    box-shadow: 0px 3px 1px #26282c;
+	.emoji_header {
+		padding-bottom: 8px;
+		padding-left: 20px;
+		padding-right: 10px;
+		box-shadow: 0px 3px 1px #26282c;
 
-    .emoji_search {
-      margin-top: 10px;
-      display: flex;
-      align-items: center;
-      color: gray;
-      background-color: #2f3135;
-      border-radius: 3px;
-      padding: 5px;
-      margin-right: 10px;
-      background-color: #232528;
-      cursor: text;
+		.emoji_search {
+			margin-top: 10px;
+			display: flex;
+			align-items: center;
+			color: gray;
+			background-color: #2f3135;
+			border-radius: 3px;
+			padding: 5px;
+			margin-right: 10px;
+			background-color: #232528;
+			cursor: text;
 
-      input {
-        border: none;
-        color: white;
-        outline-width: 0;
-        background: transparent;
-        width: 100%;
-        padding-left: 5px;
-      }
-    }
-  }
+			input {
+				border: none;
+				color: white;
+				outline-width: 0;
+				background: transparent;
+				width: 100%;
+				padding-left: 5px;
+			}
+		}
+	}
 
-  .emoji_content {
-    height: 27vh;
-    overflow-y: scroll;
-    margin-top: 4px;
-    width: 100%;
-    background-color: #2f3135;
-    padding: 10px;
+	.emoji_content {
+		height: 27vh;
+		overflow-y: scroll;
+		margin-top: 4px;
+		width: 100%;
+		background-color: #2f3135;
+		padding: 10px;
 
-    .emoji_frame {
-      padding: 4px;
-      padding-top: 12px;
-      padding-bottom: 16px;
-      border-radius: 4px;
+		.emoji_frame {
+			padding: 4px;
+			padding-top: 12px;
+			padding-bottom: 16px;
+			border-radius: 4px;
 
-      &:hover {
-        background-color: rgb(78, 78, 78);
-      }
+			&:hover {
+				background-color: rgb(78, 78, 78);
+			}
 
-      img {
-        width: 46px;
-      }
-    }
-  }
+			img {
+				width: 46px;
+			}
+		}
+	}
 }

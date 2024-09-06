@@ -1,78 +1,78 @@
 .channel {
-  padding: 2px;
-  padding-left: 10px;
-  padding-right: 10px;
+	padding: 2px;
+	padding-left: 10px;
+	padding-right: 10px;
 
-  h4 {
-    border-radius: 10px;
-    border: 2px;
-    display: flex;
-    padding: 0px;
-    margin: 0px;
-    padding-left: 15px;
-    align-items: center;
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    font-size: large;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-  }
+	h4 {
+		border-radius: 10px;
+		border: 2px;
+		display: flex;
+		padding: 0px;
+		margin: 0px;
+		padding-left: 15px;
+		align-items: center;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+		font-size: large;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+	}
 
-  .channel_name {
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow: hidden;
-    width: 80%;
-  }
+	.channel_name {
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		overflow: hidden;
+		width: 80%;
+	}
 
-  .hash {
-    font-size: 25px;
-    padding: 8px;
-    padding-top: 3px;
-    padding-bottom: 3px;
-  }
+	.hash {
+		font-size: 25px;
+		padding: 8px;
+		padding-top: 3px;
+		padding-bottom: 3px;
+	}
 }
 
 .unread_dot {
-  max-width: 8px;
-  margin-left: -8px;
+	max-width: 8px;
+	margin-left: -8px;
 }
 
 .inactive {
-  &:hover {
-    h4 {
-      color: white;
-      background-color: #35373b;
-    }
-  }
+	&:hover {
+		h4 {
+			color: white;
+			background-color: #35373b;
+		}
+	}
 
-  h4 {
-    background-color: #2f3135;
-    color: gray;
-    cursor: pointer;
-  }
+	h4 {
+		background-color: #2f3135;
+		color: gray;
+		cursor: pointer;
+	}
 }
 
 .active {
-  h4 {
-    color: white;
-    background-color: #3c3e42;
-    cursor: pointer;
-  }
+	h4 {
+		color: white;
+		background-color: #3c3e42;
+		cursor: pointer;
+	}
 }
 
 .unread_dot {
-  font-size: large;
+	font-size: large;
 }
 
 .unread {
-  h4 {
-    color: white;
-    cursor: pointer;
-  }
+	h4 {
+		color: white;
+		cursor: pointer;
+	}
 }

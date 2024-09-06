@@ -1,37 +1,37 @@
 .popup_text {
-  color: white;
-  p {
-    color: lightgrey;
-  }
+	color: white;
+	p {
+		color: lightgrey;
+	}
 }
 
 .popup_buttons {
-  white-space: nowrap;
-  text-align: right;
+	white-space: nowrap;
+	text-align: right;
 
-  .popup_cancel {
-    display: inline-block;
-    padding: 10px;
-    margin-right: 10px;
-    color: lightgrey;
+	.popup_cancel {
+		display: inline-block;
+		padding: 10px;
+		margin-right: 10px;
+		color: lightgrey;
 
-    &:hover {
-      text-decoration: underline;
-      cursor: pointer;
-    }
-  }
+		&:hover {
+			text-decoration: underline;
+			cursor: pointer;
+		}
+	}
 }
 
 .message_preview {
-  overflow-y: auto;
-  max-height: 50vh;
-  display: block;
-  align-items: center;
-  padding: 10px;
-  margin: 12px;
-  margin-top: 20px;
-  padding-left: 10px;
-  color: white;
-  background-color: #363a3f;
-  box-shadow: 1px 1px 5px 5px #292d31;
+	overflow-y: auto;
+	max-height: 50vh;
+	display: block;
+	align-items: center;
+	padding: 10px;
+	margin: 12px;
+	margin-top: 20px;
+	padding-left: 10px;
+	color: white;
+	background-color: #363a3f;
+	box-shadow: 1px 1px 5px 5px #292d31;
 }

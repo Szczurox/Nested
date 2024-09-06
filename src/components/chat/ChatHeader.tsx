@@ -12,66 +12,68 @@ import { useChannel } from "context/channelContext";
 import { NavbarVariant } from "./Navbar";
 
 interface ChatHeaderProps {
-  isNavbarOpen: boolean;
-  isMembersOpen: boolean;
-  variant: NavbarVariant;
-  onMembers: () => void;
-  setShowNavbar: (show: boolean) => void;
+	isNavbarOpen: boolean;
+	isMembersOpen: boolean;
+	variant: NavbarVariant;
+	onMembers: () => void;
+	setShowNavbar: (show: boolean) => void;
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
-  isNavbarOpen,
-  isMembersOpen,
-  variant,
-  onMembers,
-  setShowNavbar,
+	isNavbarOpen,
+	isMembersOpen,
+	variant,
+	onMembers,
+	setShowNavbar,
 }) => {
-  const { channel } = useChannel();
+	const { channel } = useChannel();
 
-  const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
+	const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
 
-  return (
-    <div className={styles.shadow}>
-      <div
-        className={
-          isNavbarOpen
-            ? `${styles.chatHeader} ${styles.chatHeader_navbar_open}`
-            : isMembersOpen
-            ? `${styles.chatHeader} ${styles.chatHeader_members_open}`
-            : styles.chatHeader
-        }
-      >
-        {isMobile ? (
-          <div className={styles.chatHeader_menu_icon}>
-            <MenuIcon onClick={(_) => setShowNavbar(!isNavbarOpen)} />
-          </div>
-        ) : null}
-        <div className={styles.chatHeader_left}>
-          <h3>
-            <span className={styles.chatHeader_hash}>#</span>
-            {channel.name}
-          </h3>
-        </div>
-        {variant != "dms" ? (
-          <div className={styles.chatHeader_right}>
-            <NotificationsIcon />
-            <EditLocationRoundedIcon />
-            <PeopleAltRoundedIcon
-              onClick={(_) => onMembers()}
-              className={styles.chatHeader_people}
-            />
+	return (
+		<div className={styles.shadow}>
+			<div
+				className={
+					isNavbarOpen
+						? `${styles.chatHeader} ${styles.chatHeader_navbar_open}`
+						: isMembersOpen
+						? `${styles.chatHeader} ${styles.chatHeader_members_open}`
+						: styles.chatHeader
+				}
+			>
+				{isMobile ? (
+					<div className={styles.chatHeader_menu_icon}>
+						<MenuIcon
+							onClick={(_) => setShowNavbar(!isNavbarOpen)}
+						/>
+					</div>
+				) : null}
+				<div className={styles.chatHeader_left}>
+					<h3>
+						<span className={styles.chatHeader_hash}>#</span>
+						{channel.name}
+					</h3>
+				</div>
+				{variant != "dms" ? (
+					<div className={styles.chatHeader_right}>
+						<NotificationsIcon />
+						<EditLocationRoundedIcon />
+						<PeopleAltRoundedIcon
+							onClick={(_) => onMembers()}
+							className={styles.chatHeader_people}
+						/>
 
-            <div className={styles.chatHeader_search}>
-              <input placeholder="Search" />
-              <SearchRoundedIcon />
-            </div>
-            <MarkunreadMailboxRoundedIcon />
-            <HelpRoundedIcon />
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
+						<div className={styles.chatHeader_search}>
+							<input placeholder="Search" />
+							<SearchRoundedIcon />
+						</div>
+						<MarkunreadMailboxRoundedIcon />
+						<HelpRoundedIcon />
+					</div>
+				) : null}
+			</div>
+		</div>
+	);
 };
 
 export default ChatHeader;
