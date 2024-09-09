@@ -67,10 +67,10 @@ Make sure to add `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PRIVATE_KEY` to Vercel's 
 
 ## Side notes
 
-- If you want you can deploy the app to [Firebase](https://firebase.google.com/docs/hosting) or any other host instead of Vercel, it shouldn't affect performance.
-  I chose Vercel because of simplicity and better integration with GitHub as well as Next.js.
+-   If you want you can deploy the app to [Firebase](https://firebase.google.com/docs/hosting) or any other host instead of Vercel, it shouldn't affect performance.
+    I chose Vercel because of simplicity and better integration with GitHub as well as Next.js.
 
-- If you prefer [yarn](https://yarnpkg.com/) over [npm](https://www.npmjs.com/) after creating `package-lock.json` you can remove `package.json` and use:
+-   If you prefer [yarn](https://yarnpkg.com/) over [npm](https://www.npmjs.com/) after creating `package-lock.json` you can remove `package.json` and use:
 
 ```bash
 yarn import

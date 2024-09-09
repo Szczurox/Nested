@@ -18,6 +18,7 @@ export type User = {
 	avatar: string;
 	tag: string;
 	nickname: string;
+	verified: boolean;
 	permissions: MemberPermission[];
 	partPermissions: ParticipantPermission[];
 };
@@ -40,11 +41,11 @@ export const UserContext = createContext<UserContextType>({
 	user: {
 		token: "",
 		uid: "",
-
 		username: "",
 		avatar: "",
 		tag: "",
 		nickname: "",
+		verified: false,
 		permissions: [],
 		partPermissions: [],
 	},
@@ -68,6 +69,7 @@ export default function UserContextComp({ children }: any) {
 		avatar: "",
 		tag: "",
 		nickname: "",
+		verified: false,
 		permissions: [],
 		partPermissions: [],
 	});
@@ -116,7 +118,6 @@ export default function UserContextComp({ children }: any) {
 	useEffect(() => {
 		const interval = setInterval(async () => {
 			const auth = await getAuth().currentUser;
-			console.log("hi");
 			if (auth) {
 				const token = await getIdToken(auth);
 				setUser({
@@ -136,6 +137,7 @@ export default function UserContextComp({ children }: any) {
 					const uid = user.uid;
 					const docSnap = await getDoc(doc(db, "profile", uid));
 					const token = await getIdToken(user);
+					const verified = await auth.currentUser?.emailVerified!;
 					if (docSnap.exists())
 						setUser({
 							token: token,
@@ -146,6 +148,7 @@ export default function UserContextComp({ children }: any) {
 								: "",
 							tag: docSnap.data().tag ? docSnap.data().tag : "",
 							nickname: "",
+							verified: verified,
 							permissions: [],
 							partPermissions: [],
 						});
@@ -157,6 +160,7 @@ export default function UserContextComp({ children }: any) {
 						avatar: "",
 						tag: "",
 						nickname: "",
+						verified: false,
 						permissions: [],
 						partPermissions: [],
 					});

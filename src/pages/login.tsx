@@ -33,6 +33,21 @@ export const Login: React.FC<{}> = ({}) => {
 		if (user.uid != "" && !loadingUser) router.push("/chat");
 	}, [user.uid, loadingUser]);
 
+	const signIn = async (values: any, setFieldError: any) => {
+		const auth = getAuth();
+		signInWithEmailAndPassword(auth, values.email, values.password)
+			.catch((error) => {
+				setFieldError("email", "Invalid email or password");
+				console.log("ERROR: " + error.code + ": " + error.message);
+			})
+			.then((userCredential) => {
+				if (userCredential) {
+					console.log(user.uid);
+					router.push("/chat");
+				}
+			});
+	};
+
 	return (
 		<motion.div
 			className={styles.auth}
@@ -44,32 +59,9 @@ export const Login: React.FC<{}> = ({}) => {
 				<h1>Login</h1>
 				<Formik
 					initialValues={{ email: "", password: "" }}
-					onSubmit={async (values, { setFieldError }) => {
-						const auth = getAuth();
-						signInWithEmailAndPassword(
-							auth,
-							values.email,
-							values.password
-						)
-							.catch((error) => {
-								setFieldError(
-									"email",
-									"Invalid email or password"
-								);
-								console.log(
-									"ERROR: " +
-										error.code +
-										": " +
-										error.message
-								);
-							})
-							.then((userCredential) => {
-								if (userCredential) {
-									console.log(user.uid);
-									router.push("/chat");
-								}
-							});
-					}}
+					onSubmit={(values, { setFieldError }) =>
+						signIn(values, setFieldError)
+					}
 				>
 					{({ isSubmitting, errors }) => (
 						<Form>

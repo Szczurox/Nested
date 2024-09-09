@@ -3,12 +3,22 @@ import Link from "next/link";
 import { Formik, Field, Form } from "formik";
 import styles from "../styles/Auth.module.scss";
 import { motion, Variants } from "framer-motion";
-import { useUser } from "context/userContext";
-import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+	getFirestore,
+	doc,
+	setDoc,
+	serverTimestamp,
+	getDoc,
+} from "firebase/firestore";
+import {
+	getAuth,
+	createUserWithEmailAndPassword,
+	sendEmailVerification,
+} from "firebase/auth";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
 import { createFirebaseApp } from "../firebase-utils/clientApp";
+import { useUser } from "context/userContext";
 
 const SignupSchema = Yup.object().shape({
 	username: Yup.string()
@@ -23,11 +33,16 @@ const SignupSchema = Yup.object().shape({
 });
 
 export const Register: React.FC<{}> = ({}) => {
-	const { user, loadingUser } = useUser();
 	const router = useRouter();
+	const { user, loadingUser } = useUser();
 
 	const app = createFirebaseApp();
 	const db = getFirestore(app!);
+
+	useEffect(() => {
+		// Route to chat if user is already authenticated
+		if (user.uid != "" && !loadingUser) router.push("/chat");
+	}, [user.uid, loadingUser]);
 
 	const createUser = async (username: string, uid: string) => {
 		await setDoc(doc(db, "profile", uid), {
@@ -35,7 +50,62 @@ export const Register: React.FC<{}> = ({}) => {
 			createdAt: serverTimestamp(),
 			tag: username,
 			avatar: "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png",
+		}).then(async () => {
+			await setDoc(doc(db, "usernames", username), {});
 		});
+	};
+
+	const userSubmit = async (values: any, setFieldError: any) => {
+		const usernameDoc = await getDoc(doc(db, "usernames", values.username));
+		if (usernameDoc.exists()) {
+			setFieldError(
+				"username",
+				"Account with this username already exists"
+			);
+			return;
+		}
+		const auth = getAuth();
+
+		createUserWithEmailAndPassword(auth, values.email, values.password)
+			.catch((error) => {
+				console.log("ERROR " + error.code + ": " + error.message);
+				switch (error.code) {
+					case "auth/email-already-in-use":
+						setFieldError(
+							"email",
+							"Account with this email already exists"
+						);
+						break;
+					case "auth/invalid-email":
+						setFieldError("email", "Invalid email");
+						break;
+					case "auth/weak-password":
+						setFieldError("password", "Password is too weak");
+						break;
+					default:
+						break;
+				}
+			})
+			.then((userCredential) => {
+				if (userCredential) {
+					console.log(auth.currentUser);
+					sendEmailVerification(auth.currentUser!)
+						.then(() => {
+							window.localStorage.setItem(
+								"emailForSignIn",
+								values.email
+							);
+							createUser(
+								values.username,
+								userCredential.user.uid
+							);
+							router.push("/verify");
+						})
+						.catch((error) => {
+							console.log(error);
+						});
+				}
+			});
 	};
 
 	const easing = [0.06, -0.5, 0.01, 0.99];
@@ -55,11 +125,6 @@ export const Register: React.FC<{}> = ({}) => {
 		},
 	};
 
-	useEffect(() => {
-		// Route to chat if user is already authenticated
-		if (user.uid != "" && !loadingUser) router.push("/chat");
-	});
-
 	return (
 		<motion.div
 			className={styles.auth}
@@ -78,47 +143,9 @@ export const Register: React.FC<{}> = ({}) => {
 					validationSchema={SignupSchema}
 					validateOnChange={false}
 					validateOnBlur={false}
-					onSubmit={async (values, { setFieldError }) => {
-						const auth = getAuth();
-						createUserWithEmailAndPassword(
-							auth,
-							values.email,
-							values.password
-						)
-							.catch((error) => {
-								console.log(
-									"ERROR " + error.code + ": " + error.message
-								);
-								switch (error.code) {
-									case "auth/email-already-in-use":
-										setFieldError(
-											"email",
-											"Account with this email already exists"
-										);
-										break;
-									case "auth/invalid-email":
-										setFieldError("email", "Invalid email");
-										break;
-									case "auth/weak-password":
-										setFieldError(
-											"password",
-											"Password is too weak"
-										);
-										break;
-									default:
-										break;
-								}
-							})
-							.then((userCredential) => {
-								if (userCredential) {
-									createUser(
-										values.username,
-										userCredential.user.uid
-									);
-									router.push("/chat");
-								}
-							});
-					}}
+					onSubmit={(values, { setFieldError }) =>
+						userSubmit(values, setFieldError)
+					}
 				>
 					{({ isSubmitting, errors, touched }) => (
 						<Form>
@@ -157,7 +184,7 @@ export const Register: React.FC<{}> = ({}) => {
 										: null}
 								</p>
 								<Field
-									class={styles.auth_field}
+									className={styles.auth_field}
 									name="email"
 									placeholder="email"
 									label="Email"

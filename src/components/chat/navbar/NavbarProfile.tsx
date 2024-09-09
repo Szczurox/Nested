@@ -114,8 +114,8 @@ export const NavbarProfile: React.FC = ({}) => {
 				</p>
 			</div>
 			<div className={styles.navbar_profileIcons}>
-				<MicIcon />
-				<HeadsetIcon />
+				{/*<MicIcon />*/}
+				{/*<HeadsetIcon />*/}
 				<SettingsIcon />
 			</div>
 		</div>
