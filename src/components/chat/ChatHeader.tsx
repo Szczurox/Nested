@@ -1,6 +1,6 @@
 import React from "react";
-import NotificationsIcon from "@material-ui/icons/Notifications";
-import EditLocationRoundedIcon from "@material-ui/icons/EditLocationRounded";
+// import NotificationsIcon from "@material-ui/icons/Notifications";
+// import EditLocationRoundedIcon from "@material-ui/icons/EditLocationRounded";
 import PeopleAltRoundedIcon from "@material-ui/icons/PeopleAltRounded";
 import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -57,8 +57,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 				</div>
 				{variant != "dms" ? (
 					<div className={styles.chatHeader_right}>
-						<NotificationsIcon />
-						<EditLocationRoundedIcon />
+						{/*<NotificationsIcon />
+						<EditLocationRoundedIcon />*/}
 						<PeopleAltRoundedIcon
 							onClick={(_) => onMembers()}
 							className={styles.chatHeader_people}

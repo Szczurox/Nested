@@ -62,6 +62,11 @@ const Settings: React.FC<SettingsProps> = ({ onCancel }) => {
 		setSaved(false);
 		setChanged(true);
 		await wait(400);
+		if (values.username == user.username) {
+			setSaved(true);
+			setChanged(false);
+			return;
+		}
 		const usernameDoc = await getDoc(doc(db, "usernames", values.username));
 		if (usernameDoc.exists()) {
 			setFieldError(

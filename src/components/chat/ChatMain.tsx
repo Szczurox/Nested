@@ -1,17 +1,12 @@
-import { TextareaAutosize } from "@material-ui/core";
 import { ProgressBar } from "react-bootstrap";
 import React, { useEffect, useRef, useState } from "react";
 import Message, { MessageData } from "./Message";
-import UploadFile, { FileUploadingData } from "./UploadFile";
+import { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/Chat.module.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
-import SendIcon from "@mui/icons-material/Send";
-import GifIcon from "@material-ui/icons/Gif";
 import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import {
-	addDoc,
-	arrayUnion,
 	collection,
 	doc,
 	documentId,
@@ -31,10 +26,7 @@ import { serverTimestamp } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
 import { useMessage } from "context/messageContext";
-import { usePopUp } from "context/popUpContext";
-import InformationPopUp from "./popup/InformationPopUp";
 import { wait } from "components/utils/utils";
-import Emoji from "./ui-icons/Emoji";
 import DotsLoading from "components/animations/DotsLoading";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { ChatInput } from "./ChatInput";
