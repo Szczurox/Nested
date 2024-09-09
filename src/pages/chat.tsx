@@ -64,8 +64,6 @@ const Chat = () => {
 	useEffect(() => {
 		if (user.uid == "" && !loadingUser && user.token == "")
 			router.push("/login");
-		else if (!user.verified && !loadingUser && user.uid != "")
-			router.push("/verify");
 		else loading();
 
 		async function loading() {
