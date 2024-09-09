@@ -15,7 +15,7 @@ Firstly, install all needed dependencies:
 npm install
 ```
 
-Then, run the development server:
+Then run the development server:
 
 ```bash
 npm run dev
@@ -25,7 +25,7 @@ yarn dev
 
 If you are using [Visual Studio Code](https://code.visualstudio.com/) this command should run automatically.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the result.
 
 ## Firebase
 
@@ -68,7 +68,6 @@ Make sure to add `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PRIVATE_KEY` to Vercel's 
 ## Side notes
 
 -   If you want you can deploy the app to [Firebase](https://firebase.google.com/docs/hosting) or any other host instead of Vercel, it shouldn't affect performance.
-    I chose Vercel because of simplicity and better integration with GitHub as well as Next.js.
 
 -   If you prefer [yarn](https://yarnpkg.com/) over [npm](https://www.npmjs.com/) after creating `package-lock.json` you can remove `package.json` and use:
 
