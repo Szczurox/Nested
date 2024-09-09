@@ -134,6 +134,7 @@ export default function UserContextComp({ children }: any) {
 		const unsubscriber = onAuthStateChanged(auth, async (user) => {
 			try {
 				if (user) {
+					console.log("uid: ", user.uid);
 					const uid = user.uid;
 					const docSnap = await getDoc(doc(db, "profile", uid));
 					const token = await getIdToken(user);

@@ -36,11 +36,11 @@ export const Member: React.FC<MemberProps> = ({
 			return onSnapshot(doc(db, "profile", id), (doc) => {
 				if (doc.exists() && doc.data().lastActive) {
 					setLastActive(
-						moment(doc.data().lastActive.toMillis()).add(3.5, "m")
+						moment(doc.data().lastActive.toMillis()).add(3, "m")
 					);
 					setIsActive(
 						moment(doc.data().lastActive.toMillis())
-							.add(3.5, "m")
+							.add(3, "m")
 							.isAfter(moment())
 					);
 				}

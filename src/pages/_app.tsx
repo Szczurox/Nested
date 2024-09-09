@@ -63,10 +63,15 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 	}, [router.events]);
 	return (
 		<>
-			<meta
-				name="viewport"
-				content="initial-scale=1, maximum-scale=1.0, user-scalable=no"
-			/>
+			<head>
+				<title>Nested</title>
+				<meta
+					name="viewport"
+					content="initial-scale=1, maximum-scale=1.0, user-scalable=no"
+				/>
+				<link rel="icon" href="/favicon.ico" />
+				<meta name="Nested" content="Chat App" />
+			</head>
 			<UserProvider>
 				<ChannelProvider>
 					<MessageProvider>

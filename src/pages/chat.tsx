@@ -48,11 +48,13 @@ const Chat = () => {
 	useEffect(() => {
 		// Ping server with activity update every 3 minutes
 		const interval = setInterval(async () => {
-			console.log("ping!");
-			await updateDoc(doc(db, "profile", user.uid), {
-				lastActive: serverTimestamp(),
-			});
-		}, 18000);
+			if (user.uid) {
+				console.log("ping!", user.uid);
+				await updateDoc(doc(db, "profile", user.uid), {
+					lastActive: serverTimestamp(),
+				});
+			}
+		}, 150000);
 
 		return () => clearInterval(interval);
 	}, []);
@@ -61,7 +63,8 @@ const Chat = () => {
 	useEffect(() => {
 		if (user.uid == "" && !loadingUser && user.token == "")
 			router.push("/login");
-		else if (!user.verified && !loadingUser) router.push("/verify");
+		else if (!user.verified && !loadingUser && user.uid != "")
+			router.push("/verify");
 		else loading();
 
 		async function loading() {
