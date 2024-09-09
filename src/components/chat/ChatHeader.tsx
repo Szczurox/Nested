@@ -77,6 +77,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 						<a
 							href="https://github.com/Szczurox/Nested/"
 							target="_blank"
+							rel="noreferrer"
 						>
 							<HelpRoundedIcon />
 						</a>
