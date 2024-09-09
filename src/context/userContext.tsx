@@ -2,6 +2,8 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { getAuth, getIdToken, onAuthStateChanged } from "firebase/auth";
 import { createFirebaseApp } from "../firebase-utils/clientApp";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { Moment } from "moment";
+import moment from "moment";
 
 export type MemberPermission =
 	| "MODERATE_MESSAGES"
@@ -19,6 +21,7 @@ export type User = {
 	tag: string;
 	nickname: string;
 	verified: boolean;
+	lastActive: number;
 	permissions: MemberPermission[];
 	partPermissions: ParticipantPermission[];
 };
@@ -34,6 +37,7 @@ export interface UserContextType {
 	) => void;
 	setMemberData: (nickname: string, permissions: MemberPermission[]) => void;
 	addPartPerms: (permissions: ParticipantPermission[]) => void;
+	setActivity: (lastActive: number) => void;
 	loadingUser: boolean;
 }
 
@@ -46,6 +50,7 @@ export const UserContext = createContext<UserContextType>({
 		tag: "",
 		nickname: "",
 		verified: false,
+		lastActive: 0,
 		permissions: [],
 		partPermissions: [],
 	},
@@ -58,6 +63,7 @@ export const UserContext = createContext<UserContextType>({
 	setMemberData: (_nickname: string, _permissions: MemberPermission[]) =>
 		undefined,
 	addPartPerms: (_permissions: ParticipantPermission[]) => undefined,
+	setActivity: (_lastActive: number) => undefined,
 	loadingUser: false,
 });
 
@@ -70,6 +76,7 @@ export default function UserContextComp({ children }: any) {
 		tag: "",
 		nickname: "",
 		verified: false,
+		lastActive: 0,
 		permissions: [],
 		partPermissions: [],
 	});
@@ -112,7 +119,13 @@ export default function UserContextComp({ children }: any) {
 			...user,
 			partPermissions: permissions,
 		});
-		console.log(user.partPermissions);
+	};
+
+	const setActivity = (lastActive: number) => {
+		setUser({
+			...user,
+			lastActive: lastActive,
+		});
 	};
 
 	useEffect(() => {
@@ -150,6 +163,7 @@ export default function UserContextComp({ children }: any) {
 							tag: docSnap.data().tag ? docSnap.data().tag : "",
 							nickname: "",
 							verified: verified,
+							lastActive: moment().valueOf(),
 							permissions: [],
 							partPermissions: [],
 						});
@@ -162,6 +176,7 @@ export default function UserContextComp({ children }: any) {
 						tag: "",
 						nickname: "",
 						verified: false,
+						lastActive: 0,
 						permissions: [],
 						partPermissions: [],
 					});
@@ -182,6 +197,7 @@ export default function UserContextComp({ children }: any) {
 				setUserData,
 				setMemberData,
 				addPartPerms: setPartPerms,
+				setActivity,
 				loadingUser,
 			}}
 		>

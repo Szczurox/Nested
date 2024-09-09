@@ -1,0 +1,153 @@
+.settings {
+	width: 100vw;
+	height: 100vh;
+	background-color: #363a3f;
+	border-radius: 10px;
+	overflow: auto;
+	align-items: center;
+
+	.container {
+		width: 900px;
+		max-width: 100vw;
+		display: flex;
+		flex-direction: row;
+		margin: auto;
+
+		.navbar {
+			flex: 0.2;
+			background-color: #2f3135;
+			height: 100vh;
+			padding-top: 30px;
+			.navbar_setting {
+				text-align: center;
+				padding: 10px;
+				color: white;
+				border: 3px white;
+				&:hover {
+					background-color: #35373b;
+				}
+				border-radius: 3px;
+			}
+
+			.active {
+				background-color: #3c3e42;
+			}
+
+			.navbar_setting_logout {
+				text-align: center;
+				padding: 10px;
+				color: #ff504d;
+				border: 3px white;
+				&:hover {
+					background-color: #ad3736;
+				}
+				border-radius: 3px;
+			}
+		}
+
+		.content {
+			flex: 0.8;
+			padding: 30px;
+			color: white;
+			background-color: #363a3f;
+
+			p {
+				padding: 0px;
+				color: lightgray;
+				user-select: none;
+			}
+
+			a {
+				color: #8de4ffab;
+				user-select: none;
+				&:hover {
+					color: #8de4ffc0;
+				}
+			}
+
+			h1 {
+				color: #ffffffe1;
+				margin-bottom: 15px;
+				user-select: none;
+			}
+
+			h3 {
+				padding: 0px;
+				color: lightgray;
+				user-select: none;
+				margin-top: 35px;
+			}
+
+			.element_error {
+				.save_field {
+					border: 2px solid #ff3b3b;
+					&:focus {
+						outline: none !important;
+						border: 2px solid #ff3b3b;
+					}
+				}
+
+				.data_text {
+					color: #ff3b3b;
+				}
+			}
+
+			.settings_field {
+				border: none;
+				height: 50px;
+				width: 100%;
+				padding: 18px 15px 15px 15px;
+				margin-top: none;
+				border-radius: 5px;
+				margin-bottom: 10px;
+				font-size: large;
+				&:focus {
+					outline: none !important;
+					border: 2px solid #35373b;
+				}
+			}
+
+			.data_text {
+				user-select: none;
+				color: darkgray;
+				text-align: left;
+				padding: 0px;
+				margin: 16px 0px 8px 0px;
+			}
+
+			.data_saved {
+				user-select: none;
+				color: white;
+				text-align: left;
+				padding: 0px;
+				margin: 10px 2px 8px 2px;
+			}
+
+			.save_button {
+				border: none;
+				border-radius: 5px;
+				margin-top: 40px;
+				font-size: large;
+				background-color: #5f6a6e;
+				color: #ffffff;
+				width: 100%;
+				height: 55px;
+				user-select: none;
+				&:hover {
+					background-color: #808b90;
+					cursor: pointer;
+				}
+			}
+		}
+
+		.close {
+			flex: 0;
+			color: white;
+			width: 40px;
+			margin-top: 30px;
+			svg {
+				font-size: 40px;
+			}
+		}
+	}
+}

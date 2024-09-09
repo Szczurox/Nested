@@ -14,7 +14,7 @@ import {
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
-import Settings from "../popup/Settings";
+import Settings from "../Settings";
 
 export const NavbarProfile: React.FC = ({}) => {
 	const { user, setUserData } = useUser();
@@ -112,10 +112,10 @@ export const NavbarProfile: React.FC = ({}) => {
 					<h3>{user.nickname}</h3>
 					<p
 						onClick={(_) =>
-							navigator.clipboard.writeText("@" + user.tag)
+							navigator.clipboard.writeText("@" + user.username)
 						}
 					>
-						@{user.tag}
+						@{user.username}
 					</p>
 				</div>
 				<div className={styles.navbar_profileIcons}>

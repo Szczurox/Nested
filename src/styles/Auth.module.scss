@@ -1,4 +1,4 @@
-$darkerlight: #8de4ffc0;
+$darkerlight: #a7b4b9;
 
 .auth {
 	height: 100vh;
@@ -30,7 +30,7 @@ $darkerlight: #8de4ffc0;
 		}
 
 		a {
-			color: #8de4ffab;
+			color: #808b90;
 			user-select: none;
 			&:hover {
 				color: $darkerlight;
@@ -54,6 +54,8 @@ $darkerlight: #8de4ffc0;
 			text-align: left;
 			margin: 0px;
 		}
+
+		// "#5f6a6e", "#808b90", "#6b7478", "#52595c"]
 
 		.singup_link {
 			color: #696969;
@@ -104,13 +106,13 @@ $darkerlight: #8de4ffc0;
 			border-radius: 5px;
 			margin-top: 40px;
 			font-size: large;
-			background-color: #3c8da5cb;
-			color: #ffffffd7;
+			background-color: #5f6a6e;
+			color: #ffffff;
 			width: 100%;
 			height: 55px;
 			user-select: none;
 			&:hover {
-				background-color: #3c8ca5ab;
+				background-color: #808b90;
 				cursor: pointer;
 			}
 		}

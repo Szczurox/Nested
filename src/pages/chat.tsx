@@ -23,6 +23,7 @@ import Members from "components/chat/Members";
 import ChatHeader from "components/chat/ChatHeader";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { NavbarGroups } from "components/chat/NavbarGroups";
+import moment from "moment";
 
 const Chat = () => {
 	const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
@@ -30,7 +31,7 @@ const Chat = () => {
 	const [membersQuery, setMembersQuery] = useState<string>(""); // Show members navbar
 	const [variant, setVariant] = useState<NavbarVariant>("server");
 
-	const { user, loadingUser, setMemberData } = useUser();
+	const { user, loadingUser, setMemberData, setActivity } = useUser();
 	const { channel, setChannelData } = useChannel();
 
 	const router = useRouter();
@@ -46,18 +47,18 @@ const Chat = () => {
 	}, [isMobile]);
 
 	useEffect(() => {
-		// Ping server with activity update every 3 minutes
 		const interval = setInterval(async () => {
-			if (user.uid) {
+			if (moment().valueOf() > user.lastActive + 150000) {
 				console.log("ping!", user.uid);
+				setActivity(moment().valueOf());
 				await updateDoc(doc(db, "profile", user.uid), {
 					lastActive: serverTimestamp(),
 				});
 			}
-		}, 150000);
+		}, 1500);
 
 		return () => clearInterval(interval);
-	}, []);
+	});
 
 	// Route to login if user is not authenticated
 	useEffect(() => {
