@@ -54,7 +54,7 @@ const Chat = () => {
 		}, 180000);
 
 		return () => clearInterval(interval);
-	});
+	}, []);
 
 	// Route to login if user is not authenticated
 	useEffect(() => {

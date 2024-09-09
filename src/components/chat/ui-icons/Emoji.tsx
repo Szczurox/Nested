@@ -117,21 +117,7 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
 				onOpen={open}
 			>
 				<div className={styles.emoji_menu}>
-					<div className={styles.emoji_header}>
-						Emoji
-						<div
-							className={styles.emoji_search}
-							onClick={(_) => inputRef.current?.focus()}
-						>
-							<input
-								placeholder="Search"
-								autoFocus
-								ref={inputRef}
-							/>
-							<SearchRoundedIcon className={styles.icon} />
-						</div>
-					</div>
-
+					<div className={styles.emoji_header}>Emoji</div>
 					<div className={styles.emoji_content}>
 						{emoji.map((emoji) => (
 							<span className={styles.emoji_frame} key={emoji.id}>

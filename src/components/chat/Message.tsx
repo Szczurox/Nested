@@ -239,8 +239,10 @@ export const Message: React.FC<MessageProps> = ({
 							// Remove all metadata from possible image/vide
 							const parsedLink =
 								el.indexOf("?") == -1
-									? el
-									: el.substring(0, el.indexOf("?"));
+									? el.toLowerCase()
+									: el
+											.substring(0, el.indexOf("?"))
+											.toLowerCase();
 
 							// If image then add as image, if video then add as video to files
 							if (
@@ -260,7 +262,6 @@ export const Message: React.FC<MessageProps> = ({
 									[el, "video"],
 								]);
 							}
-
 							// Check if is a link to one of the supported iframes (only YouTube for now)
 							else if (
 								allowedIFrames.some((element) =>
@@ -269,12 +270,14 @@ export const Message: React.FC<MessageProps> = ({
 								!iframes.includes(el)
 							) {
 								// Parse youtube URL so that it links to embed
-								const elParsed = el
-									.replace(
-										"youtu.be/",
-										"www.youtube.com/embed/"
-									)
-									.replace("watch?v=", "embed/");
+								const elParsed =
+									el
+										.replace(
+											"youtu.be/",
+											"www.youtube.com/embed/"
+										)
+										.replace("watch?v=", "embed/") +
+									"?rel=0";
 
 								// Remove unnecessary link data such as playlist ID and add to iframes
 								setIframes((iframes) => [
