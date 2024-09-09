@@ -4,7 +4,6 @@ import UploadFile, { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/components/chat/ChatInput.module.scss";
 import "bootstrap/dist/css/bootstrap.min.css";
 import SendIcon from "@mui/icons-material/Send";
-import GifIcon from "@material-ui/icons/Gif";
 import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import {
 	addDoc,
@@ -125,6 +124,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	const handleKeyPress = (e: KeyboardEvent) => {
 		if (
 			document.activeElement?.tagName != "TEXTAREA" &&
+			document.activeElement?.tagName != "INPUT" &&
 			!popUp.isOpen &&
 			textAreaRef.current &&
 			((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { NavbarHeader } from "./navbar/NavbarHeader";
 import { NavbarVoice } from "./navbar/NavbarVoice";
 import { NavbarProfile } from "./navbar/NavbarProfile";

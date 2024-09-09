@@ -67,9 +67,7 @@ export const Message: React.FC<MessageProps> = ({
 }) => {
 	const [nickname, setNickname] = useState<string>("");
 	const [nickColor, setNickColor] = useState<string>("white");
-	const [avatar, setAvatar] = useState<string>(
-		"https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
-	);
+	const [avatar, setAvatar] = useState<string>("/UserAvatar.png");
 	const [realTime, setRealTime] = useState<string>(""); // Time after formatting
 	const [input, setInput] = useState<string>(""); // Message edit input
 	const [currentLink, setCurrentLink] = useState<string>(""); // Link to embed / link user used contextmenu on
@@ -407,10 +405,8 @@ export const Message: React.FC<MessageProps> = ({
 		setIsEditing(false);
 		if (input != content) {
 			if (input.replace(/\s/g, "").length) updateMessage();
-			else {
-				// Ask if user wants to delete the message if input is set to empty
-				setShowPopUp(true);
-			}
+			// Ask if user wants to delete the message if input is set to empty
+			else setShowPopUp(true);
 		}
 	};
 

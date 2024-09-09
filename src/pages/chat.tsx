@@ -25,8 +25,9 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { NavbarGroups } from "components/chat/NavbarGroups";
 
 const Chat = () => {
-	const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
 	const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
+	const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
+	const [membersQuery, setMembersQuery] = useState<string>(""); // Show members navbar
 	const [variant, setVariant] = useState<NavbarVariant>("server");
 
 	const { user, loadingUser, setMemberData } = useUser();
@@ -51,7 +52,7 @@ const Chat = () => {
 			await updateDoc(doc(db, "profile", user.uid), {
 				lastActive: serverTimestamp(),
 			});
-		}, 180000);
+		}, 18000);
 
 		return () => clearInterval(interval);
 	}, []);
@@ -60,7 +61,7 @@ const Chat = () => {
 	useEffect(() => {
 		if (user.uid == "" && !loadingUser && user.token == "")
 			router.push("/login");
-		else if (!user.verified) router.push("/verify");
+		else if (!user.verified && !loadingUser) router.push("/verify");
 		else loading();
 
 		async function loading() {
@@ -77,8 +78,10 @@ const Chat = () => {
 							await updateDoc(doc(db, "profile", user.uid), {
 								lastActive: serverTimestamp(),
 							});
-							setShowNavbar(false);
-							setShowMembers(false);
+							if (isMobile) {
+								setShowNavbar(false);
+								setShowMembers(false);
+							}
 						}
 					});
 					loader.remove();
@@ -137,12 +140,12 @@ const Chat = () => {
 		};
 	}, [user.uid, channel.idG]);
 
-	function nav() {
-		const interval = setInterval(async () => {
-			setShowNavbar(false);
-		}, 20000);
-
-		clearInterval(interval);
+	function onMembers(q?: string) {
+		if (q == undefined) setShowMembers(!showMembers);
+		else {
+			setShowMembers(true);
+			setMembersQuery(q.toLocaleLowerCase());
+		}
 	}
 
 	// Render only if user is authenticated
@@ -163,7 +166,7 @@ const Chat = () => {
 			<div className={styles.full_chat_flexbox}>
 				<div className={styles.chat_shadow}>
 					<ChatHeader
-						onMembers={() => setShowMembers(!showMembers)}
+						onMembers={(q) => onMembers(q)}
 						isMembersOpen={showMembers}
 						isNavbarOpen={showNavbar ? true : false}
 						setShowNavbar={(show) => setShowNavbar(show)}
@@ -180,7 +183,7 @@ const Chat = () => {
 						isMembersOpen={showMembers}
 					/>
 					{showMembers && variant === "server" && (
-						<Members isMobile={isMobile} />
+						<Members isMobile={isMobile} qu={membersQuery} />
 					)}
 				</div>
 			</div>

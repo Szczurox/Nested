@@ -2,7 +2,7 @@ import React, { ReactNode, useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/popups/ChannelPopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
 import { TextareaAutosize } from "@material-ui/core";
-import PopUpButton, { buttonColors } from "./PopUpButton";
+import PopUpButton from "./PopUpButton";
 
 interface InputPopUpProps {
 	onConfirm: (input: string) => void;

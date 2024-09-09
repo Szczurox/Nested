@@ -14,11 +14,11 @@ import { MemberCount } from "./members/MemberCount";
 export type MembersVariant = "server" | "dms";
 
 interface MembersProps {
-	variant?: MembersVariant;
 	isMobile: boolean;
+	qu: string; // Search query by member name
 }
 
-const Members: React.FC<MembersProps> = ({ variant = "server", isMobile }) => {
+const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 	const [members, setMembers] = useState<MemberData[]>([]);
 
 	const { channel } = useChannel();
@@ -79,6 +79,12 @@ const Members: React.FC<MembersProps> = ({ variant = "server", isMobile }) => {
 		getMembers();
 	}, [channel.idG, db]);
 
+	const filterMembers = (): MemberData[] => {
+		return qu != ""
+			? members.filter((el) => el.name.toLowerCase().includes(qu))
+			: members;
+	};
+
 	return (
 		<div className={styles.members}>
 			{isMobile ? (
@@ -89,8 +95,10 @@ const Members: React.FC<MembersProps> = ({ variant = "server", isMobile }) => {
 					</h3>
 				</div>
 			) : null}
-			{members.length != 0 && <MemberCount count={members.length} />}
-			{members.map((member) => (
+			{members.length != 0 && (
+				<MemberCount count={filterMembers().length} />
+			)}
+			{filterMembers().map((member) => (
 				<Member
 					id={member.id}
 					key={member.id}

@@ -66,11 +66,7 @@ export const Member: React.FC<MemberProps> = ({
 			<div className={styles.member_avatar}>
 				<Avatar
 					style={{ height: "45px", width: "45px" }}
-					src={
-						avatar
-							? avatar
-							: "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
-					}
+					src={avatar ? avatar : "/UserAvatar.png"}
 				/>
 			</div>
 			<h4 style={{ color: nameColor ? nameColor : "white" }}>{name}</h4>{" "}

@@ -17,7 +17,7 @@ export const NavbarGroups: React.FC<NavbarGroupsProps> = ({
 	const [variant, setVariant] = useState<boolean>(true);
 	const [isHovering, setIsHovering] = useState<boolean>(true);
 
-	const { channel, setGroupData, setChannelData } = useChannel();
+	const { channel, setGroupData } = useChannel();
 
 	const handleClick = () => {
 		variantChange("dms");

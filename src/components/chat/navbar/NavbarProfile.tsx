@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Avatar from "@material-ui/core/Avatar";
-import MicIcon from "@material-ui/icons/Mic";
-import HeadsetIcon from "@material-ui/icons/Headset";
+// import MicIcon from "@material-ui/icons/Mic";
+// import HeadsetIcon from "@material-ui/icons/Headset";
 import SettingsIcon from "@material-ui/icons/Settings";
 import styles from "../../../styles/components/chat/navbar/NavbarProfile.module.scss";
 import { useUser } from "context/userContext";
@@ -14,15 +14,15 @@ import {
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
+import Settings from "../popup/Settings";
 
 export const NavbarProfile: React.FC = ({}) => {
 	const { user, setUserData } = useUser();
 	const { channel } = useChannel();
 
-	const [avatar, setAvatar] = useState(
-		user.avatar != ""
-			? user.avatar
-			: "https://www.pngall.com/wp-content/uploads/5/User-Profile-PNG-High-Quality-Image.png"
+	const [showSettings, setShowSettings] = useState<boolean>(false);
+	const [avatar, setAvatar] = useState<string>(
+		user.avatar != "" ? user.avatar : "/UserAvatar.png"
 	);
 
 	const storage = getStorage();
@@ -89,35 +89,41 @@ export const NavbarProfile: React.FC = ({}) => {
 	};
 
 	return (
-		<div className={styles.navbar_profile}>
-			<div className={styles.navbar_avatar}>
-				<label>
-					<input
-						type="file"
-						value=""
-						className={styles.navbar_upload_avatar}
-						onChange={(e) => {
-							if (e.target.files) uploadAvatar(e.target.files[0]);
-						}}
-					/>
-					<Avatar src={avatar} />
-				</label>
+		<>
+			{showSettings ? (
+				<Settings onCancel={() => setShowSettings(false)} />
+			) : null}
+			<div className={styles.navbar_profile}>
+				<div className={styles.navbar_avatar}>
+					<label>
+						<input
+							type="file"
+							value=""
+							className={styles.navbar_upload_avatar}
+							onChange={(e) => {
+								if (e.target.files)
+									uploadAvatar(e.target.files[0]);
+							}}
+						/>
+						<Avatar src={avatar} />
+					</label>
+				</div>
+				<div className={styles.navbar_profileInfo}>
+					<h3>{user.nickname}</h3>
+					<p
+						onClick={(_) =>
+							navigator.clipboard.writeText("@" + user.tag)
+						}
+					>
+						@{user.tag}
+					</p>
+				</div>
+				<div className={styles.navbar_profileIcons}>
+					{/*<MicIcon />*/}
+					{/*<HeadsetIcon />*/}
+					<SettingsIcon onClick={(_) => setShowSettings(true)} />
+				</div>
 			</div>
-			<div className={styles.navbar_profileInfo}>
-				<h3>{user.nickname}</h3>
-				<p
-					onClick={(_) =>
-						navigator.clipboard.writeText("@" + user.tag)
-					}
-				>
-					@{user.tag}
-				</p>
-			</div>
-			<div className={styles.navbar_profileIcons}>
-				{/*<MicIcon />*/}
-				{/*<HeadsetIcon />*/}
-				<SettingsIcon />
-			</div>
-		</div>
+		</>
 	);
 };

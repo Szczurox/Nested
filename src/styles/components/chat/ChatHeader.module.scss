@@ -29,6 +29,11 @@
 	background-color: #363a3f;
 	height: 9%;
 
+	a {
+		color: inherit;
+		text-decoration: none;
+	}
+
 	.chatHeader_menu_icon {
 		svg {
 			margin-left: 7.5px;

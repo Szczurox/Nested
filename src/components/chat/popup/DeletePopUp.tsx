@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect } from "react";
 import styles from "../../../styles/components/chat/popups/DeleteConfirmPopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
-import PopUpButton, { buttonColors } from "./PopUpButton";
+import PopUpButton from "./PopUpButton";
 
 export interface DeletePopUpProps {
 	onConfirm: () => void;

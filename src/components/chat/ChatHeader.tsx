@@ -10,12 +10,13 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import styles from "../../styles/components/chat/ChatHeader.module.scss";
 import { useChannel } from "context/channelContext";
 import { NavbarVariant } from "./Navbar";
+import Link from "next/link";
 
 interface ChatHeaderProps {
 	isNavbarOpen: boolean;
 	isMembersOpen: boolean;
 	variant: NavbarVariant;
-	onMembers: () => void;
+	onMembers: (query?: string) => void;
 	setShowNavbar: (show: boolean) => void;
 }
 
@@ -64,11 +65,21 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 						/>
 
 						<div className={styles.chatHeader_search}>
-							<input placeholder="Search" />
+							<input
+								placeholder="Search"
+								onChange={(e) => onMembers(e.target.value)}
+							/>
 							<SearchRoundedIcon />
 						</div>
-						<MarkunreadMailboxRoundedIcon />
-						<HelpRoundedIcon />
+						<Link href="/dev">
+							<MarkunreadMailboxRoundedIcon />
+						</Link>
+						<a
+							href="https://github.com/Szczurox/Nested/"
+							target="_blank"
+						>
+							<HelpRoundedIcon />
+						</a>
 					</div>
 				) : null}
 			</div>

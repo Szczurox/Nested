@@ -2,7 +2,12 @@ import React, { ReactNode, useEffect } from "react";
 import styles from "../../../styles/components/chat/popups/ScreenPopUp.module.scss";
 import { usePopUp } from "context/popUpContext";
 
-const ScreenPopUp: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface PopUpProps {
+	children: ReactNode;
+	full?: boolean;
+}
+
+const ScreenPopUp: React.FC<PopUpProps> = ({ children, full = false }) => {
 	const { setCurrentPopUp } = usePopUp();
 
 	useEffect(() => {
@@ -12,7 +17,11 @@ const ScreenPopUp: React.FC<{ children: ReactNode }> = ({ children }) => {
 
 	return (
 		<div className={styles.screen_popup}>
-			<div className={styles.screen_popup_box}>{children}</div>
+			{full ? (
+				children
+			) : (
+				<div className={styles.screen_popup_box}>{children}</div>
+			)}
 		</div>
 	);
 };

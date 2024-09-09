@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { getAuth, signOut } from "firebase/auth";
 import Link from "next/link";
 
