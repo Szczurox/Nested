@@ -4,12 +4,14 @@ import { Avatar } from "@material-ui/core";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import moment, { Moment } from "moment";
+import { useUser } from "context/userContext";
 
 interface MemberProps {
 	id: string;
 	name: string;
 	nameColor: string;
 	avatar: string;
+	changeActivity: (id: string, active: boolean) => void;
 }
 
 export interface MemberData {
@@ -24,27 +26,38 @@ export const Member: React.FC<MemberProps> = ({
 	name,
 	nameColor,
 	avatar,
+	changeActivity,
 }) => {
-	const [isActive, setIsActive] = useState<boolean>(false);
+	const [isActive, setIsActive] = useState<boolean>(true);
 	const [lastActive, setLastActive] = useState<Moment>();
+
+	const { user } = useUser();
 
 	const app = createFirebaseApp();
 	const db = getFirestore(app!);
 
 	useEffect(() => {
 		function onMemberLoad() {
-			return onSnapshot(doc(db, "profile", id), (doc) => {
-				if (doc.exists() && doc.data().lastActive) {
-					setLastActive(
-						moment(doc.data().lastActive.toMillis()).add(3, "m")
-					);
-					setIsActive(
-						moment(doc.data().lastActive.toMillis())
+			if (id != user.uid)
+				return onSnapshot(doc(db, "profile", id), (doc) => {
+					if (doc.exists() && doc.data().lastActive) {
+						const active = moment(doc.data().lastActive.toMillis())
 							.add(3, "m")
-							.isAfter(moment())
-					);
-				}
-			});
+							.isAfter(moment());
+						console.log(active, id);
+						changeActivity(id, active);
+						setLastActive(
+							moment(doc.data().lastActive.toMillis()).add(3, "m")
+						);
+						setIsActive(active);
+					}
+				});
+			else {
+				changeActivity(id, true);
+				return () => {
+					return;
+				};
+			}
 		}
 
 		const unsub = onMemberLoad();
@@ -53,8 +66,13 @@ export const Member: React.FC<MemberProps> = ({
 
 	useEffect(() => {
 		const interval = setInterval(async () => {
-			if (lastActive) {
-				setIsActive(lastActive.isAfter(moment()));
+			if (id == user.uid) setIsActive(true);
+			else if (lastActive) {
+				const activity = lastActive.isAfter(moment());
+				if (activity != isActive) {
+					changeActivity(id, activity);
+					setIsActive(activity);
+				}
 			} else setIsActive(false);
 		}, 1500);
 

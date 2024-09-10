@@ -48,7 +48,10 @@ const Chat = () => {
 
 	useEffect(() => {
 		const interval = setInterval(async () => {
-			if (moment().valueOf() > user.lastActive + 150000) {
+			if (
+				moment().valueOf() > user.lastActive + 150000 &&
+				user.uid != ""
+			) {
 				console.log("ping!", user.uid);
 				setActivity(moment().valueOf());
 				await updateDoc(doc(db, "profile", user.uid), {
@@ -162,7 +165,7 @@ const Chat = () => {
 							setVariant(variant)
 						}
 					/>
-					<Navbar variant={variant} />
+					<Navbar variant={variant} isMobile={isMobile} />
 				</div>
 			) : null}
 			<div className={styles.full_chat_flexbox}>

@@ -16,7 +16,11 @@ import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import Settings from "../Settings";
 
-export const NavbarProfile: React.FC = ({}) => {
+interface NavbarProfileProps {
+	isMobile: boolean;
+}
+
+export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 	const { user, setUserData } = useUser();
 	const { channel } = useChannel();
 
@@ -46,7 +50,11 @@ export const NavbarProfile: React.FC = ({}) => {
 	}
 
 	const uploadAvatar = (file: File) => {
-		if (file.type.substring(0, 5) == "image") {
+		// Allow images and gifs less than 3MB as a pfp
+		if (
+			file.type.substring(0, 5) == "image" &&
+			file.size / 1024 / 1024 < 3
+		) {
 			const fileRef = ref(storage, `profiles/${user.uid}`);
 			const uploadTask = uploadBytesResumable(fileRef, file!);
 			uploadTask.on(
@@ -78,7 +86,7 @@ export const NavbarProfile: React.FC = ({}) => {
 									user.uid,
 									user.username,
 									downloadURL,
-									user.tag
+									user.nick
 								);
 							});
 						}
@@ -91,7 +99,10 @@ export const NavbarProfile: React.FC = ({}) => {
 	return (
 		<>
 			{showSettings ? (
-				<Settings onCancel={() => setShowSettings(false)} />
+				<Settings
+					onCancel={() => setShowSettings(false)}
+					isMobile={isMobile}
+				/>
 			) : null}
 			<div className={styles.navbar_profile}>
 				<div className={styles.navbar_avatar}>
@@ -109,7 +120,7 @@ export const NavbarProfile: React.FC = ({}) => {
 					</label>
 				</div>
 				<div className={styles.navbar_profileInfo}>
-					<h3>{user.nickname}</h3>
+					<h3>{user.nick}</h3>
 					<p
 						onClick={(_) =>
 							navigator.clipboard.writeText("@" + user.username)

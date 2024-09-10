@@ -8,10 +8,14 @@ import { NavbarCategories } from "./navbar/NavbarCategories";
 export type NavbarVariant = "server" | "dms";
 
 interface NavbarProps {
+	isMobile: boolean;
 	variant?: NavbarVariant;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ variant = "server" }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+	isMobile,
+	variant = "server",
+}) => {
 	const [isVoiceConnected, setIsVoiceConnected] = useState(false);
 
 	return (
@@ -19,7 +23,7 @@ export const Navbar: React.FC<NavbarProps> = ({ variant = "server" }) => {
 			<NavbarHeader variant={variant} />
 			<NavbarCategories variant={variant} />
 			{isVoiceConnected ? <NavbarVoice /> : null}
-			<NavbarProfile />
+			<NavbarProfile isMobile={isMobile} />
 		</div>
 	);
 };

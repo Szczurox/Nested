@@ -1,10 +1,33 @@
 .settings {
 	width: 100vw;
-	height: 100vh;
+	height: 100%;
 	background-color: #363a3f;
 	border-radius: 10px;
 	overflow: auto;
 	align-items: center;
+	display: flex;
+	flex-direction: column;
+	border-radius: 0px;
+
+	.header {
+		width: 100%;
+		color: white;
+		text-align: center;
+		padding-top: 15px;
+		margin: auto;
+		background-color: #2f3135;
+		border-bottom: #202124 solid;
+		font-size: large;
+		flex: 0.05;
+		display: flex;
+		p {
+			margin-left: 15vw;
+			flex: 0.9;
+		}
+		svg {
+			margin-bottom: 3px;
+		}
+	}
 
 	.container {
 		width: 900px;
@@ -14,16 +37,28 @@
 		margin: auto;
 		background-color: #363a3f;
 
+		@media (pointer: none), (pointer: coarse) {
+			max-width: 100%;
+			background-color: #2f3135;
+			flex: 0.95;
+		}
+
 		.navbar {
 			flex: 0.2;
 			background-color: #2f3135;
 			height: 100vh;
 			padding-top: 30px;
+
+			@media (pointer: none), (pointer: coarse) {
+				height: auto;
+				flex: 1;
+				padding-top: 10px;
+			}
+
 			.navbar_setting {
 				text-align: center;
 				padding: 10px;
 				color: white;
-				border: 3px white;
 				&:hover {
 					background-color: #35373b;
 				}
@@ -41,7 +76,6 @@
 				text-align: center;
 				padding: 10px;
 				color: #ff504d;
-				border: 3px white;
 				&:hover {
 					background-color: #ad3736;
 				}
@@ -54,6 +88,11 @@
 			padding: 30px;
 			color: white;
 			background-color: #363a3f;
+
+			@media (pointer: none), (pointer: coarse) {
+				flex: 1;
+				background-color: #2f3135;
+			}
 
 			p {
 				padding: 0px;

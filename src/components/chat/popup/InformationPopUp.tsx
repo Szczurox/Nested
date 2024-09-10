@@ -14,7 +14,7 @@ const InformationPopUp: React.FC<InformationPopUpProps> = ({
 }) => {
 	useEffect(() => {
 		const handler = async (e: KeyboardEvent) => {
-			if (e.key == "Enter") onOk();
+			if (e.key == "Enter" || e.key == "Escape") onOk();
 		};
 
 		document.addEventListener("keydown", handler, false);

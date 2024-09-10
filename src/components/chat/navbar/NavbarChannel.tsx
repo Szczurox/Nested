@@ -134,7 +134,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 				} else {
 					await setDoc(partRef, {
 						lastActive: serverTimestamp(),
-						nickname: user.nickname,
+						nickname: user.server_nick,
 					});
 					return participantSnapshot();
 				}

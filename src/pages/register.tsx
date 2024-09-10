@@ -42,13 +42,13 @@ export const Register: React.FC<{}> = ({}) => {
 	useEffect(() => {
 		// Route to chat if user is already authenticated
 		if (user.uid != "" && !loadingUser) router.push("/chat");
-	}, [user.uid, loadingUser]);
+	}, [user.uid, loadingUser, router]);
 
 	const createUser = async (username: string, uid: string) => {
 		await setDoc(doc(db, "profile", uid), {
 			username: username,
 			createdAt: serverTimestamp(),
-			tag: username,
+			nick: username,
 			avatar: "",
 		}).then(async () => {
 			await setDoc(doc(db, "usernames", username), {});

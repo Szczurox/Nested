@@ -31,7 +31,7 @@ export const Login: React.FC<{}> = ({}) => {
 	useEffect(() => {
 		// Route to chat if user is already authenticated
 		if (user.uid != "" && !loadingUser) router.push("/chat");
-	}, [user.uid, loadingUser]);
+	}, [user.uid, loadingUser, router]);
 
 	const signIn = async (values: any, setFieldError: any) => {
 		const auth = getAuth();

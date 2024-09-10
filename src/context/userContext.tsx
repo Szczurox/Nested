@@ -2,7 +2,6 @@ import { useState, useEffect, createContext, useContext } from "react";
 import { getAuth, getIdToken, onAuthStateChanged } from "firebase/auth";
 import { createFirebaseApp } from "../firebase-utils/clientApp";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { Moment } from "moment";
 import moment from "moment";
 
 export type MemberPermission =
@@ -18,8 +17,8 @@ export type User = {
 	uid: string;
 	username: string;
 	avatar: string;
-	tag: string;
-	nickname: string;
+	nick: string;
+	server_nick: string;
 	verified: boolean;
 	lastActive: number;
 	permissions: MemberPermission[];
@@ -33,7 +32,7 @@ export interface UserContextType {
 		uid: string,
 		username: string,
 		avatar: string,
-		tag: string
+		nick: string
 	) => void;
 	setMemberData: (nickname: string, permissions: MemberPermission[]) => void;
 	addPartPerms: (permissions: ParticipantPermission[]) => void;
@@ -47,8 +46,8 @@ export const UserContext = createContext<UserContextType>({
 		uid: "",
 		username: "",
 		avatar: "",
-		tag: "",
-		nickname: "",
+		nick: "",
+		server_nick: "",
 		verified: false,
 		lastActive: 0,
 		permissions: [],
@@ -58,7 +57,7 @@ export const UserContext = createContext<UserContextType>({
 		_uid: string,
 		_username: string,
 		_avatar: string,
-		_tag: string
+		_nick: string
 	) => undefined,
 	setMemberData: (_nickname: string, _permissions: MemberPermission[]) =>
 		undefined,
@@ -73,8 +72,8 @@ export default function UserContextComp({ children }: any) {
 		uid: "",
 		username: "",
 		avatar: "",
-		tag: "",
-		nickname: "",
+		nick: "",
+		server_nick: "",
 		verified: false,
 		lastActive: 0,
 		permissions: [],
@@ -91,7 +90,7 @@ export default function UserContextComp({ children }: any) {
 		uid: string,
 		username: string,
 		avatar: string,
-		tag: string
+		nick: string
 	) => {
 		setUser({
 			...user,
@@ -99,7 +98,7 @@ export default function UserContextComp({ children }: any) {
 			uid: uid,
 			username: username,
 			avatar: avatar,
-			tag: tag,
+			nick: nick,
 		});
 	};
 
@@ -110,7 +109,7 @@ export default function UserContextComp({ children }: any) {
 		setUser({
 			...user,
 			permissions: permissions,
-			nickname: nickname,
+			server_nick: nickname,
 		});
 	};
 
@@ -160,8 +159,10 @@ export default function UserContextComp({ children }: any) {
 							avatar: docSnap.data().avatar
 								? docSnap.data().avatar
 								: "",
-							tag: docSnap.data().tag ? docSnap.data().tag : "",
-							nickname: "",
+							nick: docSnap.data().nick
+								? docSnap.data().nick
+								: "",
+							server_nick: "",
 							verified: verified,
 							lastActive: moment().valueOf(),
 							permissions: [],
@@ -173,8 +174,8 @@ export default function UserContextComp({ children }: any) {
 						uid: "",
 						username: "",
 						avatar: "",
-						tag: "",
-						nickname: "",
+						nick: "",
+						server_nick: "",
 						verified: false,
 						lastActive: 0,
 						permissions: [],

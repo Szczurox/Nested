@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../styles/components/chat/Members.module.scss";
+import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
 import { useChannel } from "context/channelContext";
 import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import {
@@ -13,18 +14,28 @@ import { MemberCount } from "./members/MemberCount";
 
 export type MembersVariant = "server" | "dms";
 
+type FilterType = "online" | "offline" | "none";
+
 interface MembersProps {
 	isMobile: boolean;
 	qu: string; // Search query by member name
 }
 
 const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
+	// Members flter query
+	const [filter, setFilter] = useState<string>(qu);
 	const [members, setMembers] = useState<MemberData[]>([]);
+	const [online, setOnline] = useState<string[]>([]);
+	const [offline, setOffline] = useState<string[]>([]);
 
 	const { channel } = useChannel();
 
 	const app = createFirebaseApp();
 	const db = getFirestore(app!);
+
+	useEffect(() => {
+		setFilter(qu);
+	}, [qu]);
 
 	useEffect(() => {
 		async function getMembers() {
@@ -70,6 +81,9 @@ const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 							})
 						);
 					}
+					if (change.type === "added") {
+						setOnline((online) => [...online, change.doc.id]);
+					}
 				});
 			});
 
@@ -79,32 +93,92 @@ const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 		getMembers();
 	}, [channel.idG, db]);
 
-	const filterMembers = (): MemberData[] => {
-		return qu != ""
-			? members.filter((el) => el.name.toLowerCase().includes(qu))
-			: members;
+	const filterMembers = (filterType: FilterType) => {
+		if (filterType == "online")
+			return members.filter(
+				(el) =>
+					online.includes(el.id) &&
+					(filter != ""
+						? el.name.toLowerCase().includes(filter)
+						: true)
+			);
+		if (filterType == "offline")
+			return members.filter(
+				(el) =>
+					offline.includes(el.id) &&
+					(filter != ""
+						? el.name.toLowerCase().includes(filter)
+						: true)
+			);
+		else
+			return filter != ""
+				? members.filter((el) => el.name.toLowerCase().includes(filter))
+				: members;
+	};
+
+	const changeActivity = (id: string, activity: boolean) => {
+		if (activity) {
+			setOnline((online) => [...online, id]);
+			setOffline((offline) => [...offline.filter((el) => el !== id)]);
+		} else {
+			setOnline((online) => [...online.filter((el) => el !== id)]);
+			setOffline((offline) => [...offline, id]);
+		}
 	};
 
 	return (
 		<div className={styles.members}>
-			{isMobile ? (
+			{isMobile && (
 				<div className={styles.members_header}>
 					<h3>
 						<span className={styles.members_header_hash}>#</span>
 						{channel.name}
 					</h3>
+					<div className={styles.chatHeader_search}>
+						<input
+							placeholder="Search"
+							onChange={(e) => setFilter(e.currentTarget.value)}
+						/>
+						<SearchRoundedIcon />
+					</div>
 				</div>
-			) : null}
-			{members.length != 0 && (
-				<MemberCount count={filterMembers().length} />
 			)}
-			{filterMembers().map((member) => (
+			{members.length != 0 && (
+				<MemberCount
+					name="Members"
+					count={filterMembers("none").length}
+				/>
+			)}
+			{members.length != 0 && !filter && (
+				<MemberCount
+					name="Online"
+					count={filterMembers("online").length}
+				/>
+			)}
+			{filterMembers("online").map((member) => (
 				<Member
 					id={member.id}
 					key={member.id}
 					name={member.name}
 					nameColor={member.nameColor}
 					avatar={member.avatar}
+					changeActivity={changeActivity}
+				/>
+			))}
+			{members.length != 0 && !filter && (
+				<MemberCount
+					name="Offline"
+					count={filterMembers("offline").length}
+				/>
+			)}
+			{filterMembers("offline").map((member) => (
+				<Member
+					id={member.id}
+					key={member.id}
+					name={member.name}
+					nameColor={member.nameColor}
+					avatar={member.avatar}
+					changeActivity={changeActivity}
 				/>
 			))}
 		</div>

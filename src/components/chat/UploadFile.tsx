@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
 import styles from "../../styles/components/chat/UploadFile.module.scss";
 import { v4 } from "uuid";
@@ -47,6 +47,8 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 	const [isTooLarge, setIsTooLarge] = useState<boolean>(false);
 	const [isWrongType, setIsWrongType] = useState<boolean>(false);
 
+	const inputRef = useRef<HTMLInputElement>(null);
+
 	const { channel } = useChannel();
 	const { user } = useUser();
 
@@ -84,12 +86,12 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 
 	async function checkFile(e: File) {
 		console.log(e.type);
-		// Allow only images, gifs and videos
+		// Allow only images, gifs less than 8MB
 		if (
 			e.type.substring(0, 5) == "image" ||
 			e.type.substring(0, 5) == "video"
 		) {
-			if (e.size / 1024 / 1024 < 5) {
+			if (e.size / 1024 / 1024 < 8) {
 				console.log("valid");
 				setFileType(e.type.substring(0, 5));
 				setFileG(e);
@@ -179,13 +181,23 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 				/>
 			)}
 			{isTooLarge && (
-				<InformationPopUp onOk={() => setIsTooLarge(false)}>
+				<InformationPopUp
+					onOk={() => {
+						setIsTooLarge(false);
+						inputRef.current!.blur();
+					}}
+				>
 					<h3>Your file too large!</h3>
-					<p>Maximum file upload size is 5MB.</p>
+					<p>Maximum file upload size is 8MB.</p>
 				</InformationPopUp>
 			)}
 			{isWrongType && (
-				<InformationPopUp onOk={() => setIsWrongType(false)}>
+				<InformationPopUp
+					onOk={() => {
+						setIsWrongType(false);
+						inputRef.current!.blur();
+					}}
+				>
 					<h3>Unsupported file type!</h3>
 					<p>Only image, video and gif files are supported.</p>
 				</InformationPopUp>
@@ -202,6 +214,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 							if (e.target.files) checkFile(e.target.files[0]);
 						}}
 						disabled={channel.id == ""}
+						ref={inputRef}
 					/>
 				</div>
 			</form>
