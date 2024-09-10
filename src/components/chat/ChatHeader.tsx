@@ -1,11 +1,11 @@
 import React from "react";
-// import NotificationsIcon from "@material-ui/icons/Notifications";
-// import EditLocationRoundedIcon from "@material-ui/icons/EditLocationRounded";
-import PeopleAltRoundedIcon from "@material-ui/icons/PeopleAltRounded";
-import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
+// import NotificationsIcon from "@mui/icons-material/Notifications";
+// import EditLocationRoundedIcon from "@mui/icons-material/EditLocationRounded";
+import PeopleAltRoundedIcon from "@mui/icons-material/PeopleAltRounded";
+import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import MenuIcon from "@mui/icons-material/Menu";
-import MarkunreadMailboxRoundedIcon from "@material-ui/icons/MarkunreadMailboxRounded";
-import HelpRoundedIcon from "@material-ui/icons/HelpRounded";
+import MarkunreadMailboxRoundedIcon from "@mui/icons-material/MarkunreadMailboxRounded";
+import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import styles from "../../styles/components/chat/ChatHeader.module.scss";
 import { useChannel } from "context/channelContext";

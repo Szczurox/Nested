@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarDm.module.scss";
-import { Avatar } from "@material-ui/core";
-import { doc, getFirestore, onSnapshot } from "firebase/firestore";
+import { Avatar } from "@mui/material";
+import { getFirestore } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
-import moment, { Moment } from "moment";
+import { Moment } from "moment";
 
 interface NavbarDmProps {
 	id?: string;

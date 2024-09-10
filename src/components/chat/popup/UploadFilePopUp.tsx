@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/popups/UploadFilePopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
 import { useChannel } from "../../../context/channelContext";
-import { TextareaAutosize } from "@material-ui/core";
+import { TextareaAutosize } from "@mui/material";
 import PopUpButton, { buttonColors } from "./PopUpButton";
 import { MediaType } from "../UploadFile";
+import Image from "next/image";
 
 interface UploadFilePopUpProps {
 	fileUrl: string;
@@ -42,20 +43,19 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 		return () => {
 			document.removeEventListener("keydown", handler, false);
 		};
-	}, []);
-
-	const pasted = (e: ClipboardEvent) => {
-		if (e.clipboardData!.files[0] == undefined && channel.id != "") {
-			textAreaRef.current!.focus();
-		}
-	};
+	}, [input, uploadFile]);
 
 	useEffect(() => {
+		const pasted = (e: ClipboardEvent) => {
+			if (e.clipboardData!.files[0] == undefined && channel.id != "") {
+				textAreaRef.current!.focus();
+			}
+		};
 		document.addEventListener("paste", pasted);
 		return () => {
 			document.removeEventListener("paste", pasted);
 		};
-	}, [input]);
+	}, [input, channel.id]);
 
 	const uploadFileKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key == "Enter" && e.shiftKey == false && channel.id != "") {
@@ -68,10 +68,12 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 		<ScreenPopUp>
 			<div>
 				{type === "image" ? (
-					<img
+					<Image
 						className={styles.upload_file_media}
 						src={fileUrl}
-						alt="Image couldn't load"
+						alt=""
+						width={0}
+						height={0}
 					/>
 				) : (
 					<video className={styles.upload_file_media} controls>

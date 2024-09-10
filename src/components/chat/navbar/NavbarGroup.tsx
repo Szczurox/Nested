@@ -1,7 +1,7 @@
 import styles from "../../../styles/components/chat/navbar/NavbarGroup.module.scss";
 import { useChannel } from "context/channelContext";
 import GroupsIcon from "@mui/icons-material/Groups";
-import { Avatar } from "@material-ui/core";
+import { Avatar } from "@mui/material";
 import { useEffect, useState } from "react";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import { useUser } from "context/userContext";
@@ -43,7 +43,7 @@ export const NavbarGroup: React.FC<NavbarGroupProps> = ({
 	useEffect(() => {
 		if (channel.idG == id) setIsSelected(true);
 		else setIsSelected(false);
-	}, [channel.idG]);
+	}, [channel.idG, id]);
 
 	return (
 		<div

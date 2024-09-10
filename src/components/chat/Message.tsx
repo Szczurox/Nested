@@ -1,5 +1,5 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
-import { Avatar, TextareaAutosize } from "@material-ui/core";
+import { Avatar, TextareaAutosize } from "@mui/material";
 import styles from "../../styles/components/chat/Message.module.scss";
 import moment from "moment";
 import {
@@ -11,12 +11,12 @@ import {
 } from "firebase/firestore";
 import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import ContextMenu, { ContextMenuHandle } from "./contextmenu/ContextMenu";
-import EditIcon from "@material-ui/icons/Edit";
-import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import SendIcon from "@mui/icons-material/Send";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import OpenInNewIcon from "@material-ui/icons/OpenInNew";
-import LinkIcon from "@material-ui/icons/Link";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
+import LinkIcon from "@mui/icons-material/Link";
 import CopyAllIcon from "@mui/icons-material/CopyAll";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
@@ -24,6 +24,7 @@ import { useMessage } from "context/messageContext";
 import DeleteConfirmPopUp from "./popup/DeleteConfirmPopUp";
 import ContextMenuElement from "./contextmenu/ContextMenuElement";
 import { MediaType } from "./UploadFile";
+import Image from "next/image";
 
 interface MessageProps {
 	id: string;
@@ -99,7 +100,7 @@ export const Message: React.FC<MessageProps> = ({
 	const menuRef = useRef<ContextMenuHandle>(null);
 	const userMenuRef = useRef<ContextMenuHandle>(null);
 	const elementRef = useRef<HTMLDivElement>(null);
-	const avatarRef = useRef<HTMLImageElement>(null);
+	const profileRef = useRef<HTMLDivElement>(null);
 	const messageContentRef = useRef<HTMLDivElement>(null);
 
 	const allowedIFrames: string[] = [
@@ -310,20 +311,22 @@ export const Message: React.FC<MessageProps> = ({
 		checkForSpecial();
 
 		document.addEventListener("copy", handleCopy);
-		document.addEventListener("keydown", handleClick);
+		document.addEventListener("keydown", handleKeyDown);
 		document.addEventListener("contextmenu", handleClick);
 
 		return () => {
 			document.removeEventListener("copy", handleCopy);
-			document.removeEventListener("keydown", handleClick);
+			document.removeEventListener("keydown", handleKeyDown);
 			document.removeEventListener("contextmenu", handleClick);
 		};
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
 		// If another message is getting edited stop editing this message
 		if (message.id != id) setIsEditing(false);
-	}, [message.id]);
+	}, [message.id, id]);
 
 	const handleCopy = (e: ClipboardEvent): void => {
 		let selection = document.getSelection();
@@ -351,12 +354,21 @@ export const Message: React.FC<MessageProps> = ({
 		}
 	};
 
-	const handleClick = (e: Event): void => {
-		// Close message content menu if contextmenu used on avatar
-		if (avatarRef.current?.contains(e.target as Node))
-			menuRef.current?.closeMenu();
-
+	const handleClick = (e: any): void => {
 		const type = (e.target! as HTMLElement).tagName;
+
+		// Close message content menu if contextmenu used on avatars
+		if (
+			(profileRef.current?.contains(e.target as Node) && type == "IMG") ||
+			e.target.id == "nickname"
+		) {
+			menuRef.current?.closeMenu();
+			userMenuRef.current?.handleContextMenu(
+				e as React.MouseEvent<HTMLElement>
+			);
+		} else {
+			userMenuRef.current?.closeMenu();
+		}
 
 		// Additional message contextmenu options if used on embed or link
 		if (type == "A" || type == "IMG" || type == "VIDEO") {
@@ -367,7 +379,9 @@ export const Message: React.FC<MessageProps> = ({
 			if (type == "VIDEO")
 				setCurrentLink((e.target as HTMLImageElement).currentSrc);
 		} else setMenuOnLink(false);
+	};
 
+	const handleKeyDown = (e: KeyboardEvent): void => {
 		if (e.type == "keydown" && (e as KeyboardEvent).key == "Escape")
 			setIsEditing(false);
 	};
@@ -431,7 +445,10 @@ export const Message: React.FC<MessageProps> = ({
 						);
 						if (emoji)
 							return (
-								<img
+								<Image
+									unoptimized
+									width={0}
+									height={0}
 									src={emoji[1]}
 									key={index}
 									className={".emoji"}
@@ -442,16 +459,23 @@ export const Message: React.FC<MessageProps> = ({
 										)! || parsedContent.length > 20
 											? {
 													width: "24px",
+													height: "auto",
 											  }
-											: {}
+											: { width: "48px", height: "auto" }
 									}
 								/>
 							);
-						else return <span>{el[0]}</span>;
-					} else if (el[1] == "text") return <span>{el[0]}</span>;
+						else return <span key={index}>{el[0]}</span>;
+					} else if (el[1] == "text")
+						return <span key={index}>{el[0]}</span>;
 					else if (el[1] == "link")
 						return (
-							<a href={el[0]} target="_blank" rel="noreferrer">
+							<a
+								href={el[0]}
+								target="_blank"
+								rel="noreferrer"
+								key={index}
+							>
 								{el[0]}
 							</a>
 						);
@@ -521,6 +545,7 @@ export const Message: React.FC<MessageProps> = ({
 						{iframes.map((el, index) => {
 							return (
 								<iframe
+									allowFullScreen={true}
 									src={el}
 									className={styles.message_iframe}
 									onLoad={(_) =>
@@ -536,11 +561,13 @@ export const Message: React.FC<MessageProps> = ({
 									href={el[0]}
 									target="_blank"
 									rel="noreferrer"
+									key={index}
 								>
 									<img
 										src={el[0]}
 										className={styles.message_embed_link}
 										key={index}
+										alt=""
 									/>
 								</a>
 							) : (
@@ -562,7 +589,7 @@ export const Message: React.FC<MessageProps> = ({
 	};
 
 	const senderInfo = (
-		<>
+		<div ref={profileRef}>
 			<div
 				className={styles.message_profilePicture}
 				onContextMenu={(e) =>
@@ -572,15 +599,14 @@ export const Message: React.FC<MessageProps> = ({
 				<Avatar
 					style={{ height: "45px", width: "45px" }}
 					src={avatar}
-					innerRef={avatarRef}
 					onLoad={onImageLoad}
 				/>
 			</div>
 			<h4 style={{ color: nickColor }}>
-				{nickname}
+				<span id="nickname">{nickname}</span>
 				<span className={styles.message_timestamp}>{realTime}</span>
 			</h4>
-		</>
+		</div>
 	);
 
 	return nickname ? (
@@ -634,7 +660,7 @@ export const Message: React.FC<MessageProps> = ({
 					Copy Message ID
 				</ContextMenuElement>
 			</ContextMenu>
-			<ContextMenu ref={userMenuRef} parentRef={avatarRef}>
+			<ContextMenu ref={userMenuRef} parentRef={profileRef}>
 				<ContextMenuElement
 					onClick={(_) => navigator.clipboard.writeText(userid)}
 				>

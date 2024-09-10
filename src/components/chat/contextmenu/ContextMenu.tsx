@@ -8,8 +8,8 @@ import React, {
 	useState,
 } from "react";
 import styles from "../../../styles/components/chat/contextmenu/ContextMenu.module.scss";
-import { useMediaQuery } from "@material-ui/core";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
+import { useMediaQuery } from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 interface ContextMenuProps {
 	children: ReactNode;
@@ -22,7 +22,6 @@ export type ContextMenuHandle = {
 	getListRef: () => RefObject<HTMLUListElement>;
 };
 
-// TODO: Special ContextMenu for mobile devices
 const ContextMenu: React.ForwardRefRenderFunction<
 	ContextMenuHandle,
 	ContextMenuProps
@@ -69,20 +68,20 @@ const ContextMenu: React.ForwardRefRenderFunction<
 		};
 	});
 
-	const handleCloseMenu = (e: Event): void => {
-		if (
-			e.type == "click" ||
-			(e.type == "keydown" && (e as KeyboardEvent).key == "Escape") ||
-			(e.type == "contextmenu" &&
-				!parentRef.current?.contains(e.target as Node) &&
-				listRef.current != null &&
-				!listRef.current!.contains(e.target as Node))
-		) {
-			setIsOpen(false);
-		}
-	};
-
 	useEffect(() => {
+		const handleCloseMenu = (e: Event): void => {
+			if (
+				e.type == "click" ||
+				(e.type == "keydown" && (e as KeyboardEvent).key == "Escape") ||
+				(e.type == "contextmenu" &&
+					!parentRef.current?.contains(e.target as Node) &&
+					listRef.current != null &&
+					!listRef.current!.contains(e.target as Node))
+			) {
+				setIsOpen(false);
+			}
+		};
+
 		document.addEventListener("keydown", handleCloseMenu);
 		document.addEventListener("click", handleCloseMenu);
 		document.addEventListener("contextmenu", handleCloseMenu);
@@ -92,7 +91,7 @@ const ContextMenu: React.ForwardRefRenderFunction<
 			document.removeEventListener("click", handleCloseMenu);
 			document.removeEventListener("contextmenu", handleCloseMenu);
 		};
-	}, [handleCloseMenu]);
+	}, [parentRef]);
 
 	return isOpen ? (
 		isMobile ? (

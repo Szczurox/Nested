@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/ui-icons/Emoji.module.scss";
-import EmojiEmotionsIcon from "@material-ui/icons/EmojiEmotions";
-import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
+import EmojiEmotionsIcon from "@mui/icons-material/EmojiEmotions";
 import FixedMenu, { FixedMenuHandle } from "../contextmenu/FixedMenu";
 import {
 	collection,
@@ -14,6 +13,7 @@ import {
 } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
+import Image from "next/image";
 
 export interface EmojiData {
 	id: string; // Emoji ID
@@ -121,10 +121,14 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
 					<div className={styles.emoji_content}>
 						{emoji.map((emoji) => (
 							<span className={styles.emoji_frame} key={emoji.id}>
-								<img
+								<Image
+									width={0}
+									height={0}
 									src={emoji.file}
 									key={emoji.id}
 									onClick={(e) => emojiClicked(e, emoji)}
+									unoptimized
+									alt=""
 								/>
 							</span>
 						))}

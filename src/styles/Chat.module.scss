@@ -80,10 +80,14 @@
 			.chat_file_uploading {
 				background-color: #2f3135;
 				margin-left: 60px;
-				width: 40vw;
+				width: 30vw;
 				height: 10vh;
 				border-radius: 10px;
 				margin-top: 5px;
+
+				@media (pointer: none), (pointer: coarse) {
+					width: 80%;
+				}
 
 				.chat_upload_icon {
 					display: inline-block;

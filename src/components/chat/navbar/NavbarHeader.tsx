@@ -3,9 +3,9 @@ import styles from "../../../styles/components/chat/navbar/NavbarHeader.module.s
 import FixedMenu, { FixedMenuHandle } from "../contextmenu/FixedMenu";
 import ContextMenuElement from "../contextmenu/ContextMenuElement";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ExpandLessIcon from "@material-ui/icons/ExpandLess";
-import EditIcon from "@material-ui/icons/Edit";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import EditIcon from "@mui/icons-material/Edit";
 import { useChannel } from "context/channelContext";
 import InputPopUp from "../popup/InputPopUp";
 import { useUser } from "context/userContext";

@@ -44,7 +44,7 @@ const PopUpSwitch: React.FC<PopUpSwitchProps> = ({
 				{ once: true }
 			);
 		}
-	}, []);
+	}, [disabled]);
 
 	return (
 		<label

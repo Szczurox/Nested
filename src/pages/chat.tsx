@@ -93,6 +93,7 @@ const Chat = () => {
 				}
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [user.uid, loadingUser]);
 
 	useEffect(() => {
@@ -143,7 +144,8 @@ const Chat = () => {
 		return () => {
 			unsub();
 		};
-	}, [user.uid, channel.idG]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [user, channel.idG]);
 
 	function onMembers(q?: string) {
 		if (q == undefined) setShowMembers(!showMembers);

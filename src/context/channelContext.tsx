@@ -68,7 +68,6 @@ export default function ChannelContextComp({ children }: any) {
 			nameC: nameC ? nameC : channel.nameC,
 			idG: channel.idG,
 		});
-		console.log(channel.id);
 	};
 
 	const setGroupData = (

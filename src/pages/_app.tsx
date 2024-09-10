@@ -61,33 +61,30 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 			router.events.off("routeChangeError", routeChangeEndHandler);
 		};
 	}, [router.events]);
+
 	return (
-		<>
-			<head>
-				<title>Nested</title>
-				<meta
-					name="viewport"
-					content="initial-scale=1, maximum-scale=1.0, user-scalable=no"
-				/>
-				<link rel="icon" href="/favicon.ico" />
-				<meta name="Nested" content="Chat App" />
-			</head>
-			<UserProvider>
-				<ChannelProvider>
-					<MessageProvider>
-						<PopUpProvider>
-							<div style={{ height: windowHeight }}>
-								{isRouteChanging ? (
-									<Loading />
-								) : (
-									<Component {...pageProps} />
-								)}
-							</div>
-						</PopUpProvider>
-					</MessageProvider>
-				</ChannelProvider>
-			</UserProvider>
-		</>
+		<UserProvider>
+			<ChannelProvider>
+				<MessageProvider>
+					<PopUpProvider>
+						<div style={{ height: windowHeight }}>
+							<title>Nested</title>
+							<meta
+								name="viewport"
+								content="initial-scale=1, maximum-scale=1.0, user-scalable=no"
+							/>
+							<link rel="icon" href="/favicon.ico" />
+							<meta name="Nested" content="Chat App" />
+							{isRouteChanging ? (
+								<Loading />
+							) : (
+								<Component {...pageProps} />
+							)}
+						</div>
+					</PopUpProvider>
+				</MessageProvider>
+			</ChannelProvider>
+		</UserProvider>
 	);
 }
 

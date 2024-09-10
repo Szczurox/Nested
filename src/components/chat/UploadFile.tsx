@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import AddCircleIcon from "@material-ui/icons/AddCircle";
+import AddCircleIcon from "@mui/icons-material/AddCircle";
 import styles from "../../styles/components/chat/UploadFile.module.scss";
 import { v4 } from "uuid";
 import {
@@ -56,20 +56,20 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 	const app = createFirebaseApp();
 	const db = getFirestore(app!);
 
-	const dropped = (e: DragEvent) => {
-		e.preventDefault();
-		if (e.dataTransfer!.files[0] != undefined && channel.id != "") {
-			checkFile(e.dataTransfer!.files[0]);
-		}
-	};
-
-	const pasted = (e: ClipboardEvent) => {
-		if (e.clipboardData!.files[0] != undefined && channel.id != "") {
-			checkFile(e.clipboardData!.files[0]);
-		}
-	};
-
 	useEffect(() => {
+		const dropped = (e: DragEvent) => {
+			e.preventDefault();
+			if (e.dataTransfer!.files[0] != undefined && channel.id != "") {
+				checkFile(e.dataTransfer!.files[0]);
+			}
+		};
+
+		const pasted = (e: ClipboardEvent) => {
+			if (e.clipboardData!.files[0] != undefined && channel.id != "") {
+				checkFile(e.clipboardData!.files[0]);
+			}
+		};
+
 		document.addEventListener("paste", pasted);
 		document.addEventListener("drop", dropped);
 		document.addEventListener("dragover", (e) => {
@@ -82,7 +82,7 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 				e.preventDefault();
 			});
 		};
-	}, [channel.id, dropped, pasted]);
+	}, [channel.id]);
 
 	async function checkFile(e: File) {
 		console.log(e.type);

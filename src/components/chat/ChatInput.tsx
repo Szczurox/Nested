@@ -1,8 +1,6 @@
-import { TextareaAutosize } from "@material-ui/core";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import UploadFile, { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/components/chat/ChatInput.module.scss";
-import "bootstrap/dist/css/bootstrap.min.css";
 import SendIcon from "@mui/icons-material/Send";
 import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import {
@@ -23,6 +21,7 @@ import { usePopUp } from "context/popUpContext";
 import Emoji from "./ui-icons/Emoji";
 import InformationPopUp from "./popup/InformationPopUp";
 import { wait } from "components/utils/utils";
+import { TextareaAutosize } from "@mui/material";
 
 interface ChatInputProps {
 	isDisabled: boolean;
@@ -81,56 +80,98 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
 	const textAreaSizeLimit = 2000;
 
+	const getEmojis = useCallback(
+		async (text: string) => {
+			if (text.includes(":>") && text.includes("<:")) {
+				const emojiCollection = collection(
+					db,
+					"groups",
+					channel.idG,
+					"emoji"
+				);
+				const emojiSplit = text.split(/(<:.*?:>+)/g);
+				console.log(emojiSplit, emojis);
+				emojiSplit.forEach(async (el) => {
+					if (
+						el.startsWith("<:") &&
+						el.endsWith(":>") &&
+						el.includes("?")
+					) {
+						let element = emojis.find((e) => e.split("|")[0] == el);
+						if (!element) {
+							const name = el.split("?")[0].slice(2);
+							const doc = await getDocs(
+								query(
+									emojiCollection,
+									where("name", "==", name)
+								)
+							);
+							const file = doc.docs[0].data().file;
+							setEmojis([...emojis, el + "|" + file]);
+							setEmojiBucket((emojiBucket) => [
+								...emojiBucket,
+								el + "|" + file,
+							]);
+						} else {
+							setEmojiBucket([...emojiBucket, element]);
+						}
+					}
+				});
+			}
+		},
+		[channel.idG, db, emojiBucket, emojis]
+	);
+
 	useEffect(() => {
 		setInputOnChannels((inputs) => [
 			...inputs.filter((el) => el[0] != channel.id),
 			[channel.id, input],
 		]);
-	}, [input]);
+	}, [input, channel.id]);
 
 	useEffect(() => {
 		var element = inputOnChannels.find((el) => el[0] == channel.id);
 		if (element) setInput(element[1]);
 		else setInput("");
-	}, [channel.id]);
+	}, [channel.id, inputOnChannels]);
 
 	useEffect(() => {
+		const pasted = (e: ClipboardEvent) => {
+			if (
+				e.clipboardData!.files[0] == undefined &&
+				channel.id != "" &&
+				!popUp.isOpen &&
+				document.activeElement?.tagName != "TEXTAREA"
+			) {
+				let text: string = e.clipboardData!.getData("TEXT");
+				getEmojis(text);
+				textAreaRef.current?.focus();
+			}
+		};
+
 		document.addEventListener("paste", pasted);
 		return () => {
 			document.removeEventListener("paste", pasted);
 		};
-	}, [input, popUp.isOpen, channel.id]);
+	}, [input, popUp.isOpen, channel.id, getEmojis]);
 
 	useEffect(() => {
+		const handleKeyPress = (e: KeyboardEvent) => {
+			if (
+				document.activeElement?.tagName != "TEXTAREA" &&
+				document.activeElement?.tagName != "INPUT" &&
+				!popUp.isOpen &&
+				textAreaRef.current &&
+				((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
+			)
+				textAreaRef.current.focus();
+		};
+
 		document.addEventListener("keydown", handleKeyPress);
 		return () => {
 			document.removeEventListener("keydown", handleKeyPress);
 		};
 	}, [popUp.isOpen]);
-
-	const pasted = (e: ClipboardEvent) => {
-		if (
-			e.clipboardData!.files[0] == undefined &&
-			channel.id != "" &&
-			!popUp.isOpen &&
-			document.activeElement?.tagName != "TEXTAREA"
-		) {
-			let text: string = e.clipboardData!.getData("TEXT");
-			getEmojis(text);
-			textAreaRef.current?.focus();
-		}
-	};
-
-	const handleKeyPress = (e: KeyboardEvent) => {
-		if (
-			document.activeElement?.tagName != "TEXTAREA" &&
-			document.activeElement?.tagName != "INPUT" &&
-			!popUp.isOpen &&
-			textAreaRef.current &&
-			((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
-		)
-			textAreaRef.current.focus();
-	};
 
 	async function sendMessage() {
 		// Get current input and reset textarea instantly, before message gets fully sent
@@ -217,42 +258,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		) {
 			e.preventDefault();
 			sendMessage();
-		}
-	}
-
-	async function getEmojis(text: string) {
-		if (text.includes(":>") && text.includes("<:")) {
-			const emojiCollection = collection(
-				db,
-				"groups",
-				channel.idG,
-				"emoji"
-			);
-			const emojiSplit = text.split(/(<:.*?:>+)/g);
-			console.log(emojiSplit, emojis);
-			emojiSplit.forEach(async (el) => {
-				if (
-					el.startsWith("<:") &&
-					el.endsWith(":>") &&
-					el.includes("?")
-				) {
-					let element = emojis.find((e) => e.split("|")[0] == el);
-					if (!element) {
-						const name = el.split("?")[0].slice(2);
-						const doc = await getDocs(
-							query(emojiCollection, where("name", "==", name))
-						);
-						const file = doc.docs[0].data().file;
-						setEmojis([...emojis, el + "|" + file]);
-						setEmojiBucket((emojiBucket) => [
-							...emojiBucket,
-							el + "|" + file,
-						]);
-					} else {
-						setEmojiBucket([...emojiBucket, element]);
-					}
-				}
-			});
 		}
 	}
 

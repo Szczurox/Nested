@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../styles/components/chat/Settings.module.scss";
 import ScreenPopUp from "./popup/ScreenPopUp";
-import CloseIcon from "@material-ui/icons/Close";
+import CloseIcon from "@mui/icons-material/Close";
 import { getAuth, signOut } from "firebase/auth";
 import { ProfileSettings } from "./settings/ProfileSettings";
 

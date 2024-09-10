@@ -111,6 +111,12 @@
 		margin-bottom: 0px;
 	}
 
+	a {
+		word-wrap: break-all;
+		overflow-wrap: break-all;
+		word-break: break-all;
+	}
+
 	h4 {
 		font-size: large;
 		margin-bottom: -0px;
@@ -130,6 +136,7 @@
 	.message_content {
 		padding: none;
 		margin: none;
+		word-break: break-word;
 
 		.message_edited_indicator {
 			font-size: small;
@@ -190,14 +197,14 @@
 	.message_embed {
 		position: relative;
 		margin-top: 4px;
-		max-width: 60vw;
-		max-height: 55vh;
+		max-width: 38vw;
+		max-height: 40vh;
 		width: auto;
 		height: auto;
 		border-radius: 10px;
 
 		@media (pointer: none), (pointer: coarse) {
-			max-width: 95%;
+			max-width: 100%;
 			margin-top: 2px;
 			margin-bottom: 0px;
 		}
@@ -206,7 +213,7 @@
 	.message_embed_text {
 		margin-top: 4px;
 		max-width: 60vw;
-		max-height: 55vh;
+		max-height: 40vh;
 		width: auto;
 		height: auto;
 		border-radius: 10px;
@@ -221,7 +228,7 @@
 	.message_embed_link {
 		margin-top: 2px;
 		max-width: 40vw;
-		max-height: 50vh;
+		max-height: 40vh;
 		width: auto;
 		height: auto;
 		border-radius: 10px;
@@ -235,7 +242,7 @@
 	.message_iframe {
 		margin-top: 4px;
 		margin-left: 60px;
-		min-width: 500px;
+		min-width: 400px;
 		min-height: 300px;
 		width: auto;
 		height: auto;

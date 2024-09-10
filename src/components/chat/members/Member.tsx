@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styles from "../../../styles/components/chat/members/Member.module.scss";
-import { Avatar } from "@material-ui/core";
+import { Avatar } from "@mui/material";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import moment, { Moment } from "moment";
@@ -62,6 +62,7 @@ export const Member: React.FC<MemberProps> = ({
 
 		const unsub = onMemberLoad();
 		return () => unsub();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {

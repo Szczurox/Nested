@@ -1,7 +1,7 @@
 import React, { ReactNode, useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/popups/ChannelPopUp.module.scss";
 import ScreenPopUp from "./ScreenPopUp";
-import { TextareaAutosize } from "@material-ui/core";
+import { TextareaAutosize } from "@mui/material";
 import PopUpButton from "./PopUpButton";
 
 interface InputPopUpProps {
@@ -43,21 +43,24 @@ const InputPopUp: React.FC<InputPopUpProps> = ({
 		};
 	}, []);
 
-	const pasted = (e: ClipboardEvent) => {
-		if (
-			e.clipboardData!.files[0] == undefined &&
-			document.activeElement?.tagName != "TEXTAREA"
-		) {
-			if ((input + e.clipboardData!.getData("Text")).length <= 40)
-				setInput(input + e.clipboardData!.getData("Text"));
-			else
-				setInput(
-					(input + e.clipboardData!.getData("Text")).substring(0, 40)
-				);
-		}
-	};
-
 	useEffect(() => {
+		const pasted = (e: ClipboardEvent) => {
+			if (
+				e.clipboardData!.files[0] == undefined &&
+				document.activeElement?.tagName != "TEXTAREA"
+			) {
+				if ((input + e.clipboardData!.getData("Text")).length <= 40)
+					setInput(input + e.clipboardData!.getData("Text"));
+				else
+					setInput(
+						(input + e.clipboardData!.getData("Text")).substring(
+							0,
+							40
+						)
+					);
+			}
+		};
+
 		document.addEventListener("paste", pasted);
 		return () => {
 			document.removeEventListener("paste", pasted);

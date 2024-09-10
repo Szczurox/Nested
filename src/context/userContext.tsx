@@ -127,6 +127,7 @@ export default function UserContextComp({ children }: any) {
 		});
 	};
 
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(() => {
 		const interval = setInterval(async () => {
 			const auth = await getAuth().currentUser;
@@ -140,6 +141,7 @@ export default function UserContextComp({ children }: any) {
 		}, 3500000);
 
 		return () => clearInterval(interval);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	useEffect(() => {
@@ -189,6 +191,7 @@ export default function UserContextComp({ children }: any) {
 		});
 
 		return () => unsubscriber();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

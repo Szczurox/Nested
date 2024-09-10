@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import Avatar from "@material-ui/core/Avatar";
-// import MicIcon from "@material-ui/icons/Mic";
-// import HeadsetIcon from "@material-ui/icons/Headset";
-import SettingsIcon from "@material-ui/icons/Settings";
+// import MicIcon from "@mui/icons-material/Mic";
+// import HeadsetIcon from "@mui/icons-material/Headset";
+import SettingsIcon from "@mui/icons-material/Settings";
 import styles from "../../../styles/components/chat/navbar/NavbarProfile.module.scss";
 import { useUser } from "context/userContext";
 import {
@@ -15,6 +14,7 @@ import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import Settings from "../Settings";
+import { Avatar } from "@mui/material";
 
 interface NavbarProfileProps {
 	isMobile: boolean;

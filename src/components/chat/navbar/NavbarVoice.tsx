@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
-import SignalCelluralAltIcon from "@material-ui/icons/SignalCellularAlt";
-import CallIcon from "@material-ui/icons/Call";
+import React from "react";
+import SignalCelluralAltIcon from "@mui/icons-material/SignalCellularAlt";
+import CallIcon from "@mui/icons-material/Call";
 import styles from "../../../styles/components/chat/navbar/NavbarVoice.module.scss";
 
 export const NavbarVoice: React.FC = ({}) => {

@@ -3,8 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Message, { MessageData } from "./Message";
 import { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/Chat.module.scss";
-import "bootstrap/dist/css/bootstrap.min.css";
-import InsertDriveFileIcon from "@material-ui/icons/InsertDriveFile";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import { createFirebaseApp } from "../../firebase-utils/clientApp";
 import {
 	collection,
@@ -100,7 +99,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 			var msg = document.getElementById(message.id);
 			wait(100).then(() => (msg ? msg.scrollIntoView(false) : null));
 		}
-	}, [message]);
+	}, [message, isMobile]);
 
 	const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
 		const { scrollTop, scrollHeight, clientHeight } = listInnerRef.current!;
@@ -289,6 +288,8 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 				unsub2();
 			};
 		}
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [channel.id, channel.idG]);
 
 	// Message at the bottom that show file upload progress

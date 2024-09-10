@@ -75,27 +75,27 @@ const FixedMenu: React.ForwardRefRenderFunction<
 		};
 	});
 
-	const handleCloseMenu = (e: Event): void => {
-		if (
-			(e.type == "mousedown" &&
-				menuRef.current != null &&
-				!menuRef.current!.contains(e.target as Node) &&
-				parentRef.current != null &&
-				!parentRef.current!.contains(e.target as Node)) ||
-			(e.type == "keydown" && (e as KeyboardEvent).key == "Escape") ||
-			(e.type == "contextmenu" &&
-				menuRef.current != null &&
-				!menuRef.current!.contains(e.target as Node) &&
-				parentRef.current != null &&
-				!parentRef.current!.contains(e.target as Node))
-		) {
-			setIsOpen(false);
-			setCurrentPopUp(false);
-			if (onClose) onClose();
-		}
-	};
-
 	useEffect(() => {
+		const handleCloseMenu = (e: Event): void => {
+			if (
+				(e.type == "mousedown" &&
+					menuRef.current != null &&
+					!menuRef.current!.contains(e.target as Node) &&
+					parentRef.current != null &&
+					!parentRef.current!.contains(e.target as Node)) ||
+				(e.type == "keydown" && (e as KeyboardEvent).key == "Escape") ||
+				(e.type == "contextmenu" &&
+					menuRef.current != null &&
+					!menuRef.current!.contains(e.target as Node) &&
+					parentRef.current != null &&
+					!parentRef.current!.contains(e.target as Node))
+			) {
+				setIsOpen(false);
+				setCurrentPopUp(false);
+				if (onClose) onClose();
+			}
+		};
+
 		document.addEventListener("keydown", handleCloseMenu);
 		document.addEventListener("mousedown", handleCloseMenu);
 		document.addEventListener("contextmenu", handleCloseMenu);
@@ -105,7 +105,7 @@ const FixedMenu: React.ForwardRefRenderFunction<
 			document.removeEventListener("mousedown", handleCloseMenu);
 			document.removeEventListener("contextmenu", handleCloseMenu);
 		};
-	}, [handleCloseMenu]);
+	}, [onClose, parentRef, setCurrentPopUp]);
 
 	return isOpen ? (
 		<div

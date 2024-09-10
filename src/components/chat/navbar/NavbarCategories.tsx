@@ -13,7 +13,7 @@ import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import { useChannel } from "context/channelContext";
 import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
 import ContextMenuElement from "../contextmenu/ContextMenuElement";
-import AddIcon from "@material-ui/icons/Add";
+import AddIcon from "@mui/icons-material/Add";
 import { useUser } from "context/userContext";
 import InputPopUp from "../popup/InputPopUp";
 import { addCategory } from "components/utils/categoryQueries";

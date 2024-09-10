@@ -14,8 +14,8 @@ import {
 	updateDoc,
 } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
-import EditIcon from "@material-ui/icons/Edit";
-import DeleteIcon from "@material-ui/icons/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AddIcon from "@mui/icons-material/Add";
@@ -92,11 +92,14 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	);
 
 	useEffect(() => {
+		console.log("fewfew");
 		if (channel.id == id) {
 			setIsActive(true);
 			if (channel.name != name) setChannelData(id, name, idC, nameC);
 		} else setIsActive(false);
-	}, [id, channel]);
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [channel.id]);
 
 	useEffect(() => {
 		const participantSnapshot = () => {
@@ -149,14 +152,16 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 				unsub();
 			};
 		});
-	}, [id, channel]);
+
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	useEffect(() => {
 		const perms = everyPerms.concat(partPerms);
 		if (perms.length && perms != null) {
 			if (channel.id == id) addPartPerms(perms);
 		}
-	}, [everyPerms, partPerms, channel.id]);
+	}, [everyPerms, partPerms, channel.id, addPartPerms, id]);
 
 	useEffect(() => {
 		if (
