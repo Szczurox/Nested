@@ -161,7 +161,8 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		if (perms.length && perms != null) {
 			if (channel.id == id) addPartPerms(perms);
 		}
-	}, [everyPerms, partPerms, channel.id, addPartPerms, id]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [channel.id, id]);
 
 	useEffect(() => {
 		if (

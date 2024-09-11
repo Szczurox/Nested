@@ -33,7 +33,7 @@ export const NavbarGroups: React.FC<NavbarGroupsProps> = ({
 			setVariant(true);
 			variantChange("server");
 		}
-	}, [channel.idG, variantChange]);
+	}, [channel.idG]);
 
 	return (
 		<div className={styles.navbar_groups}>

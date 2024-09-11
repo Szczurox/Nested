@@ -24,6 +24,7 @@ import ChatHeader from "components/chat/ChatHeader";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { NavbarGroups } from "components/chat/NavbarGroups";
 import moment from "moment";
+import VoiceChannel from "components/chat/VoiceChannel";
 
 const Chat = () => {
 	const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
@@ -145,7 +146,7 @@ const Chat = () => {
 			unsub();
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [user, channel.idG]);
+	}, [channel.idG]);
 
 	function onMembers(q?: string) {
 		if (q == undefined) setShowMembers(!showMembers);

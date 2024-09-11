@@ -18,11 +18,16 @@
 		max-height: 50px;
 		min-height: 50px;
 		margin-top: 10px;
+		margin-bottom: 6px;
 		font-size: 30px;
 		color: white;
 		text-align: center;
 		transition: border-radius 0.1s;
 		cursor: pointer;
+
+		svg {
+			margin-top: 13px;
+		}
 
 		&:hover {
 			border-radius: 8px;

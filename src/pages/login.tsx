@@ -104,9 +104,7 @@ export const Login: React.FC<{}> = ({}) => {
 								/>
 							</div>
 							<div className={styles.forgot_password}>
-								<Link href="/login">
-									<a>Forgot password?</a>
-								</Link>
+								<Link href="/login">Forgot password?</Link>
 							</div>
 							<button
 								className={styles.auth_button}
@@ -118,9 +116,7 @@ export const Login: React.FC<{}> = ({}) => {
 							<div className={styles.singup_link}>
 								<span>
 									Not a member?{" "}
-									<Link href="/register">
-										<a>Register</a>
-									</Link>
+									<Link href="/register">Register</Link>
 								</span>
 							</div>
 						</Form>

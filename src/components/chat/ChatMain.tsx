@@ -29,6 +29,7 @@ import { wait } from "components/utils/utils";
 import DotsLoading from "components/animations/DotsLoading";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { ChatInput } from "./ChatInput";
+import VoiceChannel from "./VoiceChannel";
 
 interface ChatMainProps {
 	isNavbarOpen: boolean;
@@ -53,6 +54,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	const [isLoading, setIsLoading] = useState<boolean>(false); // Are new messages loading
 	const [isTyping, setIsTyping] = useState<boolean>(false);
 	const [isDisabled, setIsDisabled] = useState<boolean>(false); // Is chatting disabled
+	const [isVoice, setIsVoice] = useState<boolean>(true); // Is voice channel
 	const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
 	const listInnerRef = useRef<HTMLHeadingElement>(null);
