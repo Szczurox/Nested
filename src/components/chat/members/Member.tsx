@@ -31,6 +31,7 @@ export const Member: React.FC<MemberProps> = ({
 	isVisible,
 	changeActivity,
 }) => {
+	const [trueAvatar, setTrueAvatar] = useState<string>(avatar);
 	const [isActive, setIsActive] = useState<boolean>(true);
 	const [lastActive, setLastActive] = useState<Moment>();
 
@@ -41,22 +42,36 @@ export const Member: React.FC<MemberProps> = ({
 	const db = getFirestore(app!);
 
 	useEffect(() => {
+		setTrueAvatar(avatar);
+	}, [avatar]);
+
+	useEffect(() => {
 		function onMemberLoad() {
 			if (id != user.uid)
 				return onSnapshot(doc(db, "profile", id), (doc) => {
-					if (doc.exists() && doc.data().lastActive) {
-						const active = moment(doc.data().lastActive.toMillis())
-							.add(3, "m")
-							.isAfter(moment());
-						changeActivity(id, active);
-						setLastActive(
-							moment(doc.data().lastActive.toMillis()).add(3, "m")
-						);
-						setIsActive(active);
+					if (doc.exists()) {
+						if (avatar == "" && doc.data().avatar)
+							setTrueAvatar(doc.data().avatar);
+						if (doc.data().lastActive) {
+							const active = moment(
+								doc.data().lastActive.toMillis()
+							)
+								.add(3, "m")
+								.isAfter(moment());
+							changeActivity(id, active);
+							setLastActive(
+								moment(doc.data().lastActive.toMillis()).add(
+									3,
+									"m"
+								)
+							);
+							setIsActive(active);
+						}
 					}
 				});
 			else {
 				changeActivity(id, true);
+				if (!avatar) setTrueAvatar(user.avatar);
 				return () => {
 					return;
 				};
@@ -92,7 +107,7 @@ export const Member: React.FC<MemberProps> = ({
 			<div className={styles.member_avatar}>
 				<Avatar
 					style={{ height: "45px", width: "45px" }}
-					src={avatar ? avatar : "/UserAvatar.png"}
+					src={trueAvatar ? trueAvatar : "/UserAvatar.png"}
 				/>
 			</div>
 			<h4 style={{ color: nameColor ? nameColor : "white" }}>{name}</h4>{" "}

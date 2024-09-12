@@ -8,16 +8,14 @@ import { createFirebaseApp } from "firebase-utils/clientApp";
 import { handleVerifyEmail } from "components/utils/actionQueries";
 
 export const Verify: React.FC<{}> = ({}) => {
-	const { user } = useUser();
 	const [mode, setMode] = useState<string>("");
 	const searchParams = useSearchParams();
 
 	const router = useRouter();
 	useEffect(() => {
 		const mod: string = searchParams.get("mode") as string;
-		const action: string = searchParams.get("obbCode") as string;
-
-		console.log(mod, action);
+		const action: string = searchParams.get("oobCode") as string;
+		console.log(searchParams.has("mode"), searchParams.has("oobCode"));
 
 		const app = createFirebaseApp();
 		const auth = getAuth(app!);
@@ -34,13 +32,13 @@ export const Verify: React.FC<{}> = ({}) => {
 				console.log("couldn't recover email");
 				break;
 			case "verifyEmail":
-				handleVerifyEmail(auth, action);
+				console.log(handleVerifyEmail(auth, action));
 				break;
 			default:
 				console.log(`Wrong argument "mode" = "${mode}" for /verify`);
 				break;
 		}
-	}, [searchParams, mode]);
+	}, [mode, searchParams]);
 
 	const click = () => {
 		if (mode == "verifyEmail") {

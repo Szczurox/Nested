@@ -132,7 +132,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
 	useEffect(() => {
 		var element = inputOnChannels.find((el) => el[0] == channel.id);
-		console.log(element);
 		if (element) setInput(element[1]);
 		else setInput("");
 	}, [channel.id, inputOnChannels]);

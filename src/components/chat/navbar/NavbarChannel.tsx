@@ -98,20 +98,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 			if (channel.name != name)
 				setChannelData(id, channelType, name, idC, nameC);
 		} else setIsActive(false);
-	}, [
-		channel.id,
-		id,
-		user.uid,
-		name,
-		channel.name,
-		addPartPerms,
-		channelType,
-		everyPerms,
-		idC,
-		nameC,
-		partPerms,
-		setChannelData,
-	]);
+	}, [channel.id, id, user.uid, name, channel.name]);
 
 	useEffect(() => {
 		const participantSnapshot = () => {
@@ -188,7 +175,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		else setShowChannel(false);
 	}, [everyPerms, partPerms]);
 
-	const updateLastActive = async () => {
+	const updateLastActive = async () =>
 		await updateDoc(
 			doc(
 				db,
@@ -201,14 +188,16 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 			),
 			{ lastActive: serverTimestamp() }
 		);
-	};
+	const updateLastViewed = async () =>
+		await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
+			lastViewed: id,
+		});
 
 	const handleToggle = () => {
-		console.log(everyPerms.concat(partPerms));
-		addPartPerms(everyPerms.concat(partPerms));
 		setChannelData(id, channelType, name, idC, nameC);
 		updateLastActive();
 		setIsActive(true);
+		updateLastViewed();
 	};
 
 	const deleteChannel = async () => {
