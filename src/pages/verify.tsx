@@ -31,13 +31,15 @@ export const Verify: React.FC<{}> = ({}) => {
 				console.log("couldn't reset password");
 				break;
 			case "recoverEmail":
-				console.log("couldn't recover password");
+				console.log("couldn't recover email");
 				break;
 			case "verifyEmail":
 				handleVerifyEmail(auth, action);
 				break;
 			default:
+				router.push("/login");
 				console.log(`Wrong argument "mode" = "${mode}" for /verify`);
+				break;
 		}
 	}, [searchParams, mode]);
 
@@ -52,7 +54,6 @@ export const Verify: React.FC<{}> = ({}) => {
 		if (user.verified) {
 			const app = createFirebaseApp();
 			const auth = getAuth(app!);
-
 			signOut(auth).then(() => router.push("/login"));
 		}
 	};
@@ -60,8 +61,11 @@ export const Verify: React.FC<{}> = ({}) => {
 	return mode == "waitForVerify" || mode == "verifyEmail" ? (
 		<div className={styles.auth}>
 			<div className={styles.center}>
-				<h3>Verification link has been sent to your email</h3>
-
+				{mode == "waitForVerify" ? (
+					<h3>Verification link has been sent to your email</h3>
+				) : (
+					<h3>Successfully verified email address!</h3>
+				)}
 				<button className={styles.auth_button} onClick={() => click()}>
 					Continue
 				</button>
