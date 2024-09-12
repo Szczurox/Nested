@@ -43,7 +43,7 @@ export const Verify: React.FC<{}> = ({}) => {
 	}, [searchParams, mode]);
 
 	const click = () => {
-		if (user.verified) {
+		if (mode == "verifyEmail") {
 			const app = createFirebaseApp();
 			const auth = getAuth(app!);
 			signOut(auth).then(() => router.push("/login"));
