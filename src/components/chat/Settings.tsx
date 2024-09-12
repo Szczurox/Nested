@@ -31,17 +31,13 @@ const Settings: React.FC<SettingsProps> = ({ isMobile, onCancel }) => {
 	}, [onCancel]);
 
 	const logOut = async () => {
-		try {
-			signOut(auth)
-				.then(() => {
-					console.log("signed out");
-				})
-				.catch((error) => {
-					console.log("SIGN OUT ERROR: " + error.message);
-				});
-		} catch {
-			console.log("SIGN OUT ERROR!");
-		}
+		signOut(auth)
+			.then(() => {
+				console.log("signed out");
+			})
+			.catch((error) => {
+				console.log("SIGN OUT ERROR: " + error.message);
+			});
 	};
 
 	const navbar = (

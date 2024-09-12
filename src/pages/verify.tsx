@@ -8,7 +8,7 @@ import { createFirebaseApp } from "firebase-utils/clientApp";
 import { handleVerifyEmail } from "components/utils/actionQueries";
 
 export const Verify: React.FC<{}> = ({}) => {
-	const { user, loadingUser } = useUser();
+	const { user } = useUser();
 	const [mode, setMode] = useState<string>("");
 	const searchParams = useSearchParams();
 
@@ -42,13 +42,6 @@ export const Verify: React.FC<{}> = ({}) => {
 				break;
 		}
 	}, [searchParams, mode]);
-
-	useEffect(() => {
-		// Route to chat if user is verified
-		if (user.uid != "" && !loadingUser && user.verified)
-			router.push("/chat");
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
 
 	const click = () => {
 		if (user.verified) {
