@@ -1,7 +1,4 @@
-"use client";
-
 import {
-	ControlBar,
 	GridLayout,
 	LiveKitRoom,
 	ParticipantTile,
@@ -11,11 +8,13 @@ import {
 import "@livekit/components-styles";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
-import { Track } from "livekit-client";
+import { Track, Room } from "livekit-client";
 import { useEffect, useState } from "react";
 
 export default function VoiceChannel() {
-	const [token, setToken] = useState("");
+	const room = new Room();
+
+	const [token, setToken] = useState<string>("");
 
 	const { user } = useUser();
 	const { channel } = useChannel();
@@ -36,6 +35,7 @@ export default function VoiceChannel() {
 					);
 				const data = await resp.json();
 				setToken(data.token);
+				await room.connect(process.env.NEXT_PUBLIC_LIVEKIT_URL!, token);
 			} catch (e) {
 				console.error(e);
 			}
@@ -48,6 +48,7 @@ export default function VoiceChannel() {
 
 	return (
 		<LiveKitRoom
+			room={room}
 			video={false}
 			audio={true}
 			token={token}
@@ -63,8 +64,7 @@ export default function VoiceChannel() {
 			}}
 		>
 			<MyVideoConference />
-			<RoomAudioRenderer />
-			<ControlBar />
+			<RoomAudioRenderer muted={user.deafened} />
 		</LiveKitRoom>
 	);
 }
@@ -77,12 +77,13 @@ function MyVideoConference() {
 		],
 		{ onlySubscribed: false }
 	);
+
 	return (
 		<GridLayout
 			tracks={tracks}
 			style={{ height: "calc(100vh - var(--lk-control-bar-height))" }}
 		>
-			<ParticipantTile />
+			<ParticipantTile disableSpeakingIndicator />
 		</GridLayout>
 	);
 }

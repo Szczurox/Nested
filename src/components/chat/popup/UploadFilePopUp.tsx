@@ -47,14 +47,11 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 
 	useEffect(() => {
 		const pasted = (e: ClipboardEvent) => {
-			if (e.clipboardData!.files[0] == undefined && channel.id != "") {
+			if (e.clipboardData!.files[0] == undefined && channel.id != "")
 				textAreaRef.current!.focus();
-			}
 		};
 		document.addEventListener("paste", pasted);
-		return () => {
-			document.removeEventListener("paste", pasted);
-		};
+		return () => document.removeEventListener("paste", pasted);
 	}, [input, channel.id]);
 
 	const uploadFileKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

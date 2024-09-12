@@ -18,6 +18,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import VolumeUpIcon from "@mui/icons-material/VolumeUp";
+import TagIcon from "@mui/icons-material/Tag";
 import AddIcon from "@mui/icons-material/Add";
 import CircleIcon from "@mui/icons-material/Circle";
 import InputPopUp from "../popup/InputPopUp";
@@ -125,14 +127,11 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
 		const everyoneSnapshot = () => {
 			return onSnapshot(everyoneRef, (doc) => {
-				if (
-					doc.exists() &&
-					everyPerms != doc.data().permissions &&
-					doc.data().permissions.length
-				) {
+				if (doc.exists()) {
 					const perms: ParticipantPermission[] = [
 						...doc.data().permissions,
 					];
+					console.log(perms);
 					if (channel.id == id) addPartPerms(partPerms.concat(perms));
 					setEveryPerms(perms);
 				}
@@ -142,7 +141,10 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		async function checkParticipant() {
 			const participantDoc = await getDoc(partRef);
 			if (lastMessageAt) {
-				if (participantDoc.exists()) {
+				if (
+					participantDoc.exists() &&
+					participantDoc.data().nickname == user.serverNick
+				) {
 					return participantSnapshot();
 				} else {
 					await setDoc(partRef, {
@@ -188,6 +190,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 			),
 			{ lastActive: serverTimestamp() }
 		);
+
 	const updateLastViewed = async () =>
 		await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
 			lastViewed: id,
@@ -195,9 +198,11 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
 	const handleToggle = () => {
 		setChannelData(id, channelType, name, idC, nameC);
-		updateLastActive();
 		setIsActive(true);
-		updateLastViewed();
+		if (channelType == "TEXT") {
+			updateLastActive();
+			updateLastViewed();
+		}
 	};
 
 	const deleteChannel = async () => {
@@ -226,7 +231,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		}
 	};
 
-	const createChannel = async (channelName: string) => {
+	const createChannel = async (channelName: string = "") => {
 		setShowPopUp(0);
 		await addChannel(channelName, channel.idG, idC);
 	};
@@ -296,6 +301,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 						value={showPopUp == 3 ? "" : name}
 						placeHolder={showPopUp == 3 ? "new-channel" : name}
 						hash={true}
+						allowEmpty={true}
 					>
 						<h3>
 							{showPopUp == 3
@@ -326,7 +332,13 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 			>
 				<h4>
 					{isUnread && <CircleIcon className={styles.unread_dot} />}
-					<span className={styles.hash}>#</span>
+					{channelType == "VOICE" ? (
+						<span className={styles.volume}>
+							<VolumeUpIcon />
+						</span>
+					) : (
+						<span className={styles.hash}>#</span>
+					)}
 					<div className={styles.channel_name}>{name}</div>
 				</h4>
 			</div>

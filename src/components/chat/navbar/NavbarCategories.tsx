@@ -20,6 +20,7 @@ import { addCategory } from "components/utils/categoryQueries";
 import { addChannel } from "components/utils/channelQueries";
 import { NavbarVariant } from "../Navbar";
 import { NavbarDm } from "./NavbarDm";
+import PopUpSwitch from "../popup/PopUpSwitch";
 
 export interface NavbarCategoriesProps {
 	variant?: NavbarVariant;
@@ -33,6 +34,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
 	const [nCategoryChannels, setNCategoryChannels] = useState<ChannelData[]>(
 		[]
 	);
+	const [isVoice, setIsVoice] = useState<boolean>(false);
 	const [showPopUp, setShowPopUp] = useState<number>(0);
 
 	const app = createFirebaseApp();
@@ -195,6 +197,7 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
 							confirmButtonName={"Create"}
 							placeHolder={showPopUp == 1 ? "new-channel" : ""}
 							hash={showPopUp == 1}
+							allowEmpty={true}
 						>
 							<h3>
 								{showPopUp == 1
@@ -202,7 +205,24 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
 									: "Create Category"}
 							</h3>
 							{showPopUp == 1 ? (
-								<p>Create a channel without category</p>
+								<>
+									<p>Create a channel without category</p>
+									<div className={styles.toggle_container}>
+										<div className={styles.toggle_text}>
+											Text
+										</div>
+										<div className={styles.toggle}>
+											<PopUpSwitch
+												onChange={(isOn) =>
+													setIsVoice(isOn)
+												}
+											/>
+										</div>
+										<div className={styles.toggle_text}>
+											Voice
+										</div>
+									</div>
+								</>
 							) : (
 								<p>Create a category</p>
 							)}

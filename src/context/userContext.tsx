@@ -21,6 +21,8 @@ export type User = {
 	serverNick: string;
 	voiceRoom: string;
 	verified: boolean;
+	muted: boolean;
+	deafened: boolean;
 	lastActive: number;
 	permissions: MemberPermission[];
 	partPermissions: ParticipantPermission[];
@@ -38,6 +40,7 @@ export interface UserContextType {
 	setMemberData: (nickname: string, permissions: MemberPermission[]) => void;
 	addPartPerms: (permissions: ParticipantPermission[]) => void;
 	setActivity: (lastActive: number) => void;
+	setVoiceData: (muted: boolean, deafened: boolean) => void;
 	loadingUser: boolean;
 }
 
@@ -50,6 +53,8 @@ export const UserContext = createContext<UserContextType>({
 		nick: "",
 		serverNick: "",
 		voiceRoom: "",
+		muted: false,
+		deafened: false,
 		verified: false,
 		lastActive: 0,
 		permissions: [],
@@ -65,6 +70,7 @@ export const UserContext = createContext<UserContextType>({
 		undefined,
 	addPartPerms: (_permissions: ParticipantPermission[]) => undefined,
 	setActivity: (_lastActive: number) => undefined,
+	setVoiceData: (_muted: boolean, _deafened: boolean) => undefined,
 	loadingUser: false,
 });
 
@@ -78,6 +84,8 @@ export default function UserContextComp({ children }: any) {
 		serverNick: "",
 		voiceRoom: "",
 		verified: false,
+		muted: false,
+		deafened: false,
 		lastActive: 0,
 		permissions: [],
 		partPermissions: [],
@@ -132,6 +140,14 @@ export default function UserContextComp({ children }: any) {
 		});
 	};
 
+	const setVoiceData = (muted: boolean, deafened: boolean) => {
+		setUser({
+			...user,
+			muted: muted,
+			deafened: deafened,
+		});
+	};
+
 	useEffect(() => {
 		const interval = setInterval(async () => {
 			const auth = await getAuth().currentUser;
@@ -169,8 +185,6 @@ export default function UserContextComp({ children }: any) {
 							nick: docSnap.data().nick
 								? docSnap.data().nick
 								: "",
-							serverNick: "",
-							voiceRoom: "",
 							verified: verified,
 							lastActive: moment().valueOf(),
 						});
@@ -184,6 +198,8 @@ export default function UserContextComp({ children }: any) {
 						serverNick: "",
 						voiceRoom: "",
 						verified: false,
+						muted: false,
+						deafened: false,
 						lastActive: 0,
 						permissions: [],
 						partPermissions: [],
@@ -207,6 +223,7 @@ export default function UserContextComp({ children }: any) {
 				setMemberData,
 				addPartPerms: setPartPerms,
 				setActivity,
+				setVoiceData,
 				loadingUser,
 			}}
 		>

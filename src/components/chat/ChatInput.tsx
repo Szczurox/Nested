@@ -24,7 +24,6 @@ import { wait } from "components/utils/utils";
 import { TextareaAutosize } from "@mui/material";
 
 interface ChatInputProps {
-	isDisabled: boolean;
 	isMobile: boolean;
 	isTyping: boolean;
 	fileUploading: (fileData: FileUploadingData) => void;
@@ -33,7 +32,6 @@ interface ChatInputProps {
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
-	isDisabled,
 	isMobile,
 	isTyping,
 	fileUploading,
@@ -44,6 +42,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		["", ""],
 	]);
 	const [input, setInput] = useState<string>(""); // Textarea input
+	const [isDisabled, setIsDisabled] = useState<boolean>(false);
 	const [emojiBucket, setEmojiBucket] = useState<string[]>([]); // Array of all the emoji name|link used in the message
 	const [emojis, setEmojis] = useState<string[]>([]); // Array of all saved samojis
 	const [slowDownCount, setSlowDownCount] = useState<number>(0); // Show Slow Down pop-up if reaches 2
@@ -121,6 +120,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		},
 		[channel.idG, db, emojiBucket, emojis]
 	);
+
+	useEffect(() => {
+		console.log(user.partPermissions);
+		setIsDisabled(
+			!user.partPermissions.includes("SEND_MESSAGES") ||
+				channel.id == "" ||
+				channel.idG == "@dms"
+		);
+	}, [channel.id, user.partPermissions, user.permissions, channel.idG]);
 
 	useEffect(() => {
 		setInputOnChannels((inputs) => [
@@ -228,9 +236,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	}
 
 	async function userTyping() {
-		if (!isTyping) {
+		if (!isTyping && input != "") {
 			clearTimeout(typingTimeout);
-
+			console.log("typing");
 			setIsTyping(true);
 			await updateDoc(doc(participantsCollection, user.uid), {
 				lastTyping: serverTimestamp(),

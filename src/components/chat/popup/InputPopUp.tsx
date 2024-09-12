@@ -11,6 +11,7 @@ interface InputPopUpProps {
 	placeHolder?: string;
 	confirmButtonName?: string;
 	hash?: boolean;
+	allowEmpty?: boolean;
 	children?: ReactNode;
 }
 
@@ -21,6 +22,7 @@ const InputPopUp: React.FC<InputPopUpProps> = ({
 	placeHolder = "",
 	confirmButtonName = "Confirm",
 	hash = false,
+	allowEmpty = false,
 	children = null,
 }) => {
 	const [input, setInput] = useState<string>(value);
@@ -114,7 +116,11 @@ const InputPopUp: React.FC<InputPopUpProps> = ({
 					<PopUpButton
 						onClick={(_) => onConfirm(input)}
 						color={"grey"}
-						disabled={!input.replace(/\s/g, "").length}
+						disabled={
+							allowEmpty
+								? false
+								: !input.replace(/\s/g, "").length
+						}
 					>
 						{confirmButtonName}
 					</PopUpButton>

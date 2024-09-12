@@ -1,6 +1,8 @@
 import React, { useState } from "react";
-// import MicIcon from "@mui/icons-material/Mic";
-// import HeadsetIcon from "@mui/icons-material/Headset";
+import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
+import HeadsetIcon from "@mui/icons-material/Headset";
+import HeadsetOffIcon from "@mui/icons-material/HeadsetOff";
 import SettingsIcon from "@mui/icons-material/Settings";
 import styles from "../../../styles/components/chat/navbar/NavbarProfile.module.scss";
 import { useUser } from "context/userContext";
@@ -21,10 +23,12 @@ interface NavbarProfileProps {
 }
 
 export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
-	const { user, setUserData } = useUser();
+	const { user, setUserData, setVoiceData } = useUser();
 	const { channel } = useChannel();
 
 	const [showSettings, setShowSettings] = useState<boolean>(false);
+	const [muted, setMuted] = useState<boolean>(false);
+	const [deafened, setDeafened] = useState<boolean>(false);
 	const [avatar, setAvatar] = useState<string>(
 		user.avatar != "" ? user.avatar : "/UserAvatar.png"
 	);
@@ -50,10 +54,10 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 	}
 
 	const uploadAvatar = (file: File) => {
-		// Allow images and gifs less than 3MB as a pfp
+		// Allow images and gifs less than 2MB as a pfp
 		if (
 			file.type.substring(0, 5) == "image" &&
-			file.size / 1024 / 1024 < 3
+			file.size / 1024 / 1024 < 2
 		) {
 			const fileRef = ref(storage, `profiles/${user.uid}`);
 			const uploadTask = uploadBytesResumable(fileRef, file!);
@@ -96,6 +100,16 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 		}
 	};
 
+	const toggleMute = () => {
+		setMuted(!muted);
+		setVoiceData(!muted, user.deafened);
+	};
+
+	const toggleDeaf = () => {
+		setDeafened(!deafened);
+		setVoiceData(user.muted, !deafened);
+	};
+
 	return (
 		<>
 			{showSettings ? (
@@ -119,7 +133,7 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 						<Avatar src={avatar} />
 					</label>
 				</div>
-				<div className={styles.navbar_profileInfo}>
+				<div className={styles.navbar_profile_info}>
 					<h3>{user.nick}</h3>
 					<p
 						onClick={(_) =>
@@ -129,10 +143,26 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 						@{user.username}
 					</p>
 				</div>
-				<div className={styles.navbar_profileIcons}>
-					{/*<MicIcon />*/}
-					{/*<HeadsetIcon />*/}
-					<SettingsIcon onClick={(_) => setShowSettings(true)} />
+				<div className={styles.navbar_profile_icons}>
+					<span className={styles.navbar_profile_icon}>
+						{muted ? (
+							<MicOffIcon onClick={(_) => toggleMute()} />
+						) : (
+							<MicIcon onClick={(_) => toggleMute()} />
+						)}
+					</span>
+					{deafened ? (
+						<span className={styles.navbar_profile_icon}>
+							<HeadsetOffIcon onClick={(_) => toggleDeaf()} />
+						</span>
+					) : (
+						<span className={styles.slighly_off}>
+							<HeadsetIcon onClick={(_) => toggleDeaf()} />
+						</span>
+					)}
+					<span className={styles.navbar_profile_icon}>
+						<SettingsIcon onClick={(_) => setShowSettings(true)} />
+					</span>
 				</div>
 			</div>
 		</>

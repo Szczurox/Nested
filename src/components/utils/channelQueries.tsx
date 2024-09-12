@@ -8,6 +8,10 @@ import {
 	arrayUnion,
 	setDoc,
 	doc,
+	getDocs,
+	orderBy,
+	query,
+	limit,
 } from "firebase/firestore";
 
 const app = createFirebaseApp();
@@ -22,6 +26,10 @@ export const addChannel = async (
 ) => {
 	const channelsCollection = collection(db, "groups", guild, "channels");
 
+	const topOrder = await getDocs(
+		query(channelsCollection, orderBy("order", "desc"), limit(1))
+	);
+
 	await addDoc(channelsCollection, {
 		name: channelName.replace(/\s/g, "").length
 			? channelName
@@ -29,6 +37,7 @@ export const addChannel = async (
 		createdAt: serverTimestamp(),
 		categoryId: category,
 		type: type,
+		order: !topOrder.empty ? topOrder.docs[0].data().order + 1 : 0,
 	}).then(
 		async (document) =>
 			await setDoc(

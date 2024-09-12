@@ -29,7 +29,6 @@ import VoiceChannel from "components/chat/VoiceChannel";
 const Chat = () => {
 	const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
 	const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
-	const [isVoice, setIsVoice] = useState<boolean>(false); // Is current channel voice channel
 	const [membersQuery, setMembersQuery] = useState<string>(""); // Show members navbar
 	const [variant, setVariant] = useState<NavbarVariant>("server");
 
@@ -134,12 +133,12 @@ const Chat = () => {
 			let unsub: () => void;
 
 			if (docSnapMember.exists()) {
-				setChannelData(docSnapMember.data().lastViewed, "TEXT");
 				unsub = onSnapshot(memberDoc, (docSnapMember) => {
 					if (
 						docSnapMember.exists() &&
 						docSnapMember.data().permissions
 					) {
+						setChannelData(docSnapMember.data().lastViewed, "TEXT");
 						setMemberData(
 							docSnapMember.data().nickname,
 							docSnapMember.data().permissions
@@ -218,7 +217,7 @@ const Chat = () => {
 					/>
 				</div>
 				<div className={styles.chat_flexbox}>
-					{isVoice ? (
+					{channel.type == "VOICE" ? (
 						<VoiceChannel />
 					) : (
 						<ChatMain

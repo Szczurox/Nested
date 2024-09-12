@@ -14,7 +14,7 @@ const ScreenPopUp: React.FC<PopUpProps> = ({ children, full = false }) => {
 	useEffect(() => {
 		setCurrentPopUp(true);
 		return () => setCurrentPopUp(false);
-	}, [setCurrentPopUp]);
+	}, []);
 
 	return (
 		<div className={styles.screen_popup}>

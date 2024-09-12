@@ -24,6 +24,7 @@ const PopUpSwitch: React.FC<PopUpSwitchProps> = ({
 	const sliderRef = useRef<HTMLSpanElement>(null);
 
 	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		console.log(e.target.checked);
 		if (!disabled) {
 			onChange(e.target.checked);
 			setIsOn(e.target.checked);

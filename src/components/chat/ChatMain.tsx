@@ -55,7 +55,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	const [canScrollToBottom, setCanScrollToBottom] = useState<boolean>(false); // Show Scroll To Bottom button
 	const [isLoading, setIsLoading] = useState<boolean>(false); // Are new messages loading
 	const [isTyping, setIsTyping] = useState<boolean>(false);
-	const [isDisabled, setIsDisabled] = useState<boolean>(false); // Is chatting disabled
 	const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
 	const listInnerRef = useRef<HTMLHeadingElement>(null);
@@ -88,14 +87,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	);
 
 	const querySizeLimit = 20;
-
-	useEffect(() => {
-		setIsDisabled(
-			!user.partPermissions.includes("SEND_MESSAGES") ||
-				channel.id == "" ||
-				channel.idG == "@dms"
-		);
-	}, [channel.id, user.partPermissions, channel.idG]);
 
 	useEffect(() => {
 		if (!isMobile) {
@@ -220,12 +211,12 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	useEffect(() => {
 		const interval = setInterval(async () => {
 			setTypingUsers((users) => [
-				...users.filter((el) => !el[1].isAfter(moment())),
+				...users.filter((el) => el[1].isAfter(moment())),
 			]);
-		}, 5000);
+		}, 2000);
 
 		return () => clearInterval(interval);
-	});
+	}, []);
 
 	useEffect(() => {
 		function getMessagesFirstBatch() {
@@ -239,28 +230,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 			return handleMessageSnapshot(qMes);
 		}
 
-		async function getTypingUsersOnJoin() {
-			var nowDate = new Date(new Date().toUTCString());
-			var tenSecsAgoDate = moment(nowDate).subtract(5, "s").toDate();
-			var tenSecsAgo = Timestamp.fromDate(tenSecsAgoDate).valueOf();
-
-			// Only get users that typed in chat within past 10 seconds
-			const qPartOnJoin = query(
-				participantsCollection,
-				where("lastTyping", ">", tenSecsAgo)
-			);
-
-			const snapshot = await getDocs(qPartOnJoin);
-
-			setTypingUsers(
-				snapshot.docs.map((el) => [
-					el.id,
-					moment(el.data().lastTyping.toMillis()).add(10, "s"),
-					el.data().nickname,
-				])
-			);
-		}
-
 		function getTypingUsers() {
 			// Participants querry
 			const qPart = query(
@@ -270,20 +239,30 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 
 			return onSnapshot(qPart, (querySnapshot) => {
 				querySnapshot.docChanges().forEach((change) => {
-					if (change.type == "modified") {
+					if (change.type == "modified" || change.type == "added") {
 						// User is typing
+						setTypingUsers((users) => [
+							...users.filter((el) => el[1].isAfter(moment())),
+						]);
 						if (change.doc.data().lastTyping) {
 							const lastType = change.doc
 								.data()
 								.lastTyping.toMillis();
-							setTypingUsers((users) => [
-								...users.filter((el) => el[0] != change.doc.id),
-								[
-									change.doc.id,
-									moment(lastType).add(20, "second"),
-									change.doc.data().nickname,
-								],
-							]);
+							if (
+								moment(lastType)
+									.add(5, "second")
+									.isAfter(moment())
+							)
+								setTypingUsers((users) => [
+									...users.filter(
+										(el) => el[0] != change.doc.id
+									),
+									[
+										change.doc.id,
+										moment(lastType).add(5, "second"),
+										change.doc.data().nickname,
+									],
+								]);
 						}
 						// User stopped typing
 						else
@@ -299,7 +278,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 		setTypingUsers([]);
 
 		if (channel.id != "" && channel.idG != "@dms") {
-			getTypingUsersOnJoin();
 			setAutoScroll(true);
 			setCanScrollToBottom(false);
 			setIsTyping(false);
@@ -315,7 +293,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 		}
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [channel.id, channel.idG]);
+	}, [channel.id, channel.idG, user.uid]);
 
 	// Message at the bottom that show file upload progress
 	const fileUploading = (fileData: FileUploadingData) => {
@@ -420,7 +398,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 				<div></div>
 			</div>
 			<ChatInput
-				isDisabled={isDisabled}
 				isMobile={isMobile}
 				isTyping={isTyping}
 				fileUploading={fileUploading}
@@ -438,21 +415,19 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 					Jump To Present
 				</div>
 			)}
-			<span>
+			<span
+				className={
+					typingUsers.length
+						? styles.chat_typing_users
+						: styles.chat_no_typing_users
+				}
+			>
 				{typingUsers.length != 0 && (
-					<span style={{ marginLeft: "45px" }}>
+					<span className={styles.chat_typing_dots}>
 						<DotsLoading />
 					</span>
 				)}
-				<span
-					className={
-						typingUsers.length
-							? styles.chat_typing_users
-							: styles.chat_no_typing_users
-					}
-				>
-					{showTypingUsers()}
-				</span>
+				{showTypingUsers()}
 			</span>
 		</div>
 	);

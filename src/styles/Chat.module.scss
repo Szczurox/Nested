@@ -52,14 +52,18 @@
 
 			.chat_typing_users {
 				color: white;
-				margin-left: 2%;
-				min-height: 2%;
+				min-height: 12px;
+				margin-bottom: 12px;
+				margin-left: 40px;
+
+				.chat_typing_dots {
+					margin-right: 20px;
+				}
 			}
 
 			.chat_no_typing_users {
 				color: white;
-				margin-left: 2%;
-				min-height: 2%;
+				min-height: 12px;
 			}
 
 			.chat_messages {

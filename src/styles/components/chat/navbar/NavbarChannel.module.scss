@@ -28,13 +28,20 @@
 		white-space: nowrap;
 		overflow: hidden;
 		width: 80%;
+		margin-bottom: 2px;
 	}
 
 	.hash {
 		font-size: 25px;
 		padding: 8px;
-		padding-top: 3px;
-		padding-bottom: 3px;
+		padding-top: 5px;
+		padding-bottom: 4px;
+	}
+
+	.volume {
+		font-size: 25px;
+		padding: 3px;
+		padding-top: 7px;
 	}
 }
 

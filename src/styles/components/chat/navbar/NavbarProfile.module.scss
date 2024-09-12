@@ -1,12 +1,13 @@
 .navbar_profile {
 	display: flex;
+	flex-direction: row;
 	justify-content: space-between;
 	align-items: center;
 	color: grey;
 	padding: 12px 20px 12px 20px;
 	border-top: 1px solid grey;
 
-	.navbar_profileInfo {
+	.navbar_profile_info {
 		flex: 1;
 		padding: 10px;
 		padding-bottom: 10px;
@@ -46,16 +47,38 @@
 		}
 	}
 
-	.navbar_profileIcons {
-		svg {
-			margin: 10px;
-			margin-bottom: 8px;
-			cursor: pointer;
+	.navbar_profile_icons {
+		margin-top: 6px;
+		flex: 1;
+		display: flex;
+		flex-direction: row;
 
-			&:hover {
-				color: white;
-				background-color: #3c3f42;
-				border-radius: 6px;
+		.slighly_off {
+			flex: 1;
+			svg {
+				margin: auto;
+				cursor: pointer;
+				height: 24px;
+
+				&:hover {
+					color: white;
+					background-color: #3c3f42;
+					border-radius: 6px;
+				}
+			}
+		}
+
+		.navbar_profile_icon {
+			flex: 1;
+			svg {
+				margin: auto;
+				cursor: pointer;
+
+				&:hover {
+					color: white;
+					background-color: #3c3f42;
+					border-radius: 6px;
+				}
 			}
 		}
 	}

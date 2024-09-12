@@ -47,7 +47,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 	variant = "server",
 }) => {
 	const [showChannels, setShowChannels] = useState<boolean>(true);
-	const [isVoice, setIsVoice] = useState<boolean>(true);
+	const [isVoice, setIsVoice] = useState<boolean>(false);
 	const [showPopUp, setShowPopUp] = useState<number>(0);
 	const [channels, setChannels] = useState<ChannelData[]>([]);
 
@@ -213,6 +213,7 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 						value={showPopUp == 1 ? "" : name}
 						placeHolder={showPopUp == 1 ? "new-channel" : name}
 						hash={true}
+						allowEmpty={true}
 					>
 						<h3>
 							{showPopUp == 1
@@ -220,20 +221,24 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 								: "Change Category Name"}
 						</h3>
 						{showPopUp == 1 ? (
-							<p>
-								<p>Create channel in {name}</p>
-								<div className={styles.channel_toggle_text}>
-									Text
+							<>
+								<p>Create a channel in {name}</p>
+								<div className={styles.toggle_container}>
+									<div className={styles.toggle_text}>
+										Text
+									</div>
+									<div className={styles.toggle}>
+										<PopUpSwitch
+											onChange={(isOn) =>
+												setIsVoice(isOn)
+											}
+										/>
+									</div>
+									<div className={styles.toggle_text}>
+										Voice
+									</div>
 								</div>
-								<div className={styles.channel_toggle}>
-									<PopUpSwitch
-										onChange={(isOn) => setIsVoice(isOn)}
-									/>
-								</div>
-								<div className={styles.channel_toggle_text}>
-									Voice (Coming Soon)
-								</div>
-							</p>
+							</>
 						) : (
 							<p>Change name for {name}</p>
 						)}
