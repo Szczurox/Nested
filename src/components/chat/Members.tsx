@@ -18,10 +18,11 @@ type FilterType = "online" | "offline" | "none";
 
 interface MembersProps {
 	isMobile: boolean;
+	show: boolean;
 	qu: string; // Search query by member name
 }
 
-const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
+const Members: React.FC<MembersProps> = ({ isMobile, show, qu }) => {
 	// Members flter query
 	const [filter, setFilter] = useState<string>(qu);
 	const [members, setMembers] = useState<MemberData[]>([]);
@@ -93,6 +94,16 @@ const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 		getMembers();
 	}, [channel.idG, db]);
 
+	const filterMember = (filterType: FilterType, memberId: string) => {
+		const isFiltered =
+			filter != "" ? memberId.toLowerCase().includes(filter) : true;
+		if (filterType == "online")
+			return online.includes(memberId) && isFiltered;
+		else if (filterType == "offline")
+			return offline.includes(memberId) && isFiltered;
+		else return isFiltered;
+	};
+
 	const filterMembers = (filterType: FilterType) => {
 		if (filterType == "online")
 			return members.filter(
@@ -102,7 +113,7 @@ const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 						? el.name.toLowerCase().includes(filter)
 						: true)
 			);
-		if (filterType == "offline")
+		else if (filterType == "offline")
 			return members.filter(
 				(el) =>
 					offline.includes(el.id) &&
@@ -127,7 +138,12 @@ const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 	};
 
 	return (
-		<div className={styles.members}>
+		<div
+			className={styles.members}
+			style={{
+				display: !show ? "none" : undefined,
+			}}
+		>
 			{isMobile && (
 				<div className={styles.members_header}>
 					<h3>
@@ -155,7 +171,7 @@ const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 					count={filterMembers("online").length}
 				/>
 			)}
-			{filterMembers("online").map((member) => (
+			{members.map((member) => (
 				<Member
 					id={member.id}
 					key={member.id}
@@ -163,6 +179,7 @@ const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 					nameColor={member.nameColor}
 					avatar={member.avatar}
 					changeActivity={changeActivity}
+					isVisible={filterMember("online", member.id)}
 				/>
 			))}
 			{members.length != 0 && !filter && (
@@ -171,7 +188,7 @@ const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 					count={filterMembers("offline").length}
 				/>
 			)}
-			{filterMembers("offline").map((member) => (
+			{members.map((member) => (
 				<Member
 					id={member.id}
 					key={member.id}
@@ -179,6 +196,7 @@ const Members: React.FC<MembersProps> = ({ isMobile, qu }) => {
 					nameColor={member.nameColor}
 					avatar={member.avatar}
 					changeActivity={changeActivity}
+					isVisible={filterMember("offline", member.id)}
 				/>
 			))}
 		</div>

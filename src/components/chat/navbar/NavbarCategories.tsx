@@ -165,43 +165,51 @@ export const NavbarCategories: React.FC<NavbarCategoriesProps> = ({
 
 	return (
 		<>
-			{user.permissions.includes("MANAGE_CHANNELS") && (
-				<ContextMenu ref={menuRef} parentRef={elementRef}>
-					<ContextMenuElement
-						type={"grey"}
-						onClick={(_) => setShowPopUp(1)}
-					>
-						<AddIcon />
-						Add Channel
-					</ContextMenuElement>
-					<ContextMenuElement
-						type={"grey"}
-						onClick={(_) => setShowPopUp(2)}
-					>
-						<AddIcon />
-						Add Category
-					</ContextMenuElement>
-				</ContextMenu>
-			)}
-
-			{showPopUp ? (
-				<InputPopUp
-					onConfirm={showPopUp == 1 ? createChannel : createCategory}
-					onCancel={() => setShowPopUp(0)}
-					confirmButtonName={"Create"}
-					placeHolder={showPopUp == 1 ? "new-channel" : ""}
-					hash={showPopUp == 1}
-				>
-					<h3>
-						{showPopUp == 1 ? "Create Channel" : "Create Category"}
-					</h3>
-					{showPopUp == 1 ? (
-						<p>Create a channel without category</p>
-					) : (
-						<p>Create a category</p>
+			{variant == "server" && (
+				<>
+					{user.permissions.includes("MANAGE_CHANNELS") && (
+						<ContextMenu ref={menuRef} parentRef={elementRef}>
+							<ContextMenuElement
+								type={"grey"}
+								onClick={(_) => setShowPopUp(1)}
+							>
+								<AddIcon />
+								Add Channel
+							</ContextMenuElement>
+							<ContextMenuElement
+								type={"grey"}
+								onClick={(_) => setShowPopUp(2)}
+							>
+								<AddIcon />
+								Add Category
+							</ContextMenuElement>
+						</ContextMenu>
 					)}
-				</InputPopUp>
-			) : null}
+
+					{showPopUp ? (
+						<InputPopUp
+							onConfirm={
+								showPopUp == 1 ? createChannel : createCategory
+							}
+							onCancel={() => setShowPopUp(0)}
+							confirmButtonName={"Create"}
+							placeHolder={showPopUp == 1 ? "new-channel" : ""}
+							hash={showPopUp == 1}
+						>
+							<h3>
+								{showPopUp == 1
+									? "Create Channel"
+									: "Create Category"}
+							</h3>
+							{showPopUp == 1 ? (
+								<p>Create a channel without category</p>
+							) : (
+								<p>Create a category</p>
+							)}
+						</InputPopUp>
+					) : null}
+				</>
+			)}
 
 			<div
 				className={styles.navbar_channels}

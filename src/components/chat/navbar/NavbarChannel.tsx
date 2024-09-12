@@ -1,4 +1,4 @@
-import { useChannel } from "context/channelContext";
+import { ChannelType, useChannel } from "context/channelContext";
 import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarChannel.module.scss";
 import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
@@ -34,8 +34,6 @@ interface NavbarChannelProps {
 	lastMessageAt?: number;
 }
 
-export type ChannelType = "voice" | "text";
-
 export interface ChannelData {
 	id: string;
 	name: string;
@@ -49,7 +47,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	id,
 	idC,
 	nameC = "",
-	channelType = "text",
+	channelType = "TEXT",
 	lastMessageAt,
 }) => {
 	const [isActive, setIsActive] = useState<boolean>(false);
@@ -95,11 +93,14 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		console.log("fewfew");
 		if (channel.id == id) {
 			setIsActive(true);
-			if (channel.name != name) setChannelData(id, name, idC, nameC);
+			const perms = everyPerms.concat(partPerms);
+			if (perms.length && perms != null)
+				if (channel.id == id) addPartPerms(perms);
+			if (channel.name != name)
+				setChannelData(id, channelType, name, idC, nameC);
 		} else setIsActive(false);
-
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [channel.id]);
+	}, [channel.id, id]);
 
 	useEffect(() => {
 		const participantSnapshot = () => {
@@ -157,14 +158,6 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	}, []);
 
 	useEffect(() => {
-		const perms = everyPerms.concat(partPerms);
-		if (perms.length && perms != null) {
-			if (channel.id == id) addPartPerms(perms);
-		}
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [channel.id, id]);
-
-	useEffect(() => {
 		if (
 			everyPerms.includes("VIEW_CHANNEL") ||
 			partPerms.includes("VIEW_CHANNEL")
@@ -195,8 +188,9 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	};
 
 	const handleToggle = () => {
+		console.log(everyPerms.concat(partPerms));
 		addPartPerms(everyPerms.concat(partPerms));
-		setChannelData(id, name, idC, nameC);
+		setChannelData(id, channelType, name, idC, nameC);
 		updateLastActive();
 		setIsActive(true);
 		updateLastViewed();
@@ -211,7 +205,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		setShowPopUp(0);
 
 		// Kick user out of the channel so that messages can't be seen anymore
-		if (channel.id == id) setChannelData("", "", "", "");
+		if (channel.id == id) setChannelData("", "TEXT", "", "", "");
 
 		await deleteDoc(channelDoc);
 	};

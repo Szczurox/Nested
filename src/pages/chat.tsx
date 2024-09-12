@@ -29,6 +29,7 @@ import VoiceChannel from "components/chat/VoiceChannel";
 const Chat = () => {
 	const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
 	const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
+	const [isVoice, setIsVoice] = useState<boolean>(false); // Is current channel voice channel
 	const [membersQuery, setMembersQuery] = useState<string>(""); // Show members navbar
 	const [variant, setVariant] = useState<NavbarVariant>("server");
 
@@ -71,7 +72,6 @@ const Chat = () => {
 		else loading();
 
 		async function loading() {
-			console.log("logged out");
 			setShowNavbar(true);
 			setShowMembers(true);
 			if (typeof window !== "undefined") {
@@ -81,9 +81,27 @@ const Chat = () => {
 						// Notify server that user is active
 						if (user.uid != "") {
 							console.log("hi");
+
+							const memberDoc = doc(
+								db,
+								"groups",
+								channel.idG,
+								"members",
+								user.uid
+							);
+
+							const docSnapMember = await getDoc(memberDoc);
+
+							if (docSnapMember.exists())
+								setChannelData(
+									docSnapMember.data().lastViewed,
+									"TEXT"
+								);
+
 							await updateDoc(doc(db, "profile", user.uid), {
 								lastActive: serverTimestamp(),
 							});
+
 							if (isMobile) {
 								setShowNavbar(false);
 								setShowMembers(false);
@@ -94,23 +112,15 @@ const Chat = () => {
 				}
 			}
 		}
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [user.uid, loadingUser]);
 
 	useEffect(() => {
-		async function setUserPerms(
-			docSnapMember: DocumentSnapshot<DocumentData>
-		) {
-			if (docSnapMember.exists()) {
-				setMemberData(
-					docSnapMember.data().nickname,
-					docSnapMember.data().permissions
-				);
-			}
-		}
-
 		// Adds user to members of the group if isn't one yet (temp till multiple groups)
 		async function checkMember() {
+			setShowMembers(false);
+
 			const memberDoc = doc(
 				db,
 				"groups",
@@ -118,13 +128,25 @@ const Chat = () => {
 				"members",
 				user.uid
 			);
+
 			const docSnapMember = await getDoc(memberDoc);
+
 			let unsub: () => void;
+
 			if (docSnapMember.exists()) {
-				setChannelData(docSnapMember.data().lastViewed);
-				unsub = onSnapshot(memberDoc, (docSnapMember) =>
-					setUserPerms(docSnapMember)
-				);
+				setChannelData(docSnapMember.data().lastViewed, "TEXT");
+				unsub = onSnapshot(memberDoc, (docSnapMember) => {
+					if (
+						docSnapMember.exists() &&
+						docSnapMember.data().permissions
+					) {
+						setMemberData(
+							docSnapMember.data().nickname,
+							docSnapMember.data().permissions
+						);
+					}
+				});
+				setShowMembers(true);
 			} else {
 				await setDoc(memberDoc, {
 					nickname: user.username,
@@ -132,19 +154,26 @@ const Chat = () => {
 					nameColor: "",
 					permissions: [],
 				});
-				unsub = onSnapshot(memberDoc, (docSnapMember) =>
-					setUserPerms(docSnapMember)
-				);
+				unsub = onSnapshot(memberDoc, (docSnapMember) => {
+					if (docSnapMember.exists()) {
+						setMemberData(
+							docSnapMember.data().nickname,
+							docSnapMember.data().permissions
+						);
+					}
+				});
 			}
 			return unsub;
 		}
 
 		let unsub: () => void = () => undefined;
 
-		if (user.uid != "") checkMember().then((result) => (unsub = result));
+		if (user.uid != "" && channel.idG != "@dms")
+			checkMember().then((result) => (unsub = result));
 		return () => {
 			unsub();
 		};
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [channel.idG]);
 
@@ -156,21 +185,28 @@ const Chat = () => {
 		}
 	}
 
+	useEffect(() => {
+		setShowNavbar(false);
+	}, [channel.id]);
+
 	// Render only if user is authenticated
 	return user.uid ? (
 		<div className={styles.app}>
 			<Loading />
-			{!isMobile || showNavbar ? (
-				<div className={styles.full_navbar_flexbox}>
-					<NavbarGroups
-						isMobile={isMobile}
-						variantChange={(variant: NavbarVariant) =>
-							setVariant(variant)
-						}
-					/>
-					<Navbar variant={variant} isMobile={isMobile} />
-				</div>
-			) : null}
+			<div
+				className={styles.full_navbar_flexbox}
+				style={{
+					display: isMobile && !showNavbar ? "none" : undefined,
+				}}
+			>
+				<NavbarGroups
+					isMobile={isMobile}
+					variantChange={(variant: NavbarVariant) =>
+						setVariant(variant)
+					}
+				/>
+				<Navbar variant={variant} isMobile={isMobile} />
+			</div>
 			<div className={styles.full_chat_flexbox}>
 				<div className={styles.chat_shadow}>
 					<ChatHeader
@@ -182,17 +218,24 @@ const Chat = () => {
 					/>
 				</div>
 				<div className={styles.chat_flexbox}>
-					<ChatMain
-						isNavbarOpen={showNavbar}
-						hideNavbar={() => {
-							setShowNavbar(false);
-							if (isMobile) setShowMembers(false);
-						}}
-						isMembersOpen={showMembers}
-					/>
-					{showMembers && variant === "server" && (
-						<Members isMobile={isMobile} qu={membersQuery} />
+					{isVoice ? (
+						<VoiceChannel />
+					) : (
+						<ChatMain
+							isNavbarOpen={showNavbar}
+							hideNavbar={() => {
+								setShowNavbar(false);
+								if (isMobile) setShowMembers(false);
+							}}
+							isMembersOpen={showMembers}
+						/>
 					)}
+
+					<Members
+						isMobile={isMobile}
+						qu={membersQuery}
+						show={showMembers && variant === "server"}
+					/>
 				</div>
 			</div>
 		</div>

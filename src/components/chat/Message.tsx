@@ -298,14 +298,13 @@ export const Message: React.FC<MessageProps> = ({
 							]);
 						}
 						// Check for emojis
-						else if (el.replace(/^\s+|\s+$/g, "").length) {
+						else if (el.replace(/^\s+|\s+$/g, "").length)
 							checkForEmoji(el);
-							console.log(el);
-						}
 					});
 			} else checkForEmoji(content); // Do next check
 		}
 
+		setParsedContent([]);
 		getUserData();
 		setTime();
 		checkForSpecial();
@@ -319,9 +318,7 @@ export const Message: React.FC<MessageProps> = ({
 			document.removeEventListener("keydown", handleKeyDown);
 			document.removeEventListener("contextmenu", handleClick);
 		};
-
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [content]);
 
 	useEffect(() => {
 		// If another message is getting edited stop editing this message
@@ -545,6 +542,7 @@ export const Message: React.FC<MessageProps> = ({
 						{iframes.map((el, index) => {
 							return (
 								<iframe
+									frameBorder="0"
 									allowFullScreen={true}
 									src={el}
 									className={styles.message_iframe}
@@ -691,7 +689,7 @@ export const Message: React.FC<MessageProps> = ({
 				<div className={styles.message_info}>
 					{senderInfo}
 					{!isEditing ? (
-						content && messageContent
+						messageContent
 					) : (
 						<div>
 							<div className={styles.message_edit_input}>

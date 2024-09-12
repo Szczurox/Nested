@@ -3,9 +3,6 @@ import { useChannel } from "context/channelContext";
 import GroupsIcon from "@mui/icons-material/Groups";
 import { Avatar } from "@mui/material";
 import { useEffect, useState } from "react";
-import { doc, getDoc, getFirestore } from "firebase/firestore";
-import { useUser } from "context/userContext";
-import { createFirebaseApp } from "firebase-utils/clientApp";
 
 interface NavbarGroupProps {
 	isMobile: boolean;
@@ -22,21 +19,23 @@ export const NavbarGroup: React.FC<NavbarGroupProps> = ({
 	const [isSelected, setIsSelected] = useState<boolean>(false);
 	const [isHover, setIsHover] = useState<boolean>(false);
 
-	const { user } = useUser();
+	// const { user } = useUser();
 
-	const app = createFirebaseApp();
-	const db = getFirestore(app!);
+	// const app = createFirebaseApp();
+	// const db = getFirestore(app!);
 
+	// Not necessary for now (check channel.tsx)
+	/*
 	const getLastViewed = async () => {
 		const memberDoc = doc(db, "groups", id, "members", user.uid);
 		const docSnapMember = await getDoc(memberDoc);
 		if (docSnapMember.exists())
 			setGroupData(id, docSnapMember.data().lastViewed);
-	};
+	};*/
 
 	const handleToggle = () => {
 		console.log(id);
-		if (!isSelected) getLastViewed();
+		if (!isSelected) setGroupData(id);
 		if (isSelected && isMobile) setIsHover(false);
 	};
 

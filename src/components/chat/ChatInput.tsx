@@ -127,10 +127,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 			...inputs.filter((el) => el[0] != channel.id),
 			[channel.id, input],
 		]);
-	}, [input, channel.id]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [input]);
 
 	useEffect(() => {
 		var element = inputOnChannels.find((el) => el[0] == channel.id);
+		console.log(element);
 		if (element) setInput(element[1]);
 		else setInput("");
 	}, [channel.id, inputOnChannels]);
@@ -288,9 +290,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 					<p>You are trying to send messages too quickly.</p>
 				</InformationPopUp>
 			) : null}
-			{!isDisabled ? (
+			{!isDisabled && (
 				<UploadFile chatInput={input} uploadCallback={uploadFile} />
-			) : null}
+			)}
 			<form>
 				<TextareaAutosize
 					value={input}
@@ -318,7 +320,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 			</form>
 			<div className={styles.chat_input_icons}>
 				{/* <GifIcon fontSize="large" className={styles.chat_input_icon} /> */}
-				<Emoji enabled={channel.id != ""} emojiAdded={addedEmoji} />
+				{!isDisabled && (
+					<Emoji
+						enabled={channel.id != "" && channel.idG != "@dms"}
+						emojiAdded={addedEmoji}
+					/>
+				)}
 				{isMobile && input != "" ? (
 					<SendIcon
 						className={styles.chat_input_icon}

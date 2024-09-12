@@ -1,4 +1,8 @@
 .emoji_icon {
+	svg {
+		transform: translate(0%, 10%);
+	}
+
 	svg:hover {
 		color: white;
 	}

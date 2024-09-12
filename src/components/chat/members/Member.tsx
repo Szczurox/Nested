@@ -5,12 +5,14 @@ import { doc, getFirestore, onSnapshot } from "firebase/firestore";
 import { createFirebaseApp } from "../../../firebase-utils/clientApp";
 import moment, { Moment } from "moment";
 import { useUser } from "context/userContext";
+import { useChannel } from "context/channelContext";
 
 interface MemberProps {
 	id: string;
 	name: string;
 	nameColor: string;
 	avatar: string;
+	isVisible: boolean;
 	changeActivity: (id: string, active: boolean) => void;
 }
 
@@ -26,11 +28,13 @@ export const Member: React.FC<MemberProps> = ({
 	name,
 	nameColor,
 	avatar,
+	isVisible,
 	changeActivity,
 }) => {
 	const [isActive, setIsActive] = useState<boolean>(true);
 	const [lastActive, setLastActive] = useState<Moment>();
 
+	const { channel } = useChannel();
 	const { user } = useUser();
 
 	const app = createFirebaseApp();
@@ -63,7 +67,7 @@ export const Member: React.FC<MemberProps> = ({
 		const unsub = onMemberLoad();
 		return () => unsub();
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [channel.idG]);
 
 	useEffect(() => {
 		const interval = setInterval(async () => {
@@ -81,7 +85,11 @@ export const Member: React.FC<MemberProps> = ({
 	});
 
 	return (
-		<div className={styles.member} id={id}>
+		<div
+			className={styles.member}
+			id={id}
+			style={{ display: !isVisible ? "none" : undefined }}
+		>
 			<div className={styles.member_avatar}>
 				<Avatar
 					style={{ height: "45px", width: "45px" }}

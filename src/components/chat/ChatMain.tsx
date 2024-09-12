@@ -20,7 +20,7 @@ import {
 	updateDoc,
 	where,
 } from "firebase/firestore";
-import moment from "moment";
+import moment, { Moment } from "moment";
 import { serverTimestamp } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
@@ -46,7 +46,9 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	const [filesUploading, setFilesUploading] = useState<FileUploadingData[]>(
 		[]
 	); // Array of all file progress messages
-	const [typingUsers, setTypingUsers] = useState<[string, string][]>([]); // Array of users that are currenty typing (except the user)
+	const [typingUsers, setTypingUsers] = useState<[string, Moment, string][]>(
+		[]
+	); // Array of users that are currenty typing (except the user)
 	const [unsubs, setUnsubs] = useState<(() => void)[]>([]); // Array of all unsubscribers
 	const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0)); // Creation date of the last message fetched
 	const [messagesEnd, setMessagesEnd] = useState<boolean>(false); // True if no more messages to load on the current channel
@@ -54,7 +56,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	const [isLoading, setIsLoading] = useState<boolean>(false); // Are new messages loading
 	const [isTyping, setIsTyping] = useState<boolean>(false);
 	const [isDisabled, setIsDisabled] = useState<boolean>(false); // Is chatting disabled
-	const [isVoice, setIsVoice] = useState<boolean>(true); // Is voice channel
 	const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
 
 	const listInnerRef = useRef<HTMLHeadingElement>(null);
@@ -89,7 +90,11 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	const querySizeLimit = 20;
 
 	useEffect(() => {
-		setIsDisabled(!user.partPermissions.includes("SEND_MESSAGES"));
+		setIsDisabled(
+			!user.partPermissions.includes("SEND_MESSAGES") ||
+				channel.id == "" ||
+				channel.idG == "@dms"
+		);
 	}, [channel.id, user.partPermissions]);
 
 	useEffect(() => {
@@ -164,16 +169,17 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 					(change.type === "added" || change.type === "modified") &&
 					change.doc.data().createdAt != null
 				) {
-					let time: number =
-						change.doc.data().createdAt.seconds * 1000 +
-						change.doc.data().createdAt.nanoseconds / 1000000;
+					console.log(change.doc.data().content);
 					setMessages((messages) =>
 						[
 							...messages.filter((el) => el.id !== change.doc.id),
 							{
 								id: change.doc.id,
 								content: change.doc.data().content,
-								timestamp: time,
+								timestamp:
+									change.doc.data().createdAt.seconds * 1000 +
+									change.doc.data().createdAt.nanoseconds /
+										1000000,
 								uid: change.doc.data().userid,
 								file: change.doc.data().file,
 								edited: change.doc.data().edited,
@@ -213,6 +219,16 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	}
 
 	useEffect(() => {
+		const interval = setInterval(async () => {
+			setTypingUsers((users) => [
+				...users.filter((el) => !el[1].isAfter(moment())),
+			]);
+		}, 5000);
+
+		return () => clearInterval(interval);
+	});
+
+	useEffect(() => {
 		function getMessagesFirstBatch() {
 			// Channels query
 			const qMes = query(
@@ -226,7 +242,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 
 		async function getTypingUsersOnJoin() {
 			var nowDate = new Date(new Date().toUTCString());
-			var tenSecsAgoDate = moment(nowDate).subtract(10, "s").toDate();
+			var tenSecsAgoDate = moment(nowDate).subtract(5, "s").toDate();
 			var tenSecsAgo = Timestamp.fromDate(tenSecsAgoDate).valueOf();
 
 			// Only get users that typed in chat within past 10 seconds
@@ -238,7 +254,11 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 			const snapshot = await getDocs(qPartOnJoin);
 
 			setTypingUsers(
-				snapshot.docs.map((el) => [el.id, el.data().nickname])
+				snapshot.docs.map((el) => [
+					el.id,
+					moment(el.data().lastTyping.toMillis()).add(10, "s"),
+					el.data().nickname,
+				])
 			);
 		}
 
@@ -253,17 +273,21 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 				querySnapshot.docChanges().forEach((change) => {
 					if (change.type == "modified") {
 						// User is typing
-						if (
-							change.doc.data().isTyping &&
-							typingUsers.find((el) => el[0] == change.doc.id) ==
-								undefined
-						)
+						if (change.doc.data().lastTyping) {
+							const lastType = change.doc
+								.data()
+								.lastTyping.toMillis();
 							setTypingUsers((users) => [
 								...users.filter((el) => el[0] != change.doc.id),
-								[change.doc.id, change.doc.data().nickname],
+								[
+									change.doc.id,
+									moment(lastType).add(20, "second"),
+									change.doc.data().nickname,
+								],
 							]);
+						}
 						// User stopped typing
-						else if (!change.doc.data().isTyping)
+						else
 							setTypingUsers((users) => [
 								...users.filter((el) => el[0] != change.doc.id),
 							]);
@@ -275,7 +299,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 		setMessages([]);
 		setTypingUsers([]);
 
-		if (channel.id != "") {
+		if (channel.id != "" && channel.idG != "@dms") {
 			getTypingUsersOnJoin();
 			setAutoScroll(true);
 			setCanScrollToBottom(false);
@@ -311,12 +335,13 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	};
 
 	const showTypingUsers = () => {
+		console.log(typingUsers);
 		if (typingUsers.length > 3) return "many people are typing...";
 		if (typingUsers.length == 3)
-			return `${typingUsers[0][1]}, ${typingUsers[1][1]} and ${typingUsers[2][1]} are typing...`;
+			return `${typingUsers[0][2]}, ${typingUsers[1][2]} and ${typingUsers[2][2]} are typing...`;
 		if (typingUsers.length == 2)
-			return `${typingUsers[0][1]} and ${typingUsers[1][1]} are typing...`;
-		if (typingUsers.length == 1) return `${typingUsers[0][1]} is typing...`;
+			return `${typingUsers[0][2]} and ${typingUsers[1][2]} are typing...`;
+		if (typingUsers.length == 1) return `${typingUsers[0][2]} is typing...`;
 	};
 
 	return (

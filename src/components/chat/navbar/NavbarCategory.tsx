@@ -120,7 +120,12 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 
 	const createChannel = async (channelName: string) => {
 		setShowPopUp(0);
-		await addChannel(channelName, channel.idG, idC, "text");
+		await addChannel(
+			channelName,
+			channel.idG,
+			idC,
+			isVoice ? "VOICE" : "TEXT"
+		);
 	};
 
 	const changeCategoryName = async (newName: string) => {
@@ -222,7 +227,6 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 								</div>
 								<div className={styles.channel_toggle}>
 									<PopUpSwitch
-										disabled={true}
 										onChange={(isOn) => setIsVoice(isOn)}
 									/>
 								</div>

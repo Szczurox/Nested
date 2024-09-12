@@ -13,6 +13,11 @@
 		align-items: center;
 		padding-bottom: 10px;
 
+		svg {
+			transform: translate(0%, 10%);
+			margin-right: 3px;
+		}
+
 		&:hover {
 			color: #d4d4d4;
 		}

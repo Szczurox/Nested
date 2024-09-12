@@ -35,7 +35,6 @@ export default function VoiceChannel() {
 						{ method: "GET" }
 					);
 				const data = await resp.json();
-				console.log(data);
 				setToken(data.token);
 			} catch (e) {
 				console.error(e);
@@ -49,7 +48,7 @@ export default function VoiceChannel() {
 
 	return (
 		<LiveKitRoom
-			video={true}
+			video={false}
 			audio={true}
 			token={token}
 			serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}

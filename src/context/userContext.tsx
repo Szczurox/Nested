@@ -127,7 +127,6 @@ export default function UserContextComp({ children }: any) {
 		});
 	};
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(() => {
 		const interval = setInterval(async () => {
 			const auth = await getAuth().currentUser;

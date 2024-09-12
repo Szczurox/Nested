@@ -1,5 +1,16 @@
 import { useState, createContext, useContext } from "react";
 
+export type ChannelType = "VOICE" | "TEXT";
+
+export type Channel = {
+	id: string; // Channel ID
+	name: string; // Channel name
+	idC: string; // Category ID
+	nameC: string; // Category name
+	idG: string; // Group ID
+	type: ChannelType; // Channel type
+};
+
 export interface ChannelContextType {
 	channel: {
 		id: string; // Channel ID
@@ -7,9 +18,11 @@ export interface ChannelContextType {
 		idC: string; // Category ID
 		nameC: string; // Category name
 		idG: string; // Group ID
+		type: ChannelType; // Channel type
 	};
 	setChannelData: (
 		id: string,
+		type: ChannelType,
 		name?: string,
 		idC?: string,
 		nameC?: string
@@ -30,9 +43,11 @@ export const ChannelContext = createContext<ChannelContextType>({
 		idC: "",
 		nameC: "",
 		idG: "",
+		type: "TEXT",
 	},
 	setChannelData: (
 		_id: string,
+		_type: ChannelType,
 		_name?: string,
 		_idC?: string,
 		_nameC?: string
@@ -47,22 +62,25 @@ export const ChannelContext = createContext<ChannelContextType>({
 });
 
 export default function ChannelContextComp({ children }: any) {
-	const [channel, setChannel] = useState({
+	const [channel, setChannel] = useState<Channel>({
 		id: "",
 		name: "",
 		idC: "",
 		nameC: "",
 		idG: "H8cO2zBjCyJYsmM4g5fv",
+		type: "TEXT",
 	});
 
 	const setChannelData = (
 		id: string,
+		type: ChannelType,
 		name?: string,
 		idC?: string,
 		nameC?: string
 	) => {
 		setChannel({
 			id: id,
+			type: type,
 			name: name ? name : channel.name,
 			idC: idC ? idC : channel.idC,
 			nameC: nameC ? nameC : channel.nameC,
@@ -83,6 +101,7 @@ export default function ChannelContextComp({ children }: any) {
 			idC: idC ? idC : channel.idC,
 			nameC: nameC ? nameC : channel.nameC,
 			idG: idG,
+			type: "TEXT",
 		});
 	};
 
