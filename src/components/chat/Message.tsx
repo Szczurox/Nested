@@ -234,7 +234,6 @@ export const Message: React.FC<MessageProps> = ({
 							el.startsWith("https://") ||
 							el.startsWith("http://")
 						) {
-							console.log(el);
 							// Remove all metadata from possible image/vide
 							const parsedLink =
 								el.indexOf("?") == -1
@@ -318,6 +317,7 @@ export const Message: React.FC<MessageProps> = ({
 			document.removeEventListener("keydown", handleKeyDown);
 			document.removeEventListener("contextmenu", handleClick);
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [content]);
 
 	useEffect(() => {

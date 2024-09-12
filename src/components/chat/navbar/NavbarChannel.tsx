@@ -90,7 +90,6 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	);
 
 	useEffect(() => {
-		console.log("fewfew");
 		if (channel.id == id) {
 			setIsActive(true);
 			const perms = everyPerms.concat(partPerms);
@@ -99,8 +98,20 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 			if (channel.name != name)
 				setChannelData(id, channelType, name, idC, nameC);
 		} else setIsActive(false);
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [channel.id, id]);
+	}, [
+		channel.id,
+		id,
+		user.uid,
+		name,
+		channel.name,
+		addPartPerms,
+		channelType,
+		everyPerms,
+		idC,
+		nameC,
+		partPerms,
+		setChannelData,
+	]);
 
 	useEffect(() => {
 		const participantSnapshot = () => {
@@ -110,6 +121,12 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 						partPerms != doc.data().permissions &&
 						doc.data().permissions != null
 					) {
+						const perms: ParticipantPermission[] = [
+							...doc.data().permissions,
+						];
+						if (channel.id == id)
+							addPartPerms(everyPerms.concat(perms));
+						setEveryPerms(perms);
 						setPartPerms([...doc.data().permissions]);
 					}
 					if (doc.data()!.lastActive < lastMessageAt!)
@@ -125,8 +142,13 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 					doc.exists() &&
 					everyPerms != doc.data().permissions &&
 					doc.data().permissions.length
-				)
-					setEveryPerms([...doc.data().permissions]);
+				) {
+					const perms: ParticipantPermission[] = [
+						...doc.data().permissions,
+					];
+					if (channel.id == id) addPartPerms(partPerms.concat(perms));
+					setEveryPerms(perms);
+				}
 			});
 		};
 
@@ -138,7 +160,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 				} else {
 					await setDoc(partRef, {
 						lastActive: serverTimestamp(),
-						nickname: user.server_nick,
+						nickname: user.serverNick,
 					});
 					return participantSnapshot();
 				}
@@ -155,7 +177,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		});
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, []);
+	}, [user.uid]);
 
 	useEffect(() => {
 		if (
@@ -181,19 +203,12 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		);
 	};
 
-	const updateLastViewed = async () => {
-		await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
-			lastViewed: id,
-		});
-	};
-
 	const handleToggle = () => {
 		console.log(everyPerms.concat(partPerms));
 		addPartPerms(everyPerms.concat(partPerms));
 		setChannelData(id, channelType, name, idC, nameC);
 		updateLastActive();
 		setIsActive(true);
-		updateLastViewed();
 	};
 
 	const deleteChannel = async () => {

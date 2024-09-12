@@ -18,7 +18,8 @@ export type User = {
 	username: string;
 	avatar: string;
 	nick: string;
-	server_nick: string;
+	serverNick: string;
+	voiceRoom: string;
 	verified: boolean;
 	lastActive: number;
 	permissions: MemberPermission[];
@@ -47,7 +48,8 @@ export const UserContext = createContext<UserContextType>({
 		username: "",
 		avatar: "",
 		nick: "",
-		server_nick: "",
+		serverNick: "",
+		voiceRoom: "",
 		verified: false,
 		lastActive: 0,
 		permissions: [],
@@ -73,7 +75,8 @@ export default function UserContextComp({ children }: any) {
 		username: "",
 		avatar: "",
 		nick: "",
-		server_nick: "",
+		serverNick: "",
+		voiceRoom: "",
 		verified: false,
 		lastActive: 0,
 		permissions: [],
@@ -106,14 +109,16 @@ export default function UserContextComp({ children }: any) {
 		nickname: string,
 		permissions: MemberPermission[]
 	) => {
+		console.log(permissions, nickname);
 		setUser({
 			...user,
 			permissions: permissions,
-			server_nick: nickname,
+			serverNick: nickname,
 		});
 	};
 
 	const setPartPerms = (permissions: ParticipantPermission[]) => {
+		console.log(permissions);
 		setUser({
 			...user,
 			partPermissions: permissions,
@@ -144,16 +149,17 @@ export default function UserContextComp({ children }: any) {
 	}, []);
 
 	useEffect(() => {
-		const unsubscriber = onAuthStateChanged(auth, async (user) => {
+		const unsubscriber = onAuthStateChanged(auth, async (userAuth) => {
 			try {
-				if (user) {
-					console.log("uid: ", user.uid);
-					const uid = user.uid;
+				if (userAuth) {
+					console.log("uid: ", userAuth.uid);
+					const uid = userAuth.uid;
 					const docSnap = await getDoc(doc(db, "profile", uid));
-					const token = await getIdToken(user);
+					const token = await getIdToken(userAuth);
 					const verified = await auth.currentUser?.emailVerified!;
 					if (docSnap.exists())
 						setUser({
+							...user,
 							token: token,
 							uid: uid,
 							username: docSnap.data().username,
@@ -163,11 +169,10 @@ export default function UserContextComp({ children }: any) {
 							nick: docSnap.data().nick
 								? docSnap.data().nick
 								: "",
-							server_nick: "",
+							serverNick: "",
+							voiceRoom: "",
 							verified: verified,
 							lastActive: moment().valueOf(),
-							permissions: [],
-							partPermissions: [],
 						});
 				} else
 					setUser({
@@ -176,7 +181,8 @@ export default function UserContextComp({ children }: any) {
 						username: "",
 						avatar: "",
 						nick: "",
-						server_nick: "",
+						serverNick: "",
+						voiceRoom: "",
 						verified: false,
 						lastActive: 0,
 						permissions: [],

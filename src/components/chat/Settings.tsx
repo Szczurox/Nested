@@ -4,6 +4,7 @@ import ScreenPopUp from "./popup/ScreenPopUp";
 import CloseIcon from "@mui/icons-material/Close";
 import { getAuth, signOut } from "firebase/auth";
 import { ProfileSettings } from "./settings/ProfileSettings";
+import { createFirebaseApp } from "firebase-utils/clientApp";
 
 export interface SettingsProps {
 	isMobile: boolean;
@@ -12,6 +13,9 @@ export interface SettingsProps {
 
 const Settings: React.FC<SettingsProps> = ({ isMobile, onCancel }) => {
 	const [active, setActive] = useState<string>("");
+
+	const app = createFirebaseApp();
+	const auth = getAuth(app!);
 
 	useEffect(() => {
 		if (!isMobile) setActive("profile");
@@ -27,14 +31,17 @@ const Settings: React.FC<SettingsProps> = ({ isMobile, onCancel }) => {
 	}, [onCancel]);
 
 	const logOut = async () => {
-		const auth = getAuth();
-		signOut(auth)
-			.then(() => {
-				console.log("signed out");
-			})
-			.catch((error) => {
-				console.log("SIGN OUT ERROR: " + error.message);
-			});
+		try {
+			signOut(auth)
+				.then(() => {
+					console.log("signed out");
+				})
+				.catch((error) => {
+					console.log("SIGN OUT ERROR: " + error.message);
+				});
+		} catch {
+			console.log("SIGN OUT ERROR!");
+		}
 	};
 
 	const navbar = (

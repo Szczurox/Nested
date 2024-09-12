@@ -95,7 +95,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 				channel.id == "" ||
 				channel.idG == "@dms"
 		);
-	}, [channel.id, user.partPermissions]);
+	}, [channel.id, user.partPermissions, channel.idG]);
 
 	useEffect(() => {
 		if (!isMobile) {
@@ -169,7 +169,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 					(change.type === "added" || change.type === "modified") &&
 					change.doc.data().createdAt != null
 				) {
-					console.log(change.doc.data().content);
 					setMessages((messages) =>
 						[
 							...messages.filter((el) => el.id !== change.doc.id),
@@ -335,7 +334,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	};
 
 	const showTypingUsers = () => {
-		console.log(typingUsers);
 		if (typingUsers.length > 3) return "many people are typing...";
 		if (typingUsers.length == 3)
 			return `${typingUsers[0][2]}, ${typingUsers[1][2]} and ${typingUsers[2][2]} are typing...`;

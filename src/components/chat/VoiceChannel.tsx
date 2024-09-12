@@ -24,9 +24,9 @@ export default function VoiceChannel() {
 		(async () => {
 			try {
 				let resp;
-				if (user.server_nick != "")
+				if (user.serverNick != "")
 					resp = await fetch(
-						`/api/get-livekit-token?room=${channel.id}&username=${user.server_nick}`,
+						`/api/get-livekit-token?room=${channel.id}&username=${user.serverNick}`,
 						{ method: "GET" }
 					);
 				else
@@ -40,7 +40,7 @@ export default function VoiceChannel() {
 				console.error(e);
 			}
 		})();
-	}, [channel.id, user.server_nick]);
+	}, [channel.id, user.serverNick, user.nick]);
 
 	if (token === "") {
 		return <div>Getting token...</div>;

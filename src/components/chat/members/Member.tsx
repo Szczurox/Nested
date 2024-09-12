@@ -48,7 +48,6 @@ export const Member: React.FC<MemberProps> = ({
 						const active = moment(doc.data().lastActive.toMillis())
 							.add(3, "m")
 							.isAfter(moment());
-						console.log(active, id);
 						changeActivity(id, active);
 						setLastActive(
 							moment(doc.data().lastActive.toMillis()).add(3, "m")

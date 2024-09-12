@@ -51,8 +51,8 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
 					onConfirm={changeName}
 					onCancel={() => setShowPopUp(false)}
 					confirmButtonName={"Confirm"}
-					value={user.server_nick}
-					placeHolder={user.server_nick}
+					value={user.serverNick}
+					placeHolder={user.serverNick}
 				>
 					<h3>{"Change Group Nickname"}</h3>
 					<p>Change nickname on this group</p>

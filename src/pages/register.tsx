@@ -99,7 +99,7 @@ export const Register: React.FC<{}> = ({}) => {
 								values.username,
 								userCredential.user.uid
 							);
-							router.push("/verify");
+							router.push("/verify?mode=waitForVerify");
 						})
 						.catch((error) => {
 							console.log(error);

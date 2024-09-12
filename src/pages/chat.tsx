@@ -175,7 +175,7 @@ const Chat = () => {
 		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [channel.idG]);
+	}, [channel.idG, user.uid]);
 
 	function onMembers(q?: string) {
 		if (q == undefined) setShowMembers(!showMembers);
