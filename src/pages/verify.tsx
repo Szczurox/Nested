@@ -16,8 +16,8 @@ export const Verify: React.FC<{}> = ({}) => {
 	useEffect(() => {
 		const mod: string = searchParams.get("mode") as string;
 		const action: string = searchParams.get("obbCode") as string;
-		const url: string = searchParams.get("continueUrl") as string;
-		const lang: string = searchParams.get("lang") as string;
+
+		console.log(mod, action);
 
 		const app = createFirebaseApp();
 		const auth = getAuth(app!);
@@ -37,7 +37,6 @@ export const Verify: React.FC<{}> = ({}) => {
 				handleVerifyEmail(auth, action);
 				break;
 			default:
-				router.push("/login");
 				console.log(`Wrong argument "mode" = "${mode}" for /verify`);
 				break;
 		}
