@@ -1,7 +1,7 @@
 {
 	"functions": {
 		"pages/api/get-livekit-token.ts": {
-			"memory": 1023,
+			"memory": 1022,
 			"maxDuration": 9
 		}
 	}
