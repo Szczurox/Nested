@@ -8,10 +8,12 @@ import {
 import "@livekit/components-styles";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
-import { Track } from "livekit-client";
+import { Track, Room } from "livekit-client";
 import { useEffect, useState } from "react";
 
 export default function VoiceChannel() {
+	const room = new Room();
+
 	const [token, setToken] = useState<string>("");
 
 	const { user } = useUser();
@@ -33,6 +35,7 @@ export default function VoiceChannel() {
 					);
 				const data = await resp.json();
 				setToken(data.token);
+				await room.connect(process.env.NEXT_PUBLIC_LIVEKIT_URL!, token);
 			} catch (e) {
 				console.error(e);
 			}
@@ -45,6 +48,7 @@ export default function VoiceChannel() {
 
 	return (
 		<LiveKitRoom
+			room={room}
 			video={false}
 			audio={true}
 			token={token}
