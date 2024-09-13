@@ -35,6 +35,7 @@ export default function VoiceChannel() {
 					);
 				const data = await resp.json();
 				setToken(data.token);
+				console.log(data.token);
 				await room.connect(process.env.NEXT_PUBLIC_LIVEKIT_URL!, token);
 			} catch (e) {
 				console.error(e);
