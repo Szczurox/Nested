@@ -51,9 +51,9 @@ export const Verify: React.FC<{}> = ({}) => {
 		<div className={styles.auth}>
 			<div className={styles.center}>
 				{mode == "waitForVerify" ? (
-					<h3>Verification link has been sent to your email</h3>
+					<h2>Verification link has been sent to your email</h2>
 				) : (
-					<h3>Successfully verified email address!</h3>
+					<h2>Successfully verified email address!</h2>
 				)}
 				<button className={styles.auth_button} onClick={() => click()}>
 					Continue

@@ -4,7 +4,6 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import { Avatar } from "@mui/material";
 import { useEffect, useState } from "react";
 import { onSnapshot, doc, getFirestore } from "firebase/firestore";
-import moment from "moment";
 import { createFirebaseApp } from "firebase-utils/clientApp";
 import { useRouter } from "next/router";
 
@@ -15,11 +14,12 @@ interface NavbarGroupProps {
 }
 
 export const NavbarGroup: React.FC<NavbarGroupProps> = ({ id, isMobile }) => {
-	const { channel } = useChannel();
+	const { channel, setGroupData } = useChannel();
 
 	const router = useRouter();
 
 	const [icon, setIcon] = useState<string>("");
+	const [name, setName] = useState<string>("");
 	const [isSelected, setIsSelected] = useState<boolean>(false);
 	const [isHover, setIsHover] = useState<boolean>(false);
 
@@ -33,14 +33,19 @@ export const NavbarGroup: React.FC<NavbarGroupProps> = ({ id, isMobile }) => {
 	};
 
 	useEffect(() => {
-		if (channel.idG == id) setIsSelected(true);
-		else setIsSelected(false);
-	}, [channel.idG, id]);
+		if (channel.idG == id && name != channel.nameG) {
+			setGroupData(id, channel.id, name);
+			setIsSelected(true);
+		} else setIsSelected(false);
+	}, [channel.idG, id, name]);
 
 	useEffect(() => {
 		function onLoad() {
 			return onSnapshot(doc(db, "groups", id), (doc) => {
-				if (doc.exists()) if (doc.data().icon) setIcon(doc.data().icon);
+				if (doc.exists()) {
+					setIcon(doc.data().icon);
+					setName(doc.data().name);
+				}
 			});
 		}
 

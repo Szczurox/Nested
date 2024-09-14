@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Formik, Field, Form } from "formik";
 import styles from "../styles/Auth.module.scss";
@@ -19,6 +19,7 @@ import * as Yup from "yup";
 import { useRouter } from "next/router";
 import { createFirebaseApp } from "../firebase-utils/clientApp";
 import { useUser } from "context/userContext";
+import { useSearchParams } from "next/navigation";
 
 const SignupSchema = Yup.object().shape({
 	username: Yup.string()
@@ -34,6 +35,7 @@ const SignupSchema = Yup.object().shape({
 
 export const Register: React.FC<{}> = ({}) => {
 	const router = useRouter();
+
 	const { user, loadingUser } = useUser();
 
 	const app = createFirebaseApp();
@@ -217,7 +219,7 @@ export const Register: React.FC<{}> = ({}) => {
 							<div className={styles.singup_link}>
 								<span>
 									Already have an account?{" "}
-									<Link href="/login">Login</Link>
+									<Link href={"/login"}>Login</Link>
 								</span>
 							</div>
 						</Form>

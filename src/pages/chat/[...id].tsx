@@ -30,7 +30,7 @@ const Chat = () => {
 	const [variant, setVariant] = useState<NavbarVariant>("server");
 
 	const { user, loadingUser, setMemberData, setActivity } = useUser();
-	const { channel, setGroupData } = useChannel();
+	const { channel, setGroupData, setChannelData } = useChannel();
 
 	const router = useRouter();
 	const { id } = router.query;
@@ -48,13 +48,12 @@ const Chat = () => {
 	useEffect(() => {
 		if (!router.isReady || !id) return;
 		const idTyped = id as string[];
-		console.log(idTyped[0]);
 		if (idTyped[0] != "@dms") {
-			if (idTyped.length == 1) setGroupData(id[0]);
-			else if (id[1] != "undefined")
-				setGroupData(id[0], id[1], "LOADING");
-			else setGroupData(id[0], "undefined", "TEXT");
-		} else setGroupData("@dms", "\n", "Friends", "", "");
+			if (idTyped.length == 1) setGroupData(id[0], "undefined");
+			else if (id[1] != "undefined") setGroupData(id[0], id[1]);
+			else setGroupData(id[0], "undefined");
+		} else setGroupData("@dms", "\n", "Direct Messages");
+
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id, router.isReady]);
 
@@ -66,9 +65,10 @@ const Chat = () => {
 			) {
 				console.log("ping!", user.uid);
 				setActivity(moment().valueOf());
-				await updateDoc(doc(db, "profile", user.uid), {
+				// TODO: disabled for now to reduce server load
+				/* await updateDoc(doc(db, "profile", user.uid), {
 					lastActive: serverTimestamp(),
-				});
+				}); */
 			}
 		}, 1500);
 
@@ -121,25 +121,21 @@ const Chat = () => {
 
 	useEffect(() => {
 		async function checkMember() {
-			setShowMembers(false);
+			if (user.uid != "" && user.verified && channel.idG != "@dms") {
+				setShowMembers(false);
 
-			const memberDoc = doc(
-				db,
-				"groups",
-				channel.idG,
-				"members",
-				user.uid
-			);
-
-			const docSnapMember = await getDoc(memberDoc);
-
-			let unsub: () => void;
-
-			if (docSnapMember.exists()) {
-				unsub = onSnapshot(memberDoc, (docSnapMember) => {
+				const memberDoc = doc(
+					db,
+					"groups",
+					channel.idG,
+					"members",
+					user.uid
+				);
+				const unsub = onSnapshot(memberDoc, (docSnapMember) => {
 					if (
 						docSnapMember.exists() &&
-						docSnapMember.data().permissions
+						docSnapMember.data().permissions &&
+						docSnapMember.data().lastViewed
 					) {
 						if (docSnapMember.data().lastViewed) {
 							router.push(
@@ -162,19 +158,14 @@ const Chat = () => {
 						);
 					}
 				});
-				setShowMembers(true);
-			} else unsub = () => null;
 
-			return unsub;
+				setShowMembers(true);
+
+				return unsub;
+			} else return () => {};
 		}
 
-		let unsub: () => void = () => undefined;
-
-		if (user.uid != "" && user.verified && channel.idG != "@dms")
-			checkMember().then((result) => (unsub = result));
-		return () => {
-			unsub();
-		};
+		checkMember();
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [channel.idG, user.uid]);

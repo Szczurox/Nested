@@ -40,15 +40,19 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 			avatar: url,
 		})
 			.catch((err) => console.log("User Error: " + err))
-			.then(
-				async () =>
+			.then(async () => {
+				var storedGroups: string[] = localStorage.getItem("groups")
+					? JSON.parse(localStorage.getItem("groups")!)
+					: [];
+				storedGroups.forEach(async (el) => {
 					await updateDoc(
-						doc(db, "groups", channel.idG, "members", user.uid),
+						doc(db, "groups", el, "members", user.uid),
 						{
 							avatar: url,
 						}
-					).catch((err) => console.log("Member Error: " + err))
-			);
+					).catch((err) => console.log("Member Error: " + err));
+				});
+			});
 	}
 
 	const uploadAvatar = (file: File) => {

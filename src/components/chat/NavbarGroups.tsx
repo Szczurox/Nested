@@ -10,7 +10,6 @@ import {
 	collection,
 	query,
 	onSnapshot,
-	where,
 } from "firebase/firestore";
 import { useUser } from "context/userContext";
 import { useRouter } from "next/router";

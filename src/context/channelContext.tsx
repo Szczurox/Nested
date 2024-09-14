@@ -5,9 +5,8 @@ export type ChannelType = "VOICE" | "TEXT" | "LOADING";
 export type Channel = {
 	id: string; // Channel ID
 	name: string; // Channel name
-	idC: string; // Category ID
-	nameC: string; // Category name
 	idG: string; // Group ID
+	nameG: string; // Group name
 	type: ChannelType; // Channel type
 };
 
@@ -15,92 +14,52 @@ export interface ChannelContextType {
 	channel: {
 		id: string; // Channel ID
 		name: string; // Channel name
-		idC: string; // Category ID
-		nameC: string; // Category name
 		idG: string; // Group ID
+		nameG: string; // Group name
 		type: ChannelType; // Channel type
 	};
-	setChannelData: (
-		id: string,
-		type: ChannelType,
-		name?: string,
-		idC?: string,
-		nameC?: string
-	) => void;
-	setGroupData: (
-		idG: string,
-		id?: string,
-		name?: string,
-		idC?: string,
-		nameC?: string
-	) => void;
+	setChannelData: (id: string, type: ChannelType, name?: string) => void;
+	setGroupData: (idG: string, id?: string, name?: string) => void;
 }
 
 export const ChannelContext = createContext<ChannelContextType>({
 	channel: {
 		id: "",
 		name: "",
-		idC: "",
-		nameC: "",
 		idG: "",
+		nameG: "",
 		type: "TEXT",
 	},
-	setChannelData: (
-		_id: string,
-		_type: ChannelType,
-		_name?: string,
-		_idC?: string,
-		_nameC?: string
-	) => undefined,
-	setGroupData: (
-		_idG: string,
-		_id?: string,
-		_name?: string,
-		_idC?: string,
-		_nameC?: string
-	) => undefined,
+	setChannelData: (_id: string, _type: ChannelType, _name?: string) =>
+		undefined,
+	setGroupData: (_idG: string, _id?: string, _name?: string) => undefined,
 });
 
 export default function ChannelContextComp({ children }: any) {
 	const [channel, setChannel] = useState<Channel>({
 		id: "",
 		name: "",
-		idC: "",
-		nameC: "",
 		idG: "@dms",
+		nameG: "Direct Messages",
 		type: "LOADING",
 	});
 
-	const setChannelData = (
-		id: string,
-		type: ChannelType,
-		name?: string,
-		idC?: string,
-		nameC?: string
-	) => {
+	const setChannelData = (id: string, type: ChannelType, name?: string) => {
 		setChannel({
 			id: id,
 			type: type,
 			name: name ? name : channel.name,
-			idC: idC ? idC : channel.idC,
-			nameC: nameC ? nameC : channel.nameC,
 			idG: channel.idG,
+			nameG: channel.nameG,
 		});
 	};
 
-	const setGroupData = (
-		idG: string,
-		id?: string,
-		name?: string,
-		idC?: string,
-		nameC?: string
-	) => {
+	const setGroupData = (idG: string, id?: string, name?: string) => {
 		setChannel({
 			id: id ? id : channel.id,
-			name: name ? name : channel.name,
-			idC: idC ? idC : channel.idC,
-			nameC: nameC ? nameC : channel.nameC,
+			name: channel.name,
 			idG: idG,
+			nameG: name ? name : channel.nameG,
 			type: "LOADING",
 		});
 	};

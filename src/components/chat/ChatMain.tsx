@@ -9,7 +9,6 @@ import {
 	collection,
 	doc,
 	documentId,
-	getDocs,
 	getFirestore,
 	limit,
 	onSnapshot,
@@ -148,9 +147,11 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 			lastActive: serverTimestamp(),
 		});
 
-	const handleMessageSnapshot = (qMes: any) => {
+	const handleMessageSnapshot = (qMes: any, isFirstBatch: boolean) => {
 		return onSnapshot(qMes, (querySnapshot: any) => {
 			querySnapshot.docChanges().forEach((change: any) => {
+				if (isFirstBatch && change.type === "added") scrollToBottom();
+
 				if (change.type === "removed" || change.type === "modified") {
 					setMessages((messages) => [
 						...messages.filter((el) => el.id !== change.doc.id),
@@ -205,7 +206,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 			startAfter(lastKey)
 		);
 
-		return handleMessageSnapshot(qMes);
+		return handleMessageSnapshot(qMes, false);
 	}
 
 	useEffect(() => {
@@ -220,81 +221,97 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 
 	useEffect(() => {
 		function getMessagesFirstBatch() {
-			// Channels query
-			const qMes = query(
-				messagesCollection,
-				orderBy("createdAt", "desc"),
-				limit(querySizeLimit)
-			);
+			if (
+				channel.id != "" &&
+				channel.idG != "@dms" &&
+				channel.type != "LOADING"
+			) {
+				// Channels query
+				const qMes = query(
+					messagesCollection,
+					orderBy("createdAt", "desc"),
+					limit(querySizeLimit)
+				);
 
-			return handleMessageSnapshot(qMes);
+				scrollToBottom();
+				return handleMessageSnapshot(qMes, true);
+			} else return () => {};
 		}
 
+		// TODO: Can't afford this for now (limiting usage)
 		function getTypingUsers() {
-			// Participants querry
-			const qPart = query(
-				participantsCollection,
-				where(documentId(), "!=", user.uid)
-			);
+			if (
+				channel.id != "" &&
+				channel.idG != "@dms" &&
+				channel.type != "LOADING"
+			) {
+				// Participants querry
+				const qPart = query(
+					participantsCollection,
+					where(documentId(), "!=", user.uid)
+				);
 
-			return onSnapshot(qPart, (querySnapshot) => {
-				querySnapshot.docChanges().forEach((change) => {
-					if (change.type == "modified" || change.type == "added") {
-						// User is typing
-						setTypingUsers((users) => [
-							...users.filter((el) => el[1].isAfter(moment())),
-						]);
-						if (change.doc.data().lastTyping) {
-							const lastType = change.doc
-								.data()
-								.lastTyping.toMillis();
-							if (
-								moment(lastType)
-									.add(5, "second")
-									.isAfter(moment())
-							)
+				return onSnapshot(qPart, (querySnapshot) => {
+					querySnapshot.docChanges().forEach((change) => {
+						if (
+							change.type == "modified" ||
+							change.type == "added"
+						) {
+							// User is typing
+							setTypingUsers((users) => [
+								...users.filter((el) =>
+									el[1].isAfter(moment())
+								),
+							]);
+							if (change.doc.data().lastTyping) {
+								const lastType = change.doc
+									.data()
+									.lastTyping.toMillis();
+								if (
+									moment(lastType)
+										.add(5, "second")
+										.isAfter(moment())
+								)
+									setTypingUsers((users) => [
+										...users.filter(
+											(el) => el[0] != change.doc.id
+										),
+										[
+											change.doc.id,
+											moment(lastType).add(5, "second"),
+											change.doc.data().nickname,
+										],
+									]);
+							}
+							// User stopped typing
+							else
 								setTypingUsers((users) => [
 									...users.filter(
 										(el) => el[0] != change.doc.id
 									),
-									[
-										change.doc.id,
-										moment(lastType).add(5, "second"),
-										change.doc.data().nickname,
-									],
 								]);
 						}
-						// User stopped typing
-						else
-							setTypingUsers((users) => [
-								...users.filter((el) => el[0] != change.doc.id),
-							]);
-					}
+					});
 				});
-			});
+			} else return () => {};
 		}
 
 		setMessages([]);
 		setTypingUsers([]);
 
-		if (
-			channel.id != "" &&
-			channel.idG != "@dms" &&
-			channel.type != "LOADING"
-		) {
-			setAutoScroll(true);
-			setCanScrollToBottom(false);
-			setIsTyping(false);
-			const unsub = getMessagesFirstBatch();
-			const unsub2 = getTypingUsers();
-			scrollToBottom();
-			return () => {
-				if (unsubs.length > 0)
-					for (let i = 0; i < unsubs.length; i++) unsubs[i]();
-				unsub();
-				unsub2();
-			};
-		}
+		setAutoScroll(true);
+		setCanScrollToBottom(false);
+		setIsTyping(false);
+		const unsub = getMessagesFirstBatch();
+		// TODO: Can't afford this for now (limiting usage)
+		// const unsub2 = getTypingUsers();
+		scrollToBottom();
+		return () => {
+			if (unsubs.length > 0)
+				for (let i = 0; i < unsubs.length; i++) unsubs[i]();
+			unsub();
+			// unsub2();
+		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [channel.id, channel.idG, user.uid, channel.type]);

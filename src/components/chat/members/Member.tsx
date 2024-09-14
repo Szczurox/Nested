@@ -31,12 +31,14 @@ export const Member: React.FC<MemberProps> = ({
 	isVisible,
 	changeActivity,
 }) => {
-	const [trueAvatar, setTrueAvatar] = useState<string>(avatar);
-	const [isActive, setIsActive] = useState<boolean>(true);
-	const [lastActive, setLastActive] = useState<Moment>();
-
 	const { channel } = useChannel();
 	const { user } = useUser();
+
+	const [trueAvatar, setTrueAvatar] = useState<string>(avatar);
+	const [isActive, setIsActive] = useState<boolean>(
+		id == user.uid ? true : false
+	);
+	const [lastActive, setLastActive] = useState<Moment>();
 
 	const app = createFirebaseApp();
 	const db = getFirestore(app!);

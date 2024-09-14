@@ -112,6 +112,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	};
 
 	const updateLastViewed = async () => {
+		console.log("rar");
 		setLastActive(moment());
 		await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
 			lastViewed: id,
@@ -119,19 +120,23 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	};
 
 	useEffect(() => {
-		if (channel.id == id && user.uid != "" && channel.name != name) {
+		if (
+			channel.id == id &&
+			user.uid != "" &&
+			(channel.name != name || channel.type != channelType)
+		) {
 			setIsActive(true);
 			const perms = everyPerms.concat(partPerms);
 			if (perms.length && perms != null)
 				if (channel.id == id) addPartPerms(perms);
-			setChannelData(id, channelType, name, idC, nameC);
-			if (channelType == "TEXT") {
+			setChannelData(id, channelType, name);
+			if (channel.type != channelType) {
 				updateLastViewed();
 				updateLastActive();
 			}
 		} else if (channel.id != id) setIsActive(false);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [channel.id, id, user.uid, name, channel.name]);
+	}, [channel.id, id, user.uid, name, channel.name, channel.type]);
 
 	useEffect(() => {
 		const participantSnapshot = () => {
@@ -162,7 +167,6 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 					const perms: ParticipantPermission[] = [
 						...doc.data().permissions,
 					];
-					console.log(perms);
 					if (channel.id == id) addPartPerms(partPerms.concat(perms));
 					setEveryPerms(perms);
 				}
@@ -215,7 +219,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		setShowPopUp(0);
 
 		// Kick user out of the channel so that messages can't be seen anymore
-		if (channel.id == id) setChannelData("", "TEXT", "", "", "");
+		if (channel.id == id) setChannelData("", "TEXT", "");
 
 		await deleteDoc(channelDoc);
 	};

@@ -235,9 +235,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 			clearTimeout(typingTimeout);
 			console.log("typing");
 			setIsTyping(true);
-			await updateDoc(doc(participantsCollection, user.uid), {
+			// TODO: Can't afford this for now (limiting usage)
+			/* await updateDoc(doc(participantsCollection, user.uid), {
 				lastTyping: serverTimestamp(),
-			});
+			}); */
 
 			setTypingTimeout(
 				setTimeout(async () => {

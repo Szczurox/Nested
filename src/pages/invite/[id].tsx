@@ -11,7 +11,7 @@ export const Invite: React.FC<{}> = ({}) => {
 	const params = useSearchParams();
 	const { id } = router.query;
 
-	const { user } = useUser();
+	const { user, loadingUser } = useUser();
 
 	const [guildId, setGuildId] = useState<string>(params.get("id") as string);
 	const [invite, setInvite] = useState<string>();
@@ -21,7 +21,15 @@ export const Invite: React.FC<{}> = ({}) => {
 
 	useEffect(() => {
 		if (!router.isReady) return;
-		if (user.uid == "" || !user.verified) router.push("/chat");
+		console.log(user.uid);
+		if (user.uid == "" && !loadingUser) {
+			router.push(
+				`/login?ref=/invite/${id as string}&id=${
+					params.get("id") as string
+				}`
+			);
+			return;
+		}
 		setInvite(id as string);
 		setGuildId(params.get("id") as string);
 		var storedGroups = localStorage.getItem("groups")
@@ -32,13 +40,12 @@ export const Invite: React.FC<{}> = ({}) => {
 			router.push(`/chat/${params.get("id") as string}`, undefined, {
 				shallow: true,
 			});
-	}, [id, router, params, guildId]);
+	}, [id, router, params, guildId, user.uid, loadingUser]);
 
 	const click = async () => {
 		var storedGroups = localStorage.getItem("groups")
 			? JSON.parse(localStorage.getItem("groups")!)
 			: [];
-		console.log(guildId);
 		if (!storedGroups.includes(guildId) && guildId) {
 			const memberDoc = doc(db, "groups", guildId, "members", user.uid);
 			try {
@@ -81,7 +88,7 @@ export const Invite: React.FC<{}> = ({}) => {
 	return (
 		<div className={styles.auth}>
 			<div className={styles.center}>
-				<h3>Invited to a server</h3>
+				<h2>Invited to a group</h2>
 				<button className={styles.auth_button} onClick={() => click()}>
 					Accept invite
 				</button>

@@ -83,7 +83,7 @@ const Members: React.FC<MembersProps> = ({ isMobile, show, qu }) => {
 						);
 					}
 					if (change.type === "added") {
-						setOnline((online) => [...online, change.doc.id]);
+						setOffline((offline) => [...offline, change.doc.id]);
 					}
 				});
 			});
@@ -186,7 +186,7 @@ const Members: React.FC<MembersProps> = ({ isMobile, show, qu }) => {
 			))}
 			{members.length != 0 && !filter && (
 				<MemberCount
-					name="Offline"
+					name="Hidden"
 					count={filterMembers("offline").length}
 				/>
 			)}

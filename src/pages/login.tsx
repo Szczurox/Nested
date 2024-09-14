@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Formik, Field, Form } from "formik";
 import styles from "../styles/Auth.module.scss";
@@ -6,10 +6,14 @@ import { motion, Variants } from "framer-motion";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useUser } from "context/userContext";
 import { useRouter } from "next/router";
+import { useSearchParams } from "next/navigation";
+import { wait } from "components/utils/utils";
 
 export const Login: React.FC<{}> = ({}) => {
-	const { user, loadingUser } = useUser();
 	const router = useRouter();
+	const searchParams = useSearchParams();
+
+	const { user, loadingUser } = useUser();
 
 	const easing = [0.06, -0.5, 0.01, 0.99];
 
@@ -30,6 +34,7 @@ export const Login: React.FC<{}> = ({}) => {
 
 	useEffect(() => {
 		// Route to chat if user is already authenticated
+		console.log(user.uid);
 		if (user.uid != "" && !loadingUser) router.push("/chat");
 	}, [user.uid, loadingUser, router]);
 
@@ -41,7 +46,17 @@ export const Login: React.FC<{}> = ({}) => {
 				console.log("ERROR: " + error.code + ": " + error.message);
 			})
 			.then((userCredential) => {
-				if (userCredential) router.push("/chat");
+				if (userCredential) {
+					if (searchParams.get("ref"))
+						wait(600).then(() =>
+							router.push(
+								`${
+									searchParams.get("ref") as string
+								}?id=${searchParams.get("id")}`
+							)
+						);
+					else router.push("/chat");
+				}
 			});
 	};
 
@@ -113,7 +128,7 @@ export const Login: React.FC<{}> = ({}) => {
 							<div className={styles.singup_link}>
 								<span>
 									Not a member?{" "}
-									<Link href="/register">Register</Link>
+									<Link href={"/register"}>Register</Link>
 								</span>
 							</div>
 						</Form>
