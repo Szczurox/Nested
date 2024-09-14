@@ -28,7 +28,7 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 
 	const [showSettings, setShowSettings] = useState<boolean>(false);
 	const [avatar, setAvatar] = useState<string>(
-		user.avatar != "" ? user.avatar : "/UserAvatar.png"
+		user.avatar ? user.avatar : "/UserAvatar.png"
 	);
 
 	const storage = getStorage();

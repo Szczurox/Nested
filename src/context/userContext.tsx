@@ -177,9 +177,7 @@ export default function UserContextComp({ children }: any) {
 							token: token,
 							uid: uid,
 							username: docSnap.data().username,
-							avatar: docSnap.data().avatar
-								? docSnap.data().avatar
-								: "",
+							avatar: docSnap.data().avatar,
 							nick: docSnap.data().nick
 								? docSnap.data().nick
 								: "",

@@ -55,10 +55,11 @@
 	.emoji_content {
 		height: 27vh;
 		overflow-y: scroll;
-		margin-top: 4px;
+		margin-top: 2px;
 		width: 100%;
 		background-color: #2f3135;
 		padding: 10px;
+		padding-top: 0px;
 
 		.emoji_frame {
 			padding: 4px;
@@ -71,6 +72,7 @@
 			}
 
 			img {
+				transform: translate(0%, 40%);
 				width: 46px;
 				height: auto;
 			}
