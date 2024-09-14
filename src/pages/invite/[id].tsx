@@ -1,17 +1,7 @@
 import styles from "../../styles/Auth.module.scss";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import {
-	collection,
-	doc,
-	getDoc,
-	getDocs,
-	getFirestore,
-	limit,
-	query,
-	setDoc,
-	where,
-} from "firebase/firestore";
+import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
 import { createFirebaseApp } from "firebase-utils/clientApp";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "context/userContext";
@@ -31,17 +21,17 @@ export const Invite: React.FC<{}> = ({}) => {
 
 	useEffect(() => {
 		if (!router.isReady) return;
+		if (user.uid == "" || !user.verified) router.push("/chat");
 		setInvite(id as string);
 		setGuildId(params.get("id") as string);
 		var storedGroups = localStorage.getItem("groups")
 			? JSON.parse(localStorage.getItem("groups")!)
 			: [];
 
-		if (storedGroups.includes(params.get("id") as string)) {
+		if (storedGroups.includes(params.get("id") as string))
 			router.push(`/chat/${params.get("id") as string}`, undefined, {
 				shallow: true,
 			});
-		}
 	}, [id, router, params, guildId]);
 
 	const click = async () => {

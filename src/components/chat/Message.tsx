@@ -138,7 +138,7 @@ export const Message: React.FC<MessageProps> = ({
 					// If it doesn't exist get author info from users
 					const docSnap = await getDoc(doc(db, "profile", userid));
 					if (docSnap.exists()) {
-						setNickname(docSnap.data().username);
+						setNickname(docSnap.data().nick);
 						if (docSnap.data().avatar)
 							setAvatar(docSnap.data().avatar);
 					}
@@ -336,11 +336,9 @@ export const Message: React.FC<MessageProps> = ({
 			range.startContainer.parentElement?.closest(styles.message_content)
 		) {
 			for (let node of contents.childNodes.values()) {
-				if (node.nodeType === 1 && node.nodeName === "IMG") {
+				if (node.nodeType === 1 && node.nodeName === "IMG")
 					copiedText += (node as HTMLImageElement).alt;
-				} else {
-					copiedText += node.textContent;
-				}
+				else copiedText += node.textContent;
 			}
 
 			e.clipboardData!.setData(

@@ -66,10 +66,9 @@ const Chat = () => {
 			) {
 				console.log("ping!", user.uid);
 				setActivity(moment().valueOf());
-				// TODO: disabled for now to lower server load
-				/* await updateDoc(doc(db, "profile", user.uid), {
+				await updateDoc(doc(db, "profile", user.uid), {
 					lastActive: serverTimestamp(),
-				}); */
+				});
 			}
 		}, 1500);
 
@@ -99,6 +98,12 @@ const Chat = () => {
 							/*await updateDoc(doc(db, "profile", user.uid), {
 								lastActive: serverTimestamp(),
 							});*/
+
+							await updateDoc(doc(db, "profile", user.uid), {
+								lastMessagedAt: serverTimestamp(),
+							}).catch((err) => {
+								console.log(err);
+							});
 
 							if (isMobile) {
 								setShowNavbar(false);
