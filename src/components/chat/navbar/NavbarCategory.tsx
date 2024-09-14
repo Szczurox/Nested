@@ -100,12 +100,17 @@ export const NavbarCategory: React.FC<NavbarCategoryProps> = ({
 									id: change.doc.id,
 									createdAt: change.doc.data().createdAt,
 									name: change.doc.data().name,
-									lastMessageAt:
-										change.doc.data().lastMessageAt,
+									lastMessageAt: change.doc.data()
+										.lastMessageAt
+										? change.doc
+												.data()
+												.lastMessageAt.toMillis()
+										: 0,
 									type: change.doc.data().type,
+									order: change.doc.data().order,
 								},
 							].sort((x, y) => {
-								return x.createdAt > y.createdAt ? 1 : -1;
+								return x.order > y.order ? 1 : -1;
 							})
 						);
 					}

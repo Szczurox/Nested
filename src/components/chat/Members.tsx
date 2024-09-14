@@ -91,6 +91,8 @@ const Members: React.FC<MembersProps> = ({ isMobile, show, qu }) => {
 			return unsub;
 		}
 
+		setMembers([]);
+
 		getMembers();
 	}, [channel.idG, db]);
 

@@ -41,10 +41,7 @@ export const Login: React.FC<{}> = ({}) => {
 				console.log("ERROR: " + error.code + ": " + error.message);
 			})
 			.then((userCredential) => {
-				if (userCredential) {
-					console.log(user.uid);
-					router.push("/chat");
-				}
+				if (userCredential) router.push("/chat");
 			});
 	};
 
@@ -77,7 +74,7 @@ export const Login: React.FC<{}> = ({}) => {
 									{errors.email ? " - " + errors.email : null}
 								</p>
 								<Field
-									class={styles.auth_field}
+									className={styles.auth_field}
 									name="email"
 									placeholder="email"
 									label="Email"

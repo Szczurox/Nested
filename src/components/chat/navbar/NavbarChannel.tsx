@@ -19,13 +19,14 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VolumeUpIcon from "@mui/icons-material/VolumeUp";
-import TagIcon from "@mui/icons-material/Tag";
 import AddIcon from "@mui/icons-material/Add";
 import CircleIcon from "@mui/icons-material/Circle";
 import InputPopUp from "../popup/InputPopUp";
 import BasicDeletePopUp from "../popup/DeletePopUp";
 import { addChannel } from "components/utils/channelQueries";
 import { ParticipantPermission, useUser } from "context/userContext";
+import { useRouter } from "next/router";
+import moment, { Moment } from "moment";
 
 interface NavbarChannelProps {
 	name: string;
@@ -42,6 +43,7 @@ export interface ChannelData {
 	createdAt: string;
 	lastMessageAt: number;
 	type: ChannelType;
+	order: number;
 }
 
 export const NavbarChannel: React.FC<NavbarChannelProps> = ({
@@ -61,9 +63,12 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	const [partPerms, setPartPerms] = useState<ParticipantPermission[]>([]);
 	// 0 - None  /  1 - Delete  /  2 - Change Name  /  3 - Create
 	const [showPopUp, setShowPopUp] = useState<number>(0);
+	const [lastActive, setLastActive] = useState<Moment>();
 
 	const { channel, setChannelData } = useChannel();
 	const { user, addPartPerms } = useUser();
+
+	const router = useRouter();
 
 	const menuRef = useRef<ContextMenuHandle>(null);
 	const elementRef = useRef<HTMLDivElement>(null);
@@ -91,15 +96,41 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		"everyone"
 	);
 
+	const updateLastActive = async () => {
+		await updateDoc(
+			doc(
+				db,
+				"groups",
+				channel.idG,
+				"channels",
+				id,
+				"participants",
+				user.uid
+			),
+			{ lastActive: serverTimestamp() }
+		);
+	};
+
+	const updateLastViewed = async () => {
+		setLastActive(moment());
+		await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
+			lastViewed: id,
+		});
+	};
+
 	useEffect(() => {
-		if (channel.id == id) {
+		if (channel.id == id && user.uid != "" && channel.name != name) {
 			setIsActive(true);
 			const perms = everyPerms.concat(partPerms);
 			if (perms.length && perms != null)
 				if (channel.id == id) addPartPerms(perms);
-			if (channel.name != name)
-				setChannelData(id, channelType, name, idC, nameC);
-		} else setIsActive(false);
+			setChannelData(id, channelType, name, idC, nameC);
+			if (channelType == "TEXT") {
+				updateLastViewed();
+				updateLastActive();
+			}
+		} else if (channel.id != id) setIsActive(false);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [channel.id, id, user.uid, name, channel.name]);
 
 	useEffect(() => {
@@ -118,7 +149,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 						setEveryPerms(perms);
 						setPartPerms([...doc.data().permissions]);
 					}
-					if (doc.data()!.lastActive < lastMessageAt!)
+					if (doc.data()!.lastViewed < lastMessageAt!)
 						setIsUnread(true);
 					else setIsUnread(false);
 				}
@@ -140,20 +171,18 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
 		async function checkParticipant() {
 			const participantDoc = await getDoc(partRef);
-			if (lastMessageAt) {
-				if (
-					participantDoc.exists() &&
-					participantDoc.data().nickname == user.serverNick
-				) {
-					return participantSnapshot();
-				} else {
-					await setDoc(partRef, {
-						lastActive: serverTimestamp(),
-						nickname: user.serverNick,
-					});
-					return participantSnapshot();
-				}
-			} else return () => undefined;
+			if (
+				participantDoc.exists() &&
+				participantDoc.data().nickname == user.serverNick
+			) {
+				return participantSnapshot();
+			} else {
+				await setDoc(partRef, {
+					lastActive: serverTimestamp(),
+					nickname: user.serverNick ? user.serverNick : user.nick,
+				});
+				return participantSnapshot();
+			}
 		}
 
 		const unsub = everyoneSnapshot();
@@ -166,7 +195,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		});
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [user.uid]);
+	}, [user.uid, id]);
 
 	useEffect(() => {
 		if (
@@ -176,34 +205,6 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 			setShowChannel(true);
 		else setShowChannel(false);
 	}, [everyPerms, partPerms]);
-
-	const updateLastActive = async () =>
-		await updateDoc(
-			doc(
-				db,
-				"groups",
-				channel.idG,
-				"channels",
-				id,
-				"participants",
-				user.uid
-			),
-			{ lastActive: serverTimestamp() }
-		);
-
-	const updateLastViewed = async () =>
-		await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
-			lastViewed: id,
-		});
-
-	const handleToggle = () => {
-		setChannelData(id, channelType, name, idC, nameC);
-		setIsActive(true);
-		if (channelType == "TEXT") {
-			updateLastActive();
-			updateLastViewed();
-		}
-	};
 
 	const deleteChannel = async () => {
 		// It won't actually delete the channel, it's subcollections (messages) will still exist
@@ -326,7 +327,11 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 						: `${styles.channel} ${styles.inactive}`
 				}
 				id={id}
-				onClick={handleToggle}
+				onClick={() =>
+					router.push(`/chat/${channel.idG}/${id}`, undefined, {
+						shallow: true,
+					})
+				}
 				onContextMenu={(e) => menuRef.current?.handleContextMenu(e)}
 				ref={elementRef}
 			>

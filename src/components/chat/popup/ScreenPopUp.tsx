@@ -10,10 +10,10 @@ interface PopUpProps {
 const ScreenPopUp: React.FC<PopUpProps> = ({ children, full = false }) => {
 	const { setCurrentPopUp } = usePopUp();
 
-	// eslint-disable-next-line react-hooks/exhaustive-deps
 	useEffect(() => {
 		setCurrentPopUp(true);
 		return () => setCurrentPopUp(false);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

@@ -117,7 +117,6 @@ export default function UserContextComp({ children }: any) {
 		nickname: string,
 		permissions: MemberPermission[]
 	) => {
-		console.log(permissions, nickname);
 		setUser({
 			...user,
 			permissions: permissions,
@@ -126,7 +125,6 @@ export default function UserContextComp({ children }: any) {
 	};
 
 	const setPartPerms = (permissions: ParticipantPermission[]) => {
-		console.log(permissions);
 		setUser({
 			...user,
 			partPermissions: permissions,

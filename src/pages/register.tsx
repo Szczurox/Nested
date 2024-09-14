@@ -88,13 +88,8 @@ export const Register: React.FC<{}> = ({}) => {
 			})
 			.then((userCredential) => {
 				if (userCredential) {
-					console.log(auth.currentUser);
 					sendEmailVerification(auth.currentUser!)
 						.then(() => {
-							window.localStorage.setItem(
-								"emailForSignIn",
-								values.email
-							);
 							createUser(
 								values.username,
 								userCredential.user.uid

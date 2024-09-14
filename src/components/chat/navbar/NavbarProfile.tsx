@@ -27,8 +27,6 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 	const { channel } = useChannel();
 
 	const [showSettings, setShowSettings] = useState<boolean>(false);
-	const [muted, setMuted] = useState<boolean>(false);
-	const [deafened, setDeafened] = useState<boolean>(false);
 	const [avatar, setAvatar] = useState<string>(
 		user.avatar != "" ? user.avatar : "/UserAvatar.png"
 	);
@@ -101,13 +99,11 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 	};
 
 	const toggleMute = () => {
-		setMuted(!muted);
-		setVoiceData(!muted, user.deafened);
+		setVoiceData(!user.muted, user.deafened);
 	};
 
 	const toggleDeaf = () => {
-		setDeafened(!deafened);
-		setVoiceData(user.muted, !deafened);
+		setVoiceData(user.muted, !user.deafened);
 	};
 
 	return (
@@ -145,13 +141,13 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 				</div>
 				<div className={styles.navbar_profile_icons}>
 					<span className={styles.navbar_profile_icon}>
-						{muted ? (
+						{user.muted ? (
 							<MicOffIcon onClick={(_) => toggleMute()} />
 						) : (
 							<MicIcon onClick={(_) => toggleMute()} />
 						)}
 					</span>
-					{deafened ? (
+					{user.deafened ? (
 						<span className={styles.navbar_profile_icon}>
 							<HeadsetOffIcon onClick={(_) => toggleDeaf()} />
 						</span>

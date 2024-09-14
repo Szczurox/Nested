@@ -52,7 +52,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 				<div className={styles.chatHeader_left}>
 					<h3>
 						<span className={styles.chatHeader_hash}>#</span>
-						{channel.name}
+						{channel.type != "LOADING" && channel.name}
 					</h3>
 				</div>
 				{variant != "dms" ? (

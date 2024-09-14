@@ -5,10 +5,8 @@ import PopUpProvider from "../context/popUpContext";
 import MessageProvider from "../context/messageContext";
 import { AppProps } from "next/dist/shared/lib/router/router";
 import { useEffect, useState } from "react";
-import Loading from "components/Loading";
 
 function MyApp({ Component, pageProps, router }: AppProps) {
-	const [isRouteChanging, setIsRouteChanging] = useState<boolean>(false);
 	const [windowHeight, setWindowHeight] = useState<number>(0);
 
 	useEffect(() => {
@@ -25,10 +23,6 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 	}, []);
 
 	useEffect(() => {
-		const routeChangeStartHandler = () => setIsRouteChanging(true);
-
-		const routeChangeEndHandler = () => setIsRouteChanging(false);
-
 		const checkForZoom = (e: any) => {
 			if (e.ctrlKey && (e.key == "+" || e.key == "-" || e.key == "=")) {
 				e.preventDefault();
@@ -49,16 +43,10 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 		document.addEventListener("wheel", checkForZoomScroll, {
 			passive: false,
 		});
-		router.events.on("routeChangeStart", routeChangeStartHandler);
-		router.events.on("routeChangeComplete", routeChangeEndHandler);
-		router.events.on("routeChangeError", routeChangeEndHandler);
 		return () => {
 			document.removeEventListener("contextmenu", handleContextMenu);
 			document.removeEventListener("keydown", checkForZoom);
 			document.removeEventListener("wheel", checkForZoomScroll);
-			router.events.off("routeChangeStart", routeChangeStartHandler);
-			router.events.off("routeChangeComplete", routeChangeEndHandler);
-			router.events.off("routeChangeError", routeChangeEndHandler);
 		};
 	}, [router.events]);
 
@@ -75,11 +63,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 							/>
 							<link rel="icon" href="/favicon.ico" />
 							<meta name="Nested" content="Chat App" />
-							{isRouteChanging ? (
-								<Loading />
-							) : (
-								<Component {...pageProps} />
-							)}
+							<Component {...pageProps} />
 						</div>
 					</PopUpProvider>
 				</MessageProvider>

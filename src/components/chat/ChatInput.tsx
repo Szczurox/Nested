@@ -22,6 +22,7 @@ import Emoji from "./ui-icons/Emoji";
 import InformationPopUp from "./popup/InformationPopUp";
 import { wait } from "components/utils/utils";
 import { TextareaAutosize } from "@mui/material";
+import { Moment } from "moment";
 
 interface ChatInputProps {
 	isMobile: boolean;
@@ -45,7 +46,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	const [isDisabled, setIsDisabled] = useState<boolean>(false);
 	const [emojiBucket, setEmojiBucket] = useState<string[]>([]); // Array of all the emoji name|link used in the message
 	const [emojis, setEmojis] = useState<string[]>([]); // Array of all saved samojis
-	const [slowDownCount, setSlowDownCount] = useState<number>(0); // Show Slow Down pop-up if reaches 2
+	const [slowDown, setSlowDown] = useState<Moment>();
+	const [slowPopUp, setSlowPopUp] = useState<boolean>(false);
 	const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>(
 		setTimeout(() => null, 0)
 	);
@@ -89,7 +91,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 					"emoji"
 				);
 				const emojiSplit = text.split(/(<:.*?:>+)/g);
-				console.log(emojiSplit, emojis);
 				emojiSplit.forEach(async (el) => {
 					if (
 						el.startsWith("<:") &&
@@ -122,7 +123,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	);
 
 	useEffect(() => {
-		console.log(user.partPermissions);
 		setIsDisabled(
 			!user.partPermissions.includes("SEND_MESSAGES") ||
 				channel.id == "" ||
@@ -190,14 +190,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		setInput("");
 		if (chatInput.length) {
 			setInput("");
-			await updateDoc(
+			// TODO: Can't afford this for now (limiting usage)
+			/* await updateDoc(
 				doc(db, "groups", channel.idG, "channels", channel.id),
 				{
 					lastMessageAt: serverTimestamp(),
 				}
 			).catch((err) =>
 				console.log("Update lastMessagedAt Error: " + err)
-			);
+			); */
 
 			await addDoc(messagesCollection, {
 				content: chatInput,
@@ -205,13 +206,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 				createdAt: serverTimestamp(),
 				edited: false,
 				emojiBucket: arrayUnion(...emojiBucket),
-			})
-				.catch((err) => {
-					console.log(err);
-					// Create rejection is surely caused by trying to send too many messages
-					setSlowDownCount(slowDownCount + 1);
-				})
-				.then((_) => scrollToBottom());
+			}).then((_) => scrollToBottom());
 
 			// Update the time at which the last message was sent by the user
 			// Rate limit user
@@ -227,7 +222,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
 	async function sendMessageMobile() {
 		userTyping();
-		if (slowDownCount > 1 || popUp.isOpen) {
+		if (slowPopUp || popUp.isOpen) {
 			// Don't update input if sending messages too quickly or pop-up is open
 			textAreaRef.current!.blur();
 		} else if (channel.id != "") {
@@ -255,7 +250,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	async function checkMessage(e: React.KeyboardEvent<HTMLTextAreaElement>) {
 		userTyping();
 		await getEmojis(input);
-		if (slowDownCount > 1 || popUp.isOpen) {
+		if (slowPopUp || popUp.isOpen) {
 			// Don't update input if sending messages too quickly or pop-up is open
 			e.preventDefault();
 			textAreaRef.current!.blur();
@@ -289,9 +284,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
 	return (
 		<div className={styles.chat_input}>
-			{slowDownCount > 1 ? (
+			{slowPopUp ? (
 				<InformationPopUp
-					onOk={() => wait(1500).then(() => setSlowDownCount(0))}
+					onOk={() => wait(1500).then(() => setSlowPopUp(false))}
 				>
 					<h3>Slow down!</h3>
 					<p>You are trying to send messages too quickly.</p>

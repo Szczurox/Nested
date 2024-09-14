@@ -277,7 +277,11 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 		setMessages([]);
 		setTypingUsers([]);
 
-		if (channel.id != "" && channel.idG != "@dms") {
+		if (
+			channel.id != "" &&
+			channel.idG != "@dms" &&
+			channel.type != "LOADING"
+		) {
 			setAutoScroll(true);
 			setCanScrollToBottom(false);
 			setIsTyping(false);
@@ -293,7 +297,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 		}
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [channel.id, channel.idG, user.uid]);
+	}, [channel.id, channel.idG, user.uid, channel.type]);
 
 	// Message at the bottom that show file upload progress
 	const fileUploading = (fileData: FileUploadingData) => {
@@ -395,7 +399,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 						</Message>
 					);
 				})}
-				<div></div>
 			</div>
 			<ChatInput
 				isMobile={isMobile}

@@ -1,6 +1,6 @@
 import { useState, createContext, useContext } from "react";
 
-export type ChannelType = "VOICE" | "TEXT";
+export type ChannelType = "VOICE" | "TEXT" | "LOADING";
 
 export type Channel = {
 	id: string; // Channel ID
@@ -67,8 +67,8 @@ export default function ChannelContextComp({ children }: any) {
 		name: "",
 		idC: "",
 		nameC: "",
-		idG: "H8cO2zBjCyJYsmM4g5fv",
-		type: "TEXT",
+		idG: "@dms",
+		type: "LOADING",
 	});
 
 	const setChannelData = (
@@ -101,7 +101,7 @@ export default function ChannelContextComp({ children }: any) {
 			idC: idC ? idC : channel.idC,
 			nameC: nameC ? nameC : channel.nameC,
 			idG: idG,
-			type: "TEXT",
+			type: "LOADING",
 		});
 	};
 

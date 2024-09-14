@@ -1,6 +1,5 @@
 import styles from "../styles/Auth.module.scss";
 import React, { useEffect, useState } from "react";
-import { useUser } from "context/userContext";
 import { useRouter } from "next/router";
 import { getAuth, signOut } from "firebase/auth";
 import { useSearchParams } from "next/navigation";
