@@ -167,7 +167,7 @@ const Members: React.FC<MembersProps> = ({ isMobile, show, qu }) => {
 					count={filterMembers("none").length}
 				/>
 			)}
-			{members.length != 0 && !filter && (
+			{filterMembers("online").length != 0 && !filter && (
 				<MemberCount
 					name="Online"
 					count={filterMembers("online").length}
@@ -184,7 +184,7 @@ const Members: React.FC<MembersProps> = ({ isMobile, show, qu }) => {
 					isVisible={filterMember("online", member.id)}
 				/>
 			))}
-			{members.length != 0 && !filter && (
+			{filterMembers("offline").length != 0 && !filter && (
 				<MemberCount
 					name="Hidden"
 					count={filterMembers("offline").length}

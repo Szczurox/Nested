@@ -225,7 +225,11 @@ const Chat = () => {
 					<Members
 						isMobile={isMobile}
 						qu={membersQuery}
-						show={showMembers && variant === "server"}
+						show={
+							showMembers &&
+							variant === "server" &&
+							channel.type != "VOICE"
+						}
 					/>
 				</div>
 			</div>

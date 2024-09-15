@@ -28,7 +28,6 @@ import { wait } from "components/utils/utils";
 import DotsLoading from "components/animations/DotsLoading";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { ChatInput } from "./ChatInput";
-import VoiceChannel from "./VoiceChannel";
 
 interface ChatMainProps {
 	isNavbarOpen: boolean;
@@ -151,7 +150,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 		return onSnapshot(qMes, (querySnapshot: any) => {
 			querySnapshot.docChanges().forEach((change: any) => {
 				if (isFirstBatch && change.type === "added") scrollToBottom();
-
 				if (change.type === "removed" || change.type === "modified") {
 					setMessages((messages) => [
 						...messages.filter((el) => el.id !== change.doc.id),
