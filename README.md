@@ -3,13 +3,15 @@
 [![Lines of code](https://tokei.rs/b1/github/Szczurox/Nested)](https://github.com/Szczurox/Nested)
 [![License](https://img.shields.io/github/license/Szczurox/Nested?service=github)](https://github.com/Szczurox/Nested/blob/main/LICENSE)
 
-This is a [Next.js](https://nextjs.org/) chat app with [Firebase](https://firebase.google.com/)-based backend bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+This is a [Next.js](https://nextjs.org/) chat app with [Firebase](https://firebase.google.com/)-based backend.
 
-The project is still in development.
+The project is still in development. 
+
+You can view the live version at [nested.party](https://nested.party/)
 
 ## Getting Started
 
-Firstly, install all needed dependencies:
+Firstly, install all of the needed dependencies by running:
 
 ```bash
 npm install
@@ -39,11 +41,11 @@ To get Firebase up and running create a project by going to [Firebase console](h
 
 Then create [Firestore Database](https://firebase.google.com/docs/firestore) and [Cloud Storage](https://firebase.google.com/docs/storage).
 
-After you are done go to the project settings, scroll down and copy firebase config.
+When you are done, go to the project settings, scroll down, and copy firebase config.
 
-Then go to service accounts category in the setting, get the firebase service account email and generate new private key.
+Then go to **Service accounts** category in the settings, copy the firebase service account email, and generate a new private key.
 
-After that create [.env.local](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) file with this structure
+After that, create [`.env.local`](https://nextjs.org/docs/pages/building-your-application/configuring/environment-variables) file with this structure:
 
 ```env
 NEXT_PUBLIC_FIREBASE_API_KEY=[apiKey]
@@ -52,22 +54,45 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=[projectId]
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=[storageBucket]
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=[messagingSenderId]
 NEXT_PUBLIC_FIREBASE_APP_ID=[appId]
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=[measurementId]
 FIREBASE_CLIENT_EMAIL=[serviceAccountEmail]
 FIREBASE_PRIVATE_KEY=[privateKey]
 ```
 
+Make sure to set up [Firestore Authentication](https://firebase.google.com/docs/auth) and select Email/Password as a sign-in provider in **Sign-in method** tab.
+
+You should also change the action URL in **Templates > Edit template > Customise action URL** to `https://(yourdomain)/verify` after you host the app.
+
+## Livekit
+
+This project uses [LiveKit](https://docs.livekit.io/realtime/quickstarts/nextjs-13/) for real time audio calls.
+
+Check out [LiveKit's documentation](https://docs.livekit.io/home/) for more details
+
+### Getting started with LiveKIt
+
+To get audio calls to work go to [LiveKit's Cloud](https://cloud.livekit.io/) and create a project.
+
+After creating the project, go to **Settings > Keys** and create a new key.
+
+Copy generated values and paste them in `.env.local` file as:
+
+```env
+NEXT_PUBLIC_LIVEKIT_URL=[WEBSOCKET URL]
+LIVEKIT_API_KEY=[API KEY]
+LIVEKIT_API_SECRET=[SECRET KEY]
+```
+
 ## Deploy on Vercel
 
-This project uses [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) for hosting and serverless functions.
+This project uses [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) for hosting and some serverless functions.
 
 Check out [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
-Make sure to add `FIREBASE_CLIENT_EMAIL` and `FIREBASE_PRIVATE_KEY` to Vercel's enviroment variables in Settings > Environment Variables
+Make sure to add all of the environment variables to Vercel's enviroment variables in **Settings > Environment Variables**.
 
 ## Side notes
 
--   If you want you can deploy the app to [Firebase](https://firebase.google.com/docs/hosting) or any other host instead of Vercel, it shouldn't affect performance.
+-   If you want you can deploy the app to [Firebase](https://firebase.google.com/docs/hosting) or any other host instead of Vercel; it shouldn't affect performance.
 
 -   If you prefer [yarn](https://yarnpkg.com/) over [npm](https://www.npmjs.com/) after creating `package-lock.json` you can remove `package.json` and use:
 
