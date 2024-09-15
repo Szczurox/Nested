@@ -121,7 +121,7 @@ const Chat = () => {
 
 	useEffect(() => {
 		async function checkMember() {
-			if (user.uid != "" && user.verified && channel.idG != "@dms") {
+			if (user.uid != "" && channel.idG != "@dms") {
 				setShowMembers(false);
 
 				const memberDoc = doc(
@@ -131,12 +131,14 @@ const Chat = () => {
 					"members",
 					user.uid
 				);
+
 				const unsub = onSnapshot(memberDoc, (docSnapMember) => {
-					if (
-						docSnapMember.exists() &&
-						docSnapMember.data().permissions &&
-						docSnapMember.data().lastViewed
-					) {
+					if (docSnapMember.exists()) {
+						console.log(docSnapMember.data().permissions);
+						setMemberData(
+							docSnapMember.data().nickname,
+							docSnapMember.data().permissions
+						);
 						if (docSnapMember.data().lastViewed) {
 							router.push(
 								`/chat/${channel.idG}/${
@@ -152,10 +154,6 @@ const Chat = () => {
 								{ shallow: true }
 							);
 						}
-						setMemberData(
-							docSnapMember.data().nickname,
-							docSnapMember.data().permissions
-						);
 					}
 				});
 
