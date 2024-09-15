@@ -11,6 +11,7 @@ export const Verify: React.FC<{}> = ({}) => {
 	const searchParams = useSearchParams();
 
 	const router = useRouter();
+
 	useEffect(() => {
 		const mod: string = searchParams.get("mode") as string;
 		const action: string = searchParams.get("oobCode") as string;
