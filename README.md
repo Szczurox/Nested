@@ -62,26 +62,6 @@ Make sure to set up [Firestore Authentication](https://firebase.google.com/docs/
 
 You should also change the action URL in **Templates > Edit template > Customise action URL** to `https://(yourdomain)/verify` after you host the app.
 
-## Livekit
-
-This project uses [LiveKit](https://docs.livekit.io/realtime/quickstarts/nextjs-13/) for real time audio calls.
-
-Check out [LiveKit's documentation](https://docs.livekit.io/home/) for more details
-
-### Getting started with LiveKIt
-
-To get audio calls to work go to [LiveKit's Cloud](https://cloud.livekit.io/) and create a project.
-
-After creating the project, go to **Settings > Keys** and create a new key.
-
-Copy generated values and paste them in `.env.local` file as:
-
-```env
-NEXT_PUBLIC_LIVEKIT_URL=[WEBSOCKET URL]
-LIVEKIT_API_KEY=[API KEY]
-LIVEKIT_API_SECRET=[SECRET KEY]
-```
-
 ## Deploy on Vercel
 
 This project uses [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) for hosting and some serverless functions.
