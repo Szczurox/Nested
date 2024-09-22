@@ -21,8 +21,10 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 				error: "Missing authorization token",
 			});
 
+		// Verify that user is authenticated
 		const decodedToken = await admin.auth().verifyIdToken(token);
 
+		// Verify that user can join this channel
 		const doc = await db
 			.collection("groups")
 			.doc(group)
@@ -37,14 +39,13 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 				error: "Unauthorized",
 			});
 
+		// Sign JWT token and return it to client
 		if (decodedToken) {
 			const token = jwt.sign(
 				{
 					uid: decodedToken.uid,
 					username: doc.data()!.nickname,
-					avatar: doc.data()!.avatar,
 					channel: channel,
-					group: group,
 				},
 				process.env.SOCKET_SECRET_KEY!,
 				{}

@@ -15,21 +15,39 @@ interface VoiceChannelProps {}
 const PeerVideo: React.FC<{ peer: SimplePeer.Instance }> = ({ peer }) => {
 	const ref = useRef<HTMLVideoElement>(null);
 
+	const [nick, setNick] = useState<string>("");
+
+	const { user } = useUser();
+
 	useEffect(() => {
-		console.log("I exist");
+		console.log("I exist!");
+
 		peer.on("stream", (stream) => {
 			console.log(stream);
 			ref.current!.srcObject = stream;
 		});
-		peer.on("data", (data) => {});
+
+		peer.on("connect", () => {
+			if (user.serverNick) peer.send(user.serverNick as string);
+			else peer.send(user.nick as string);
+		});
+
+		peer.on("data", (data) => {
+			console.log(data);
+			setNick(data);
+		});
 	}, []);
 
-	return <video playsInline autoPlay ref={ref} />;
+	return (
+		<>
+			{nick}
+			<video playsInline autoPlay ref={ref} />
+		</>
+	);
 };
 
 export const VoiceChannel: React.FC<VoiceChannelProps> = ({}) => {
 	const [isConnected, setIsConnected] = useState<boolean>(false);
-	const [transport, setTransport] = useState<string>("N/A");
 	const [socket, setSocket] = useState<Socket | undefined>(undefined);
 	const [peers, setPeers] = useState<Peer[]>([]);
 
@@ -48,9 +66,8 @@ export const VoiceChannel: React.FC<VoiceChannelProps> = ({}) => {
 			initiator: true,
 			trickle: false,
 			stream,
+			objectMode: true,
 		});
-
-		console.log(peer);
 
 		peer.on("signal", (signal) => {
 			console.log(clientToSignal, callerID);
@@ -69,17 +86,16 @@ export const VoiceChannel: React.FC<VoiceChannelProps> = ({}) => {
 		callerID: string,
 		stream: MediaStream
 	) {
-		if (!socket) return;
-
 		const peer = new SimplePeer({
 			initiator: false,
 			trickle: false,
 			stream,
+			objectMode: true,
 		});
 
 		peer.on("signal", (signal: any) => {
 			console.log(incomingSignal, callerID);
-			socket.emit("returning signal", { signal, callerID });
+			socket!.emit("returning signal", { signal, callerID });
 		});
 
 		peer.signal(incomingSignal);
@@ -121,7 +137,6 @@ export const VoiceChannel: React.FC<VoiceChannelProps> = ({}) => {
 		function onConnect() {
 			if (!socket) return;
 			setIsConnected(true);
-			setTransport(socket.io.engine.transport.name);
 
 			navigator.mediaDevices
 				.getUserMedia({
@@ -133,11 +148,10 @@ export const VoiceChannel: React.FC<VoiceChannelProps> = ({}) => {
 
 					let gotClients = false;
 
-					if (gotClients == false) socket.emit("get clients", "");
+					if (gotClients == false) socket.emit("get clients");
 
 					socket.on("all clients", (clients: string[]) => {
 						gotClients = true;
-						console.log(clients, socket!.id);
 						if (clients && clients.length > 0) {
 							const getPeers: Peer[] = [];
 							clients.forEach((clientID: string) => {
@@ -147,7 +161,6 @@ export const VoiceChannel: React.FC<VoiceChannelProps> = ({}) => {
 										socket!.id!,
 										stream!
 									);
-									console.log(peer);
 									getPeers.push({
 										id: clientID,
 										peer: peer,
@@ -159,46 +172,61 @@ export const VoiceChannel: React.FC<VoiceChannelProps> = ({}) => {
 								}
 							});
 							setPeers(getPeers);
-							console.log(getPeers, peers);
 						}
 					});
 
 					socket.on("joined", (payload) => {
-						console.log(payload);
+						console.log("user joined the channel");
 
 						const peer = addPeer(
 							payload.signal,
-							payload.callerID,
+							payload.id,
 							stream!
 						);
 
 						peersRef.current.push({
-							id: payload.callerID,
-							peer: peer!,
+							id: payload.id,
+							peer: peer,
 						});
 
-						console.log(peer, payload.callerID);
+						console.log(peer, payload.id);
 
 						setPeers((peers) => [
 							...peers,
-							{ id: payload.callerID, peer: peer! },
+							{ id: payload.id, peer: peer },
 						]);
 					});
 
 					socket.on("returned signal", (payload) => {
-						console.log(payload);
+						console.log("signaling response");
 						const item = peersRef.current.find(
 							(p) => p.id === payload.id
 						);
-						console.log(peers, item);
 						if (item) item.peer.signal(payload.signal);
+					});
+
+					socket.on("left", (payload) => {
+						console.log(payload, peersRef);
+						const item = peersRef.current.find(
+							(p) => p.id == payload.id
+						);
+						console.log(item);
+						if (item) {
+							const channelPeers = [...peers];
+							peersRef.current.splice(
+								peersRef.current.indexOf(item),
+								1
+							);
+							channelPeers.splice(channelPeers.indexOf(item), 1);
+							setPeers(channelPeers);
+							item.peer.destroy();
+						}
 					});
 				});
 		}
 
 		function onDisconnect() {
 			setIsConnected(false);
-			setTransport("N/A");
 		}
 
 		socket.on("connect", onConnect);
@@ -208,23 +236,17 @@ export const VoiceChannel: React.FC<VoiceChannelProps> = ({}) => {
 			socket.disconnect();
 			socket.off("connect", onConnect);
 			socket.off("disconnect", onDisconnect);
+			peers.forEach((peer) => {
+				peer.peer.destroy();
+			});
 		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [socket]);
 
-	function disconnect() {
-		if (!socket) return;
-		console.log(socket.id);
-		socket.disconnect();
-		setSocket(undefined);
-	}
-
 	return (
 		<div>
 			<p>Status: {isConnected ? "connected" : "disconnected"}</p>
-			<p>Transport: {transport}</p>
-			<button onClick={() => disconnect()}>Leave</button>
 			<video muted ref={userVideoRef} autoPlay playsInline />
 			{user.serverNick ? user.serverNick : user.nick}
 			{peers.map((peer) => {
