@@ -69,7 +69,7 @@ const InputPopUp: React.FC<InputPopUpProps> = ({
 		};
 	}, [input]);
 
-	const createChannelKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+	const confirmKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key == "Enter") {
 			e.preventDefault();
 			onConfirm(input);
@@ -90,7 +90,7 @@ const InputPopUp: React.FC<InputPopUpProps> = ({
 							maxRows={1}
 							maxLength={100}
 							onChange={(e) => setInput(e.target.value)}
-							onKeyDown={(e) => createChannelKey(e)}
+							onKeyDown={confirmKey}
 							placeholder={placeHolder}
 							ref={textAreaRef}
 							onFocus={(e) =>

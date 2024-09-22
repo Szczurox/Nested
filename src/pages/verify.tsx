@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { getAuth, signOut } from "firebase/auth";
 import { useSearchParams } from "next/navigation";
-import { createFirebaseApp } from "firebase-utils/clientApp";
+import { createFirebaseApp } from "global-utils/clientApp";
 import { handleVerifyEmail } from "components/utils/actionQueries";
 
 export const Verify: React.FC<{}> = ({}) => {

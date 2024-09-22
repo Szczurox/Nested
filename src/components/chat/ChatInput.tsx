@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import UploadFile, { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/components/chat/ChatInput.module.scss";
 import SendIcon from "@mui/icons-material/Send";
-import { createFirebaseApp } from "../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../global-utils/clientApp";
 import {
 	addDoc,
 	arrayUnion,

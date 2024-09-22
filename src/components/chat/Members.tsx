@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "../../styles/components/chat/Members.module.scss";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import { useChannel } from "context/channelContext";
-import { createFirebaseApp } from "../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../global-utils/clientApp";
 import {
 	getFirestore,
 	collection,

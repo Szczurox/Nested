@@ -73,8 +73,11 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 						height={0}
 					/>
 				) : (
-					<video className={styles.upload_file_media} controls>
-						<source src={fileUrl} />
+					<video
+						className={styles.upload_file_media}
+						src={fileUrl}
+						controls
+					>
 						Your browser does not support the video files, {fileUrl}
 						.
 					</video>

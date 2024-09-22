@@ -4,7 +4,7 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import { Avatar } from "@mui/material";
 import { useEffect, useState } from "react";
 import { onSnapshot, doc, getFirestore } from "firebase/firestore";
-import { createFirebaseApp } from "firebase-utils/clientApp";
+import { createFirebaseApp } from "global-utils/clientApp";
 import { useRouter } from "next/router";
 
 interface NavbarGroupProps {

@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { getAuth, getIdToken, onAuthStateChanged } from "firebase/auth";
-import { createFirebaseApp } from "../firebase-utils/clientApp";
+import { createFirebaseApp } from "../global-utils/clientApp";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import moment from "moment";
 
@@ -19,7 +19,7 @@ export type User = {
 	avatar: string;
 	nick: string;
 	serverNick: string;
-	voiceRoom: string;
+	room: string;
 	verified: boolean;
 	muted: boolean;
 	deafened: boolean;
@@ -40,7 +40,7 @@ export interface UserContextType {
 	setMemberData: (nickname: string, permissions: MemberPermission[]) => void;
 	addPartPerms: (permissions: ParticipantPermission[]) => void;
 	setActivity: (lastActive: number) => void;
-	setVoiceData: (muted: boolean, deafened: boolean) => void;
+	setVoiceData: (muted: boolean, deafened: boolean, room?: string) => void;
 	loadingUser: boolean;
 }
 
@@ -52,7 +52,7 @@ export const UserContext = createContext<UserContextType>({
 		avatar: "",
 		nick: "",
 		serverNick: "",
-		voiceRoom: "",
+		room: "",
 		muted: false,
 		deafened: false,
 		verified: false,
@@ -82,7 +82,7 @@ export default function UserContextComp({ children }: any) {
 		avatar: "",
 		nick: "",
 		serverNick: "",
-		voiceRoom: "",
+		room: "",
 		verified: false,
 		muted: false,
 		deafened: false,
@@ -138,11 +138,12 @@ export default function UserContextComp({ children }: any) {
 		});
 	};
 
-	const setVoiceData = (muted: boolean, deafened: boolean) => {
+	const setVoiceData = (muted: boolean, deafened: boolean, room?: string) => {
 		setUser({
 			...user,
 			muted: muted,
 			deafened: deafened,
+			room: room ? room : user.room,
 		});
 	};
 
@@ -192,7 +193,7 @@ export default function UserContextComp({ children }: any) {
 						avatar: "",
 						nick: "",
 						serverNick: "",
-						voiceRoom: "",
+						room: "",
 						verified: false,
 						muted: false,
 						deafened: false,

@@ -4,7 +4,7 @@ import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import { NavbarGroup } from "./navbar/NavbarGroup";
 import { NavbarVariant } from "./Navbar";
 import { useChannel } from "context/channelContext";
-import { createFirebaseApp } from "firebase-utils/clientApp";
+import { createFirebaseApp } from "global-utils/clientApp";
 import {
 	getFirestore,
 	collection,

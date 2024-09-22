@@ -4,7 +4,7 @@ import Message, { MessageData } from "./Message";
 import { FileUploadingData } from "./UploadFile";
 import styles from "../../styles/Chat.module.scss";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
-import { createFirebaseApp } from "../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../global-utils/clientApp";
 import {
 	collection,
 	doc,

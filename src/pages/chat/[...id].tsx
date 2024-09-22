@@ -6,7 +6,7 @@ import { useRouter } from "next/router";
 import { ChatMain } from "components/chat/ChatMain";
 import Loading from "components/Loading";
 import { wait } from "components/utils/utils";
-import { createFirebaseApp } from "../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../global-utils/clientApp";
 import {
 	doc,
 	getDoc,
@@ -20,7 +20,6 @@ import Members from "components/chat/Members";
 import ChatHeader from "components/chat/ChatHeader";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { NavbarGroups } from "components/chat/NavbarGroups";
-import moment from "moment";
 import VoiceChannel from "components/chat/VoiceChannel";
 
 const Chat = () => {
@@ -29,8 +28,8 @@ const Chat = () => {
 	const [membersQuery, setMembersQuery] = useState<string>(""); // Show members navbar
 	const [variant, setVariant] = useState<NavbarVariant>("server");
 
-	const { user, loadingUser, setMemberData, setActivity } = useUser();
-	const { channel, setGroupData, setChannelData } = useChannel();
+	const { user, loadingUser, setMemberData } = useUser();
+	const { channel, setGroupData } = useChannel();
 
 	const router = useRouter();
 	const { id } = router.query;
@@ -56,24 +55,6 @@ const Chat = () => {
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id, router.isReady]);
-
-	useEffect(() => {
-		const interval = setInterval(async () => {
-			if (
-				moment().valueOf() > user.lastActive + 150000 &&
-				user.uid != ""
-			) {
-				console.log("ping!", user.uid);
-				setActivity(moment().valueOf());
-				// TODO: disabled for now to reduce server load
-				/* await updateDoc(doc(db, "profile", user.uid), {
-					lastActive: serverTimestamp(),
-				}); */
-			}
-		}, 1500);
-
-		return () => clearInterval(interval);
-	});
 
 	// Route to login if user is not authenticated
 	useEffect(() => {
@@ -134,7 +115,6 @@ const Chat = () => {
 
 				const unsub = onSnapshot(memberDoc, (docSnapMember) => {
 					if (docSnapMember.exists()) {
-						console.log(docSnapMember.data().permissions);
 						setMemberData(
 							docSnapMember.data().nickname,
 							docSnapMember.data().permissions

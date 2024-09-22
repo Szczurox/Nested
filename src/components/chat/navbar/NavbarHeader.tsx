@@ -9,7 +9,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import { useChannel } from "context/channelContext";
 import InputPopUp from "../popup/InputPopUp";
 import { useUser } from "context/userContext";
-import { createFirebaseApp } from "../../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../../global-utils/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 
 export type NavbarHeaderVariant = "server" | "dms";

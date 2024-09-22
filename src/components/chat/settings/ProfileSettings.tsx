@@ -5,7 +5,7 @@ import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { wait } from "components/utils/utils";
 import { useUser } from "context/userContext";
-import { createFirebaseApp } from "firebase-utils/clientApp";
+import { createFirebaseApp } from "global-utils/clientApp";
 import {
 	getFirestore,
 	getDoc,

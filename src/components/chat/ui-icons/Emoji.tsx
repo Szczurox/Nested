@@ -12,7 +12,7 @@ import {
 	Timestamp,
 } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
-import { createFirebaseApp } from "../../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../../global-utils/clientApp";
 import Image from "next/image";
 
 export interface EmojiData {

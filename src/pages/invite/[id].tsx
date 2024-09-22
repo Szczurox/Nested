@@ -2,7 +2,7 @@ import styles from "../../styles/Auth.module.scss";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
-import { createFirebaseApp } from "firebase-utils/clientApp";
+import { createFirebaseApp } from "global-utils/clientApp";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "context/userContext";
 

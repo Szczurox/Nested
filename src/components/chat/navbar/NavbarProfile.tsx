@@ -12,7 +12,7 @@ import {
 	ref,
 	uploadBytesResumable,
 } from "firebase/storage";
-import { createFirebaseApp } from "../../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../../global-utils/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import Settings from "../Settings";

@@ -13,7 +13,7 @@ import {
 	setDoc,
 	updateDoc,
 } from "firebase/firestore";
-import { createFirebaseApp } from "../../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../../global-utils/clientApp";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -107,7 +107,11 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 				"participants",
 				user.uid
 			),
-			{ lastActive: serverTimestamp() }
+			{
+				lastActive: serverTimestamp(),
+				nickname: user.serverNick ? user.serverNick : user.nick,
+				avatar: user.avatar,
+			}
 		);
 	};
 
@@ -131,7 +135,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 				if (channel.id == id) addPartPerms(perms);
 			setChannelData(id, channelType, name);
 			if (channel.type != channelType) {
-				updateLastViewed();
+				if (channelType == "TEXT") updateLastViewed();
 				updateLastActive();
 			}
 		} else if (channel.id != id) setIsActive(false);

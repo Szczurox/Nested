@@ -4,7 +4,7 @@ import ScreenPopUp from "./popup/ScreenPopUp";
 import CloseIcon from "@mui/icons-material/Close";
 import { getAuth, signOut } from "firebase/auth";
 import { ProfileSettings } from "./settings/ProfileSettings";
-import { createFirebaseApp } from "firebase-utils/clientApp";
+import { createFirebaseApp } from "global-utils/clientApp";
 
 export interface SettingsProps {
 	isMobile: boolean;
