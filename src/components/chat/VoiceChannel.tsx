@@ -14,7 +14,7 @@ interface Peer {
 }
 
 const PeerAudio: React.FC<{ peer: SimplePeer.Instance }> = ({ peer }) => {
-	const ref = useRef<HTMLVideoElement>(null);
+	const ref = useRef<HTMLAudioElement>(null);
 
 	useEffect(() => {
 		console.log("I exist!");
@@ -92,6 +92,8 @@ export const VoiceChannel: React.FC = ({}) => {
 		if (!voice.room) return;
 
 		const newSocket = async () => {
+			setCurrentVoiceState(false, voice.muted, voice.deafened);
+
 			setStream(
 				await navigator.mediaDevices.getUserMedia({
 					video: false,
@@ -129,6 +131,8 @@ export const VoiceChannel: React.FC = ({}) => {
 		if (socket.connected) onConnect();
 
 		async function updateConnected() {
+			setCurrentVoiceState(true, voice.muted, voice.deafened);
+
 			await updateDoc(
 				doc(
 					db,
@@ -148,8 +152,6 @@ export const VoiceChannel: React.FC = ({}) => {
 		function onConnect() {
 			if (!socket) return;
 			setIsConnected(true);
-			setCurrentVoiceState(true, voice.muted, voice.deafened);
-			updateConnected();
 
 			let gotClients = false;
 
@@ -157,7 +159,8 @@ export const VoiceChannel: React.FC = ({}) => {
 
 			socket.on("all clients", (clients: string[]) => {
 				gotClients = true;
-				if (clients && clients.length > 0) {
+				console.log(clients, clients.length);
+				if (clients && clients.length > 1) {
 					const getPeers: Peer[] = [];
 					clients.forEach((clientID: string) => {
 						if (clientID != socket!.id) {
@@ -177,11 +180,11 @@ export const VoiceChannel: React.FC = ({}) => {
 						}
 					});
 					setPeers(getPeers);
-				}
+				} else updateConnected();
 			});
 
 			socket.on("joined", (payload) => {
-				console.log("user joined the channel");
+				console.log("user joined the channel", payload.id);
 
 				const peer = addPeer(payload.signal, payload.id, stream!);
 
@@ -197,6 +200,7 @@ export const VoiceChannel: React.FC = ({}) => {
 
 			socket.on("returned signal", (payload) => {
 				console.log("signaling response");
+				updateConnected();
 				const item = peersRef.current.find((p) => p.id === payload.id);
 				if (item) item.peer.signal(payload.signal);
 			});
@@ -204,13 +208,13 @@ export const VoiceChannel: React.FC = ({}) => {
 			socket.on("left", (payload) => {
 				console.log(payload, peersRef);
 				const item = peersRef.current.find((p) => p.id == payload.id);
-				console.log(item);
+				console.log(item, payload.id, peersRef.current);
 				if (item) {
+					item.peer.destroy();
 					const channelPeers = [...peers];
 					peersRef.current.splice(peersRef.current.indexOf(item), 1);
 					channelPeers.splice(channelPeers.indexOf(item), 1);
 					setPeers(channelPeers);
-					item.peer.destroy();
 				}
 			});
 		}
@@ -226,9 +230,15 @@ export const VoiceChannel: React.FC = ({}) => {
 			socket.disconnect();
 			socket.off("connect", onConnect);
 			socket.off("disconnect", onDisconnect);
+			socket.off("returned signal");
+			socket.off("joined");
+			socket.off("all clients");
 			peers.forEach((peer) => {
 				peer.peer.destroy();
 			});
+			peersRef.current = [];
+			setPeers([]);
+			setSocket(undefined);
 		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps

@@ -78,7 +78,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
 	const { channel, setChannelData } = useChannel();
 	const { user, addPartPerms } = useUser();
-	const { setCurrentRoom } = useVoice();
+	const { voice, setCurrentRoom, setCurrentVoiceState } = useVoice();
 
 	const router = useRouter();
 

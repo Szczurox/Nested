@@ -57,7 +57,12 @@ export default function VoiceContextComp({ children }: any) {
 	};
 
 	const setCurrentRoom = (room: string, roomName: string) => {
-		setVoice({ ...voice, room: room, roomName: roomName });
+		setVoice({
+			...voice,
+			room: room,
+			roomName: roomName,
+			connected: room == "" ? false : voice.connected,
+		});
 	};
 
 	return (
