@@ -14,17 +14,17 @@ import {
 } from "firebase/storage";
 import { createFirebaseApp } from "../../../global-utils/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
-import { useChannel } from "context/channelContext";
 import Settings from "../Settings";
 import { Avatar } from "@mui/material";
+import { useVoice } from "context/voiceContext";
 
 interface NavbarProfileProps {
 	isMobile: boolean;
 }
 
 export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
-	const { user, setUserData, setVoiceData } = useUser();
-	const { channel } = useChannel();
+	const { user, setUserData } = useUser();
+	const { voice, setCurrentVoiceState } = useVoice();
 
 	const [showSettings, setShowSettings] = useState<boolean>(false);
 	const [avatar, setAvatar] = useState<string>(
@@ -103,11 +103,11 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 	};
 
 	const toggleMute = () => {
-		setVoiceData(!user.muted, user.deafened);
+		setCurrentVoiceState(voice.connected, !voice.muted, voice.deafened);
 	};
 
 	const toggleDeaf = () => {
-		setVoiceData(user.muted, !user.deafened);
+		setCurrentVoiceState(voice.connected, voice.muted, !voice.deafened);
 	};
 
 	return (
@@ -145,13 +145,13 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 				</div>
 				<div className={styles.navbar_profile_icons}>
 					<span className={styles.navbar_profile_icon}>
-						{user.muted ? (
+						{voice.muted ? (
 							<MicOffIcon onClick={(_) => toggleMute()} />
 						) : (
 							<MicIcon onClick={(_) => toggleMute()} />
 						)}
 					</span>
-					{user.deafened ? (
+					{voice.deafened ? (
 						<span className={styles.navbar_profile_icon}>
 							<HeadsetOffIcon onClick={(_) => toggleDeaf()} />
 						</span>

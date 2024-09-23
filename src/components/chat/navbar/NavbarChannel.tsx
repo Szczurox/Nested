@@ -4,14 +4,17 @@ import styles from "../../../styles/components/chat/navbar/NavbarChannel.module.
 import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
 import ContextMenuElement from "../contextmenu/ContextMenuElement";
 import {
+	collection,
 	deleteDoc,
 	doc,
 	getDoc,
 	getFirestore,
 	onSnapshot,
+	query,
 	serverTimestamp,
 	setDoc,
 	updateDoc,
+	where,
 } from "firebase/firestore";
 import { createFirebaseApp } from "../../../global-utils/clientApp";
 import EditIcon from "@mui/icons-material/Edit";
@@ -27,6 +30,13 @@ import { addChannel } from "components/utils/channelQueries";
 import { ParticipantPermission, useUser } from "context/userContext";
 import { useRouter } from "next/router";
 import moment, { Moment } from "moment";
+import { useVoice } from "context/voiceContext";
+
+interface ChannelCallerData {
+	id: string;
+	name: string;
+	avatar: string;
+}
 
 interface NavbarChannelProps {
 	name: string;
@@ -61,12 +71,14 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	const [everyPerms, setEveryPerms] = useState<ParticipantPermission[]>([]);
 	// Participant permissions
 	const [partPerms, setPartPerms] = useState<ParticipantPermission[]>([]);
+	const [callers, setCallers] = useState<ChannelCallerData[]>([]);
 	// 0 - None  /  1 - Delete  /  2 - Change Name  /  3 - Create
 	const [showPopUp, setShowPopUp] = useState<number>(0);
 	const [lastActive, setLastActive] = useState<Moment>();
 
 	const { channel, setChannelData } = useChannel();
 	const { user, addPartPerms } = useUser();
+	const { setCurrentRoom } = useVoice();
 
 	const router = useRouter();
 
@@ -76,15 +88,16 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	const app = createFirebaseApp();
 	const db = getFirestore(app!);
 
-	const partRef = doc(
+	const participantsRef = collection(
 		db,
 		"groups",
 		channel.idG,
 		"channels",
 		id,
-		"participants",
-		user.uid
+		"participants"
 	);
+
+	const partRef = doc(participantsRef, user.uid);
 
 	const everyoneRef = doc(
 		db,
@@ -97,51 +110,42 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	);
 
 	const updateLastActive = async () => {
-		await updateDoc(
-			doc(
-				db,
-				"groups",
-				channel.idG,
-				"channels",
-				id,
-				"participants",
-				user.uid
-			),
-			{
-				lastActive: serverTimestamp(),
-				nickname: user.serverNick ? user.serverNick : user.nick,
-				avatar: user.avatar,
-			}
-		);
+		await updateDoc(partRef, {
+			lastActive: serverTimestamp(),
+			nickname: user.serverNick ? user.serverNick : user.nick,
+			avatar: user.avatar,
+		});
 	};
 
 	const updateLastViewed = async () => {
-		console.log("rar");
 		setLastActive(moment());
 		await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
 			lastViewed: id,
 		});
 	};
 
+	// Update currently active channel
 	useEffect(() => {
 		if (
 			channel.id == id &&
 			user.uid != "" &&
-			(channel.name != name || channel.type != channelType)
+			(channel.name != name || channel.type != channelType) &&
+			channelType != "VOICE"
 		) {
 			setIsActive(true);
 			const perms = everyPerms.concat(partPerms);
-			if (perms.length && perms != null)
-				if (channel.id == id) addPartPerms(perms);
+			if (perms.length && perms != null && channel.id == id)
+				addPartPerms(perms);
 			setChannelData(id, channelType, name);
 			if (channel.type != channelType) {
-				if (channelType == "TEXT") updateLastViewed();
+				updateLastViewed();
 				updateLastActive();
 			}
 		} else if (channel.id != id) setIsActive(false);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [channel.id, id, user.uid, name, channel.name, channel.type]);
 
+	// Participant data
 	useEffect(() => {
 		const participantSnapshot = () => {
 			return onSnapshot(partRef, (doc) => {
@@ -206,6 +210,54 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	}, [user.uid, id]);
 
 	useEffect(() => {
+		if (channelType != "VOICE") return;
+
+		async function connectedSnapshot() {
+			const partQuery = query(
+				participantsRef,
+				where("connected", "==", "connected")
+			);
+			return onSnapshot(partQuery, (snap) => {
+				snap.docChanges().forEach((change) => {
+					if (
+						change.type === "removed" ||
+						change.type === "modified"
+					) {
+						setCallers((callers) =>
+							[
+								...callers.filter(
+									(el) => el.id !== change.doc.id
+								),
+							].sort((x, y) => {
+								return x.name > y.name ? 1 : -1;
+							})
+						);
+					}
+					if (change.type === "added" || change.type === "modified") {
+						setCallers((callers) =>
+							[
+								...callers.filter(
+									(el) => el.id !== change.doc.id
+								),
+								{
+									id: change.doc.id,
+									name: change.doc.data().nickname,
+									avatar: change.doc.data().avatar,
+								},
+							].sort((x, y) => {
+								return x.name > y.name ? 1 : -1;
+							})
+						);
+					}
+				});
+			});
+		}
+
+		connectedSnapshot();
+	}, []);
+
+	// Check if user can display channel
+	useEffect(() => {
 		if (
 			everyPerms.includes("VIEW_CHANNEL") ||
 			partPerms.includes("VIEW_CHANNEL")
@@ -243,6 +295,10 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	const createChannel = async (channelName: string = "") => {
 		setShowPopUp(0);
 		await addChannel(channelName, channel.idG, idC);
+	};
+
+	const handleChannelJoin = () => {
+		setCurrentRoom(id, name);
 	};
 
 	return showChannel ? (
@@ -328,17 +384,21 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
 			<div
 				className={
-					isActive
-						? `${styles.channel} ${styles.active}`
-						: isUnread
-						? `${styles.channel} ${styles.unread}`
+					channelType == "TEXT"
+						? isActive
+							? `${styles.channel} ${styles.active}`
+							: isUnread
+							? `${styles.channel} ${styles.unread}`
+							: `${styles.channel} ${styles.inactive}`
 						: `${styles.channel} ${styles.inactive}`
 				}
 				id={id}
 				onClick={() =>
-					router.push(`/chat/${channel.idG}/${id}`, undefined, {
-						shallow: true,
-					})
+					channelType == "TEXT"
+						? router.push(`/chat/${channel.idG}/${id}`, undefined, {
+								shallow: true,
+						  })
+						: handleChannelJoin()
 				}
 				onContextMenu={(e) => menuRef.current?.handleContextMenu(e)}
 				ref={elementRef}
@@ -354,6 +414,9 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 					)}
 					<div className={styles.channel_name}>{name}</div>
 				</h4>
+				{callers.map((caller) => (
+					<p key={caller.id}>{caller.name}</p>
+				))}
 			</div>
 		</>
 	) : null;

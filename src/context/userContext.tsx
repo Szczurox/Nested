@@ -19,10 +19,7 @@ export type User = {
 	avatar: string;
 	nick: string;
 	serverNick: string;
-	room: string;
 	verified: boolean;
-	muted: boolean;
-	deafened: boolean;
 	lastActive: number;
 	permissions: MemberPermission[];
 	partPermissions: ParticipantPermission[];
@@ -40,7 +37,6 @@ export interface UserContextType {
 	setMemberData: (nickname: string, permissions: MemberPermission[]) => void;
 	addPartPerms: (permissions: ParticipantPermission[]) => void;
 	setActivity: (lastActive: number) => void;
-	setVoiceData: (muted: boolean, deafened: boolean, room?: string) => void;
 	loadingUser: boolean;
 }
 
@@ -52,9 +48,6 @@ export const UserContext = createContext<UserContextType>({
 		avatar: "",
 		nick: "",
 		serverNick: "",
-		room: "",
-		muted: false,
-		deafened: false,
 		verified: false,
 		lastActive: 0,
 		permissions: [],
@@ -70,7 +63,6 @@ export const UserContext = createContext<UserContextType>({
 		undefined,
 	addPartPerms: (_permissions: ParticipantPermission[]) => undefined,
 	setActivity: (_lastActive: number) => undefined,
-	setVoiceData: (_muted: boolean, _deafened: boolean) => undefined,
 	loadingUser: false,
 });
 
@@ -82,10 +74,7 @@ export default function UserContextComp({ children }: any) {
 		avatar: "",
 		nick: "",
 		serverNick: "",
-		room: "",
 		verified: false,
-		muted: false,
-		deafened: false,
 		lastActive: 0,
 		permissions: [],
 		partPermissions: [],
@@ -138,15 +127,6 @@ export default function UserContextComp({ children }: any) {
 		});
 	};
 
-	const setVoiceData = (muted: boolean, deafened: boolean, room?: string) => {
-		setUser({
-			...user,
-			muted: muted,
-			deafened: deafened,
-			room: room ? room : user.room,
-		});
-	};
-
 	useEffect(() => {
 		const interval = setInterval(async () => {
 			const auth = await getAuth().currentUser;
@@ -193,10 +173,7 @@ export default function UserContextComp({ children }: any) {
 						avatar: "",
 						nick: "",
 						serverNick: "",
-						room: "",
 						verified: false,
-						muted: false,
-						deafened: false,
 						lastActive: 0,
 						permissions: [],
 						partPermissions: [],
@@ -220,7 +197,6 @@ export default function UserContextComp({ children }: any) {
 				setMemberData,
 				addPartPerms: setPartPerms,
 				setActivity,
-				setVoiceData,
 				loadingUser,
 			}}
 		>

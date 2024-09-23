@@ -9,7 +9,6 @@ import { wait } from "components/utils/utils";
 import { createFirebaseApp } from "../../global-utils/clientApp";
 import {
 	doc,
-	getDoc,
 	getFirestore,
 	onSnapshot,
 	serverTimestamp,
@@ -20,7 +19,6 @@ import Members from "components/chat/Members";
 import ChatHeader from "components/chat/ChatHeader";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { NavbarGroups } from "components/chat/NavbarGroups";
-import VoiceChannel from "components/chat/VoiceChannel";
 
 const Chat = () => {
 	const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
@@ -189,18 +187,14 @@ const Chat = () => {
 					/>
 				</div>
 				<div className={styles.chat_flexbox}>
-					{channel.type == "VOICE" ? (
-						<VoiceChannel />
-					) : (
-						<ChatMain
-							isNavbarOpen={showNavbar}
-							hideNavbar={() => {
-								setShowNavbar(false);
-								if (isMobile) setShowMembers(false);
-							}}
-							isMembersOpen={showMembers}
-						/>
-					)}
+					<ChatMain
+						isNavbarOpen={showNavbar}
+						hideNavbar={() => {
+							setShowNavbar(false);
+							if (isMobile) setShowMembers(false);
+						}}
+						isMembersOpen={showMembers}
+					/>
 
 					<Members
 						isMobile={isMobile}

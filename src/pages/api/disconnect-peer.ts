@@ -1,9 +1,8 @@
 import { NextApiResponse, NextApiRequest } from "next";
 import { getAdmin } from "global-utils/firebase-server";
-import jwt from "jsonwebtoken";
 
 export default async function GET(req: NextApiRequest, res: NextApiResponse) {
-	if (req.method === "GET") {
+	if (req.method === "POST") {
 		const admin = getAdmin()!;
 		const db = admin?.firestore()!;
 
@@ -25,37 +24,25 @@ export default async function GET(req: NextApiRequest, res: NextApiResponse) {
 		const decodedToken = await admin.auth().verifyIdToken(token);
 
 		// Verify that user can join this channel
-		const doc = await db
+		const docRef = db
 			.collection("groups")
 			.doc(group)
 			.collection("channels")
 			.doc(channel)
 			.collection("participants")
-			.doc(decodedToken.uid)
-			.get();
+			.doc(decodedToken.uid);
 
-		if (!doc.exists || !doc.data())
+		// Sign JWT token and return it to client
+		try {
+			await docRef.update({ connected: "disconnected" });
+		} catch {
 			return res.status(400).send({
 				error: "Unauthorized",
 			});
-
-		// Sign JWT token and return it to client
-		if (decodedToken) {
-			const jwtToken = jwt.sign(
-				{
-					token: token,
-					uid: decodedToken.uid,
-					username: doc.data()!.nickname,
-					channel: channel,
-					group: group,
-				},
-				process.env.SOCKET_SECRET_KEY!,
-				{}
-			);
-
-			return res.json({
-				token: jwtToken,
-			});
 		}
+
+		return res.json({
+			disconnected: true,
+		});
 	}
 }
