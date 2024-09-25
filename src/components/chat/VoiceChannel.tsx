@@ -28,6 +28,24 @@ const PeerAudio: React.FC<{ peer: SimplePeer.Instance }> = ({ peer }) => {
 	return <audio playsInline autoPlay ref={ref} />;
 };
 
+const iceServers = [
+	{ urls: "stun:stun.l.google.com:19302" },
+	{ urls: "stun:stun.l.google.com:5349" },
+	{ urls: "stun:stun1.l.google.com:3478" },
+	{ urls: "stun:stun1.l.google.com:5349" },
+	{ urls: "stun:stun2.l.google.com:19302" },
+	{ urls: "stun:stun2.l.google.com:5349" },
+	{ urls: "stun:stun3.l.google.com:3478" },
+	{ urls: "stun:stun3.l.google.com:5349" },
+	{ urls: "stun:stun4.l.google.com:19302" },
+	{ urls: "stun:stun4.l.google.com:5349" },
+	{
+		urls: "turn:global.relay.metered.ca:80",
+		username: process.env.NEXT_PUBLIC_TURN_USERNAME,
+		credential: process.env.NEXT_PUBLIC_TURN_PASSWORD,
+	},
+];
+
 export const VoiceChannel: React.FC = ({}) => {
 	const [isConnected, setIsConnected] = useState<boolean>(false);
 	const [socket, setSocket] = useState<Socket | undefined>(undefined);
@@ -53,6 +71,7 @@ export const VoiceChannel: React.FC = ({}) => {
 			trickle: false,
 			stream,
 			objectMode: true,
+			config: { iceServers: iceServers },
 		});
 
 		peer.on("signal", (signal) => {
@@ -76,6 +95,7 @@ export const VoiceChannel: React.FC = ({}) => {
 			trickle: false,
 			stream,
 			objectMode: true,
+			config: { iceServers: iceServers },
 		});
 
 		peer.on("signal", (signal: any) => {
