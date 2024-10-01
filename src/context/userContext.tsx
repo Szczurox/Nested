@@ -37,6 +37,7 @@ export interface UserContextType {
 	setMemberData: (nickname: string, permissions: MemberPermission[]) => void;
 	addPartPerms: (permissions: ParticipantPermission[]) => void;
 	setActivity: (lastActive: number) => void;
+	setProfileData: (username: string, avatar?: string, nick?: string) => void;
 	loadingUser: boolean;
 }
 
@@ -63,6 +64,8 @@ export const UserContext = createContext<UserContextType>({
 		undefined,
 	addPartPerms: (_permissions: ParticipantPermission[]) => undefined,
 	setActivity: (_lastActive: number) => undefined,
+	setProfileData: (_username: string, _avatar?: string, _nick?: string) =>
+		undefined,
 	loadingUser: false,
 });
 
@@ -127,6 +130,19 @@ export default function UserContextComp({ children }: any) {
 		});
 	};
 
+	const setProfileData = (
+		username: string,
+		avatar?: string,
+		nick?: string
+	) => {
+		setUser({
+			...user,
+			username: username,
+			avatar: avatar ? avatar : user.avatar,
+			nick: nick ? nick : user.nick,
+		});
+	};
+
 	useEffect(() => {
 		const interval = setInterval(async () => {
 			const auth = await getAuth().currentUser;
@@ -158,7 +174,9 @@ export default function UserContextComp({ children }: any) {
 							token: token,
 							uid: uid,
 							username: docSnap.data().username,
-							avatar: docSnap.data().avatar,
+							avatar: docSnap.data().avatar
+								? docSnap.data().avatar
+								: "/UserAvatar.png",
 							nick: docSnap.data().nick
 								? docSnap.data().nick
 								: "",
@@ -197,6 +215,7 @@ export default function UserContextComp({ children }: any) {
 				setMemberData,
 				addPartPerms: setPartPerms,
 				setActivity,
+				setProfileData,
 				loadingUser,
 			}}
 		>

@@ -46,7 +46,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	const [isDisabled, setIsDisabled] = useState<boolean>(false);
 	const [emojiBucket, setEmojiBucket] = useState<string[]>([]); // Array of all the emoji name|link used in the message
 	const [emojis, setEmojis] = useState<string[]>([]); // Array of all saved samojis
-	const [slowDown, setSlowDown] = useState<Moment>();
 	const [slowPopUp, setSlowPopUp] = useState<boolean>(false);
 	const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>(
 		setTimeout(() => null, 0)
@@ -68,15 +67,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		"channels",
 		channel.id ? channel.id : "None",
 		"messages"
-	);
-
-	const participantsCollection = collection(
-		db,
-		"groups",
-		channel.idG,
-		"channels",
-		channel.id ? channel.id : "None",
-		"participants"
 	);
 
 	const textAreaSizeLimit = 2000;
@@ -126,9 +116,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		setIsDisabled(
 			!user.partPermissions.includes("SEND_MESSAGES") ||
 				channel.id == "" ||
-				channel.idG == "@dms"
+				channel.idG == "@dms" ||
+				popUp.isOpen
 		);
-	}, [channel.id, user.partPermissions, user.permissions, channel.idG]);
+	}, [
+		channel.id,
+		user.partPermissions,
+		user.permissions,
+		channel.idG,
+		popUp,
+	]);
 
 	useEffect(() => {
 		setInputOnChannels((inputs) => [
@@ -148,8 +145,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		const pasted = (e: ClipboardEvent) => {
 			if (
 				e.clipboardData!.files[0] == undefined &&
-				channel.id != "" &&
-				!popUp.isOpen &&
+				!isDisabled &&
 				document.activeElement?.tagName != "TEXTAREA"
 			) {
 				let text: string = e.clipboardData!.getData("TEXT");
@@ -162,14 +158,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		return () => {
 			document.removeEventListener("paste", pasted);
 		};
-	}, [input, popUp.isOpen, channel.id, getEmojis]);
+	}, [input, channel.id, getEmojis]);
 
 	useEffect(() => {
 		const handleKeyPress = (e: KeyboardEvent) => {
 			if (
 				document.activeElement?.tagName != "TEXTAREA" &&
 				document.activeElement?.tagName != "INPUT" &&
-				!popUp.isOpen &&
+				!isDisabled &&
 				textAreaRef.current &&
 				((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
 			)
@@ -180,7 +176,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		return () => {
 			document.removeEventListener("keydown", handleKeyPress);
 		};
-	}, [popUp.isOpen]);
+	}, [isDisabled]);
 
 	async function sendMessage() {
 		// Get current input and reset textarea instantly, before message gets fully sent

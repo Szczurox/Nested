@@ -6,14 +6,6 @@ import HeadsetOffIcon from "@mui/icons-material/HeadsetOff";
 import SettingsIcon from "@mui/icons-material/Settings";
 import styles from "../../../styles/components/chat/navbar/NavbarProfile.module.scss";
 import { useUser } from "context/userContext";
-import {
-	getDownloadURL,
-	getStorage,
-	ref,
-	uploadBytesResumable,
-} from "firebase/storage";
-import { createFirebaseApp } from "../../../global-utils/clientApp";
-import { doc, getFirestore, updateDoc } from "firebase/firestore";
 import Settings from "../Settings";
 import { Avatar } from "@mui/material";
 import { useVoice } from "context/voiceContext";
@@ -23,84 +15,10 @@ interface NavbarProfileProps {
 }
 
 export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
-	const { user, setUserData } = useUser();
+	const { user } = useUser();
 	const { voice, setCurrentVoiceState } = useVoice();
 
 	const [showSettings, setShowSettings] = useState<boolean>(false);
-	const [avatar, setAvatar] = useState<string>(
-		user.avatar ? user.avatar : "/UserAvatar.png"
-	);
-
-	const storage = getStorage();
-	const app = createFirebaseApp();
-	const db = getFirestore(app!);
-
-	async function fileSubmit(url: string) {
-		await updateDoc(doc(db, "profile", user.uid), {
-			avatar: url,
-		})
-			.catch((err) => console.log("User Error: " + err))
-			.then(async () => {
-				var storedGroups: string[] = localStorage.getItem("groups")
-					? JSON.parse(localStorage.getItem("groups")!)
-					: [];
-				storedGroups.forEach(async (el) => {
-					await updateDoc(
-						doc(db, "groups", el, "members", user.uid),
-						{
-							avatar: url,
-						}
-					).catch((err) => console.log("Member Error: " + err));
-				});
-			});
-	}
-
-	const uploadAvatar = (file: File) => {
-		// Allow images and gifs less than 2MB as a pfp
-		if (
-			file.type.substring(0, 5) == "image" &&
-			file.size / 1024 / 1024 < 2
-		) {
-			const fileRef = ref(storage, `profiles/${user.uid}`);
-			const uploadTask = uploadBytesResumable(fileRef, file!);
-			uploadTask.on(
-				"state_changed",
-				(snapshot) => {
-					const progress =
-						(snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-					console.log("Upload is " + progress + "% done");
-					switch (snapshot.state) {
-						case "paused":
-							console.log("Upload is paused");
-							break;
-						case "running":
-							console.log("Upload is running");
-							break;
-					}
-				},
-				(error) => {
-					console.log(error);
-				},
-				() => {
-					getDownloadURL(uploadTask.snapshot.ref).then(
-						(downloadURL) => {
-							console.log("Avatar uploaded! ", downloadURL);
-							fileSubmit(downloadURL).then(() => {
-								setAvatar(downloadURL);
-								setUserData(
-									user.token,
-									user.uid,
-									user.username,
-									downloadURL,
-									user.nick
-								);
-							});
-						}
-					);
-				}
-			);
-		}
-	};
 
 	const toggleMute = () => {
 		setCurrentVoiceState(voice.connected, !voice.muted, voice.deafened);
@@ -120,24 +38,13 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 			) : null}
 			<div className={styles.navbar_profile}>
 				<div className={styles.navbar_avatar}>
-					<label>
-						<input
-							type="file"
-							value=""
-							className={styles.navbar_upload_avatar}
-							onChange={(e) => {
-								if (e.target.files)
-									uploadAvatar(e.target.files[0]);
-							}}
-						/>
-						<Avatar src={avatar} />
-					</label>
+					<Avatar src={user.avatar} />
 				</div>
 				<div className={styles.navbar_profile_info}>
 					<h3>{user.nick}</h3>
 					<p
 						onClick={(_) =>
-							navigator.clipboard.writeText("@" + user.username)
+							navigator.clipboard.writeText(user.username)
 						}
 					>
 						@{user.username}
