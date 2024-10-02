@@ -16,8 +16,9 @@ import {
 	setDoc,
 } from "firebase/firestore";
 import { Avatar } from "@mui/material";
-import InformationPopUp from "../popup/InformationPopUp";
 import { uploadAvatar } from "components/utils/storageQueries";
+import InformationPopUp from "../popup/InformationPopUp";
+import EditIcon from "@mui/icons-material/Edit";
 
 export const ProfileSettings: React.FC = ({}) => {
 	const SignupSchema = Yup.object().shape({
@@ -36,6 +37,7 @@ export const ProfileSettings: React.FC = ({}) => {
 
 	const [changed, setChanged] = useState<boolean>(false);
 	const [saved, setSaved] = useState<boolean>(false);
+	const [showEdit, setShowEdit] = useState<boolean>(false);
 	const [display, setDisplay] = useState<string>(user.nick);
 	const [name, setName] = useState<string>(user.username);
 	const [filePopUp, setFilePopUp] = useState<string>("");
@@ -72,10 +74,7 @@ export const ProfileSettings: React.FC = ({}) => {
 				nick: values.nickname,
 			});
 			setProfileData(user.username, user.avatar, values.nickname);
-		} else if (avatar != user.avatar && file && user.uid) {
-			uploadAvatar(file, user.uid);
-			setProfileData(user.username, avatar);
-		}
+		} else if (file) uploadAvatar(file, user.uid);
 		setChanged(false);
 		setSaved(true);
 	};
@@ -116,7 +115,12 @@ export const ProfileSettings: React.FC = ({}) => {
 			)}
 			<div className={profStyles.profile_container}>
 				<div className={profStyles.profile}>
-					<div className={profStyles.avatar}>
+					{showEdit && <EditIcon className={profStyles.edit} />}
+					<div
+						className={profStyles.avatar}
+						onMouseEnter={() => setShowEdit(true)}
+						onMouseLeave={() => setShowEdit(false)}
+					>
 						<label>
 							<input
 								type="file"
@@ -171,7 +175,7 @@ export const ProfileSettings: React.FC = ({}) => {
 										name="nickname"
 										placeholder={user.nick}
 										type="nickname"
-										autocomplete="off"
+										autoComplete="off"
 										onInput={(
 											e: React.FormEvent<HTMLInputElement>
 										) => handleChange("nickname", e)}
@@ -195,7 +199,7 @@ export const ProfileSettings: React.FC = ({}) => {
 										name="username"
 										placeholder={user.username}
 										type="username"
-										autocomplete="off"
+										autoComplete="off"
 										onInput={(
 											e: React.FormEvent<HTMLInputElement>
 										) => handleChange("username", e)}
@@ -208,14 +212,14 @@ export const ProfileSettings: React.FC = ({}) => {
 								>
 									{changed ? <DotsLoading /> : "Save"}
 								</button>
-								{saved ? (
+								{saved && (
 									<p className={styles.data_saved}>
 										Saved successfully!
 										{errors.username &&
 											touched.username &&
 											" - " + errors.username}
 									</p>
-								) : null}
+								)}
 							</Form>
 						</div>
 					)}

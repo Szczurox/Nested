@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import MicIcon from "@mui/icons-material/Mic";
 import MicOffIcon from "@mui/icons-material/MicOff";
 import HeadsetIcon from "@mui/icons-material/Headset";
@@ -18,7 +18,12 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 	const { user } = useUser();
 	const { voice, setCurrentVoiceState } = useVoice();
 
+	const [avatar, setAvatar] = useState<string>(user.avatar);
 	const [showSettings, setShowSettings] = useState<boolean>(false);
+
+	useEffect(() => {
+		setAvatar(user.avatar);
+	}, [user.avatar]);
 
 	const toggleMute = () => {
 		setCurrentVoiceState(voice.connected, !voice.muted, voice.deafened);
@@ -30,15 +35,15 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 
 	return (
 		<>
-			{showSettings ? (
+			{showSettings && (
 				<Settings
 					onCancel={() => setShowSettings(false)}
 					isMobile={isMobile}
 				/>
-			) : null}
+			)}
 			<div className={styles.navbar_profile}>
 				<div className={styles.navbar_avatar}>
-					<Avatar src={user.avatar} />
+					<Avatar src={avatar} />
 				</div>
 				<div className={styles.navbar_profile_info}>
 					<h3>{user.nick}</h3>
@@ -59,11 +64,11 @@ export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
 						)}
 					</span>
 					{voice.deafened ? (
-						<span className={styles.navbar_profile_icon}>
+						<span className={styles.slighly_off}>
 							<HeadsetOffIcon onClick={(_) => toggleDeaf()} />
 						</span>
 					) : (
-						<span className={styles.slighly_off}>
+						<span className={styles.navbar_profile_icon}>
 							<HeadsetIcon onClick={(_) => toggleDeaf()} />
 						</span>
 					)}

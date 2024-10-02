@@ -21,9 +21,10 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { NavbarGroups } from "components/chat/NavbarGroups";
 
 const Chat = () => {
-	const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
-	const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
-	const [membersQuery, setMembersQuery] = useState<string>(""); // Show members navbar
+	const [showBookmarks, setShowBookmarks] = useState<boolean>(true);
+	const [showNavbar, setShowNavbar] = useState<boolean>(true);
+	const [showMembers, setShowMembers] = useState<boolean>(true);
+	const [membersQuery, setMembersQuery] = useState<string>(""); // Search qury for member search
 	const [variant, setVariant] = useState<NavbarVariant>("server");
 
 	const { user, loadingUser, setMemberData } = useUser();
@@ -135,7 +136,7 @@ const Chat = () => {
 					}
 				});
 
-				setShowMembers(true);
+				if (!isMobile) setShowMembers(true);
 
 				return unsub;
 			} else return () => {};
@@ -184,6 +185,7 @@ const Chat = () => {
 						isNavbarOpen={showNavbar ? true : false}
 						setShowNavbar={(show) => setShowNavbar(show)}
 						variant={variant}
+						onBookmarks={(show) => setShowBookmarks(show)}
 					/>
 				</div>
 				<div className={styles.chat_flexbox}>

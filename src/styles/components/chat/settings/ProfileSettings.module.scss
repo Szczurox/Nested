@@ -9,6 +9,7 @@
 	padding: 10px;
 	padding-left: 16px;
 	border-radius: 6px;
+	position: relative;
 
 	.profile_info {
 		padding-left: 16px;
@@ -19,14 +20,29 @@
 		}
 	}
 
+	.edit {
+		transform: translate(200%, 0%);
+		top: 35px;
+		left: -10px;
+		position: absolute;
+		color: white;
+		z-index: 100;
+	}
+
 	.avatar {
 		position: relative;
 		cursor: pointer;
 		font-size: 180px;
 		width: "auto";
 		height: "auto";
+
 		img {
+			filter: brightness(100%);
 			cursor: pointer;
+
+			&:hover {
+				filter: brightness(50%);
+			}
 		}
 		.upload_avatar {
 			opacity: 0;

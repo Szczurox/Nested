@@ -297,8 +297,12 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		await addChannel(channelName, channel.idG, idC);
 	};
 
-	const handleChannelJoin = () => {
-		setCurrentRoom(id, name);
+	const handleChannelClick = () => {
+		if (channelType == "TEXT")
+			router.push(`/chat/${channel.idG}/${id}`, undefined, {
+				shallow: true,
+			});
+		else setCurrentRoom(id, name);
 	};
 
 	return showChannel ? (
@@ -393,13 +397,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 						: `${styles.channel} ${styles.inactive}`
 				}
 				id={id}
-				onClick={() =>
-					channelType == "TEXT"
-						? router.push(`/chat/${channel.idG}/${id}`, undefined, {
-								shallow: true,
-						  })
-						: handleChannelJoin()
-				}
+				onClick={() => handleChannelClick()}
 				onContextMenu={(e) => menuRef.current?.handleContextMenu(e)}
 				ref={elementRef}
 			>

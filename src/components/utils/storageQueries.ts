@@ -29,10 +29,10 @@ async function fileSubmit(url: string, uid: string) {
 
 export const uploadAvatar = async (file: File, uid: string) => {
 	const storage = getStorage();
-
 	const fileRef = ref(storage, `profiles/${uid}`);
 	const uploadTask = uploadBytesResumable(fileRef, file!);
-	uploadTask.on(
+
+	await uploadTask.on(
 		"state_changed",
 		(snapshot) => {
 			const progress =
@@ -51,10 +51,12 @@ export const uploadAvatar = async (file: File, uid: string) => {
 			console.log(error);
 		},
 		() => {
-			getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-				console.log("Avatar uploaded! ", downloadURL);
-				fileSubmit(downloadURL, uid);
-			});
+			getDownloadURL(uploadTask.snapshot.ref).then(
+				async (downloadURL) => {
+					console.log("Avatar uploaded! ", downloadURL);
+					await fileSubmit(downloadURL, uid);
+				}
+			);
 		}
 	);
 };

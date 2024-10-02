@@ -34,7 +34,7 @@ export const NavbarGroup: React.FC<NavbarGroupProps> = ({ id, isMobile }) => {
 
 	useEffect(() => {
 		if (channel.idG == id && name != channel.nameG) {
-			setGroupData(id, channel.id, name);
+			setGroupData(id, channel.id, name, icon);
 			setIsSelected(true);
 		} else setIsSelected(false);
 		// eslint-disable-next-line react-hooks/exhaustive-deps

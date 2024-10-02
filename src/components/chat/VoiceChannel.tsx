@@ -23,7 +23,7 @@ const PeerAudio: React.FC<{ peer: SimplePeer.Instance }> = ({ peer }) => {
 			console.log(stream);
 			ref.current!.srcObject = stream;
 		});
-	}, []);
+	}, [peer]);
 
 	return <audio playsInline autoPlay ref={ref} />;
 };
