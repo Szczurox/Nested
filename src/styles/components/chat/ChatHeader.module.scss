@@ -1,20 +1,28 @@
-.chatHeader_navbar_open {
+.chat_header_navbar_open {
 	@media (pointer: none), (pointer: coarse) {
 		z-index: 10;
 		width: 100%;
-		transform: translate(85%, 0px);
+		padding: none;
+		transform: translate(-85%, 0%);
 	}
 }
 
-.chatHeader_members_open {
+.chat_header_members_open {
 	@media (pointer: none), (pointer: coarse) {
 		z-index: 10;
 		width: 100%;
-		transform: translate(-85%, 0px);
+		transform: translate(-85%, 0%);
 	}
 }
 
-.chatHeader {
+.bookmarks {
+	height: 5%;
+	padding: 5px;
+	background-color: #242528;
+	display: flex;
+}
+
+.chat_header {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
@@ -34,7 +42,7 @@
 		text-decoration: none;
 	}
 
-	.chatHeader_menu_icon {
+	.chat_header_menu_icon {
 		svg {
 			margin-left: 7.5px;
 			cursor: pointer;
@@ -42,6 +50,7 @@
 			width: 30px;
 			height: 30px;
 			margin-bottom: 5px;
+			transform: translate(0%, 20%);
 
 			&:hover {
 				color: white;
@@ -49,7 +58,7 @@
 		}
 	}
 
-	.chatHeader_hash {
+	.chat_header_hash {
 		color: grey;
 		font-size: 32px;
 		padding: 10px;
@@ -59,7 +68,7 @@
 		}
 	}
 
-	.chatHeader_left {
+	.chat_header_left {
 		h3 {
 			display: flex;
 			align-items: center;
@@ -71,21 +80,21 @@
 		}
 	}
 
-	.chatHeader_right {
+	.chat_header_right {
 		display: inline-block;
 		align-items: center;
 		justify-content: space-between;
 	}
 
-	.chatHeader_right {
+	.chat_header_right {
 		svg {
 			margin-left: 7.5px;
-			cursor: pointer;
 			margin-right: 7.5px;
-			transform: translate(0%, 30%);
+			cursor: pointer;
+			transform: translate(0%, 20%);
 
 			@media (pointer: none), (pointer: coarse) {
-				&:not(.chatHeader_people) {
+				&:not(.chat_header_people) {
 					display: none;
 				}
 			}
@@ -96,7 +105,7 @@
 		}
 	}
 
-	.chatHeader_search {
+	.chat_header_search {
 		display: inline-block;
 		align-items: center;
 		color: gray;

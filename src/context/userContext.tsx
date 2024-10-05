@@ -1,6 +1,6 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { getAuth, getIdToken, onAuthStateChanged } from "firebase/auth";
-import { createFirebaseApp } from "../firebase-utils/clientApp";
+import { createFirebaseApp } from "../global-utils/clientApp";
 import { doc, getDoc, getFirestore } from "firebase/firestore";
 import moment from "moment";
 
@@ -19,10 +19,7 @@ export type User = {
 	avatar: string;
 	nick: string;
 	serverNick: string;
-	voiceRoom: string;
 	verified: boolean;
-	muted: boolean;
-	deafened: boolean;
 	lastActive: number;
 	permissions: MemberPermission[];
 	partPermissions: ParticipantPermission[];
@@ -40,7 +37,7 @@ export interface UserContextType {
 	setMemberData: (nickname: string, permissions: MemberPermission[]) => void;
 	addPartPerms: (permissions: ParticipantPermission[]) => void;
 	setActivity: (lastActive: number) => void;
-	setVoiceData: (muted: boolean, deafened: boolean) => void;
+	setProfileData: (username: string, avatar?: string, nick?: string) => void;
 	loadingUser: boolean;
 }
 
@@ -52,9 +49,6 @@ export const UserContext = createContext<UserContextType>({
 		avatar: "",
 		nick: "",
 		serverNick: "",
-		voiceRoom: "",
-		muted: false,
-		deafened: false,
 		verified: false,
 		lastActive: 0,
 		permissions: [],
@@ -70,7 +64,8 @@ export const UserContext = createContext<UserContextType>({
 		undefined,
 	addPartPerms: (_permissions: ParticipantPermission[]) => undefined,
 	setActivity: (_lastActive: number) => undefined,
-	setVoiceData: (_muted: boolean, _deafened: boolean) => undefined,
+	setProfileData: (_username: string, _avatar?: string, _nick?: string) =>
+		undefined,
 	loadingUser: false,
 });
 
@@ -82,10 +77,7 @@ export default function UserContextComp({ children }: any) {
 		avatar: "",
 		nick: "",
 		serverNick: "",
-		voiceRoom: "",
 		verified: false,
-		muted: false,
-		deafened: false,
 		lastActive: 0,
 		permissions: [],
 		partPermissions: [],
@@ -138,11 +130,16 @@ export default function UserContextComp({ children }: any) {
 		});
 	};
 
-	const setVoiceData = (muted: boolean, deafened: boolean) => {
+	const setProfileData = (
+		username: string,
+		avatar?: string,
+		nick?: string
+	) => {
 		setUser({
 			...user,
-			muted: muted,
-			deafened: deafened,
+			username: username,
+			avatar: avatar ? avatar : user.avatar,
+			nick: nick ? nick : user.nick,
 		});
 	};
 
@@ -177,7 +174,9 @@ export default function UserContextComp({ children }: any) {
 							token: token,
 							uid: uid,
 							username: docSnap.data().username,
-							avatar: docSnap.data().avatar,
+							avatar: docSnap.data().avatar
+								? docSnap.data().avatar
+								: "/UserAvatar.png",
 							nick: docSnap.data().nick
 								? docSnap.data().nick
 								: "",
@@ -192,10 +191,7 @@ export default function UserContextComp({ children }: any) {
 						avatar: "",
 						nick: "",
 						serverNick: "",
-						voiceRoom: "",
 						verified: false,
-						muted: false,
-						deafened: false,
 						lastActive: 0,
 						permissions: [],
 						partPermissions: [],
@@ -219,7 +215,7 @@ export default function UserContextComp({ children }: any) {
 				setMemberData,
 				addPartPerms: setPartPerms,
 				setActivity,
-				setVoiceData,
+				setProfileData,
 				loadingUser,
 			}}
 		>

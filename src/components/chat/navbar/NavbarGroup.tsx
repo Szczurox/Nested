@@ -4,7 +4,7 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import { Avatar } from "@mui/material";
 import { useEffect, useState } from "react";
 import { onSnapshot, doc, getFirestore } from "firebase/firestore";
-import { createFirebaseApp } from "firebase-utils/clientApp";
+import { createFirebaseApp } from "global-utils/clientApp";
 import { useRouter } from "next/router";
 
 interface NavbarGroupProps {
@@ -34,7 +34,7 @@ export const NavbarGroup: React.FC<NavbarGroupProps> = ({ id, isMobile }) => {
 
 	useEffect(() => {
 		if (channel.idG == id && name != channel.nameG) {
-			setGroupData(id, channel.id, name);
+			setGroupData(id, channel.id, name, icon);
 			setIsSelected(true);
 		} else setIsSelected(false);
 		// eslint-disable-next-line react-hooks/exhaustive-deps

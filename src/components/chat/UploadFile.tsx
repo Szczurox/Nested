@@ -18,7 +18,7 @@ import {
 } from "firebase/firestore";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
-import { createFirebaseApp } from "../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../global-utils/clientApp";
 import UploadFilePopUp from "./popup/UploadFilePopUp";
 import InformationPopUp from "./popup/InformationPopUp";
 

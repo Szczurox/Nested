@@ -1,5 +1,3 @@
-import "server-only";
-
 import * as adm from "firebase-admin";
 
 export const getAdmin = () => {

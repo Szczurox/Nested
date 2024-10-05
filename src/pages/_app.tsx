@@ -3,6 +3,7 @@ import UserProvider from "../context/userContext";
 import ChannelProvider from "../context/channelContext";
 import PopUpProvider from "../context/popUpContext";
 import MessageProvider from "../context/messageContext";
+import VoiceProvider from "../context/voiceContext";
 import { AppProps } from "next/dist/shared/lib/router/router";
 import { useEffect, useState } from "react";
 
@@ -53,20 +54,22 @@ function MyApp({ Component, pageProps, router }: AppProps) {
 	return (
 		<UserProvider>
 			<ChannelProvider>
-				<MessageProvider>
-					<PopUpProvider>
-						<div style={{ height: windowHeight }}>
-							<title>Nested</title>
-							<meta
-								name="viewport"
-								content="initial-scale=1, maximum-scale=1.0, user-scalable=no"
-							/>
-							<link rel="icon" href="/favicon.ico" />
-							<meta name="Nested" content="Chat App" />
-							<Component {...pageProps} />
-						</div>
-					</PopUpProvider>
-				</MessageProvider>
+				<VoiceProvider>
+					<MessageProvider>
+						<PopUpProvider>
+							<div style={{ height: windowHeight }}>
+								<title>Nested</title>
+								<meta
+									name="viewport"
+									content="initial-scale=1, maximum-scale=1.0, user-scalable=no"
+								/>
+								<link rel="icon" href="/favicon.ico" />
+								<meta name="Nested" content="Chat App" />
+								<Component {...pageProps} />
+							</div>
+						</PopUpProvider>
+					</MessageProvider>
+				</VoiceProvider>
 			</ChannelProvider>
 		</UserProvider>
 	);

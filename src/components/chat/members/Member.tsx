@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styles from "../../../styles/components/chat/members/Member.module.scss";
 import { Avatar } from "@mui/material";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
-import { createFirebaseApp } from "../../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../../global-utils/clientApp";
 import moment, { Moment } from "moment";
 import { useUser } from "context/userContext";
 import { useChannel } from "context/channelContext";

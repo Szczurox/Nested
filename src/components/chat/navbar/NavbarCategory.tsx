@@ -7,7 +7,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import styles from "../../../styles/components/chat/navbar/NavbarCategory.module.scss";
 import { ChannelData, NavbarChannel } from "./NavbarChannel";
-import { createFirebaseApp } from "../../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../../global-utils/clientApp";
 import {
 	collection,
 	deleteDoc,

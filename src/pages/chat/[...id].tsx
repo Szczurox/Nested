@@ -6,10 +6,9 @@ import { useRouter } from "next/router";
 import { ChatMain } from "components/chat/ChatMain";
 import Loading from "components/Loading";
 import { wait } from "components/utils/utils";
-import { createFirebaseApp } from "../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../global-utils/clientApp";
 import {
 	doc,
-	getDoc,
 	getFirestore,
 	onSnapshot,
 	serverTimestamp,
@@ -20,17 +19,16 @@ import Members from "components/chat/Members";
 import ChatHeader from "components/chat/ChatHeader";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { NavbarGroups } from "components/chat/NavbarGroups";
-import moment from "moment";
-import VoiceChannel from "components/chat/VoiceChannel";
 
 const Chat = () => {
-	const [showNavbar, setShowNavbar] = useState<boolean>(true); // Show channels navbar
-	const [showMembers, setShowMembers] = useState<boolean>(true); // Show members navbar
-	const [membersQuery, setMembersQuery] = useState<string>(""); // Show members navbar
+	const [showBookmarks, setShowBookmarks] = useState<boolean>(true);
+	const [showNavbar, setShowNavbar] = useState<boolean>(true);
+	const [showMembers, setShowMembers] = useState<boolean>(true);
+	const [membersQuery, setMembersQuery] = useState<string>(""); // Search qury for member search
 	const [variant, setVariant] = useState<NavbarVariant>("server");
 
-	const { user, loadingUser, setMemberData, setActivity } = useUser();
-	const { channel, setGroupData, setChannelData } = useChannel();
+	const { user, loadingUser, setMemberData } = useUser();
+	const { channel, setGroupData } = useChannel();
 
 	const router = useRouter();
 	const { id } = router.query;
@@ -56,24 +54,6 @@ const Chat = () => {
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [id, router.isReady]);
-
-	useEffect(() => {
-		const interval = setInterval(async () => {
-			if (
-				moment().valueOf() > user.lastActive + 150000 &&
-				user.uid != ""
-			) {
-				console.log("ping!", user.uid);
-				setActivity(moment().valueOf());
-				// TODO: disabled for now to reduce server load
-				/* await updateDoc(doc(db, "profile", user.uid), {
-					lastActive: serverTimestamp(),
-				}); */
-			}
-		}, 1500);
-
-		return () => clearInterval(interval);
-	});
 
 	// Route to login if user is not authenticated
 	useEffect(() => {
@@ -134,7 +114,6 @@ const Chat = () => {
 
 				const unsub = onSnapshot(memberDoc, (docSnapMember) => {
 					if (docSnapMember.exists()) {
-						console.log(docSnapMember.data().permissions);
 						setMemberData(
 							docSnapMember.data().nickname,
 							docSnapMember.data().permissions
@@ -157,7 +136,7 @@ const Chat = () => {
 					}
 				});
 
-				setShowMembers(true);
+				if (!isMobile) setShowMembers(true);
 
 				return unsub;
 			} else return () => {};
@@ -206,21 +185,18 @@ const Chat = () => {
 						isNavbarOpen={showNavbar ? true : false}
 						setShowNavbar={(show) => setShowNavbar(show)}
 						variant={variant}
+						onBookmarks={(show) => setShowBookmarks(show)}
 					/>
 				</div>
 				<div className={styles.chat_flexbox}>
-					{channel.type == "VOICE" ? (
-						<VoiceChannel />
-					) : (
-						<ChatMain
-							isNavbarOpen={showNavbar}
-							hideNavbar={() => {
-								setShowNavbar(false);
-								if (isMobile) setShowMembers(false);
-							}}
-							isMembersOpen={showMembers}
-						/>
-					)}
+					<ChatMain
+						isNavbarOpen={showNavbar}
+						hideNavbar={() => {
+							setShowNavbar(false);
+							if (isMobile) setShowMembers(false);
+						}}
+						isMembersOpen={showMembers}
+					/>
 
 					<Members
 						isMobile={isMobile}

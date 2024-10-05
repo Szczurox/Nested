@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import styles from "../../../styles/components/chat/navbar/NavbarHeader.module.scss";
 import FixedMenu, { FixedMenuHandle } from "../contextmenu/FixedMenu";
 import ContextMenuElement from "../contextmenu/ContextMenuElement";
@@ -6,10 +6,10 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import EditIcon from "@mui/icons-material/Edit";
-import { useChannel } from "context/channelContext";
 import InputPopUp from "../popup/InputPopUp";
+import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
-import { createFirebaseApp } from "../../../firebase-utils/clientApp";
+import { createFirebaseApp } from "../../../global-utils/clientApp";
 import { doc, getFirestore, updateDoc } from "firebase/firestore";
 
 export type NavbarHeaderVariant = "server" | "dms";
@@ -58,7 +58,6 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
 					<p>Change nickname on this group</p>
 				</InputPopUp>
 			)}
-
 			<div
 				className={styles.sidebar_header}
 				onClick={(e) =>
@@ -97,7 +96,7 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
 						Copy Group ID
 					</ContextMenuElement>
 				</FixedMenu>
-				<h4>Text Channels</h4>
+				<h3>{channel.nameG}</h3>
 				{showMenu ? <ExpandLessIcon /> : <ExpandMoreIcon />}
 			</div>
 		</>

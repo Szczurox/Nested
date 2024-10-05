@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { NavbarHeader } from "./navbar/NavbarHeader";
 import { NavbarVoice } from "./navbar/NavbarVoice";
 import { NavbarProfile } from "./navbar/NavbarProfile";
 import styles from "../../styles/components/chat/Navbar.module.scss";
 import { NavbarCategories } from "./navbar/NavbarCategories";
+import { useVoice } from "context/voiceContext";
 
 export type NavbarVariant = "server" | "dms";
 
@@ -16,13 +17,13 @@ export const Navbar: React.FC<NavbarProps> = ({
 	isMobile,
 	variant = "server",
 }) => {
-	const [isVoiceConnected, setIsVoiceConnected] = useState(false);
+	const { voice } = useVoice();
 
 	return (
 		<div className={styles.navbar}>
 			<NavbarHeader variant={variant} />
 			<NavbarCategories variant={variant} />
-			{isVoiceConnected ? <NavbarVoice /> : null}
+			{voice.room && <NavbarVoice />}
 			<NavbarProfile isMobile={isMobile} />
 		</div>
 	);

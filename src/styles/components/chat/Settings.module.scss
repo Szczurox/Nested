@@ -25,7 +25,7 @@
 			flex: 0.9;
 		}
 		svg {
-			margin-bottom: 3px;
+			transform: translate(0%, -2%);
 		}
 	}
 
@@ -117,15 +117,17 @@
 			.settings_field {
 				border: none;
 				height: 50px;
+				color: white;
 				width: 100%;
 				padding: 18px 15px 15px 15px;
 				margin-top: none;
 				border-radius: 5px;
 				margin-bottom: 10px;
 				font-size: large;
+				background-color: #46484d;
 				&:focus {
 					outline: none !important;
-					border: 2px solid #35373b;
+					border: 1px solid #35373b;
 				}
 			}
 
@@ -166,7 +168,7 @@
 			flex: 0;
 			color: white;
 			width: 40px;
-			margin-top: 30px;
+			margin-top: 28px;
 			svg {
 				font-size: 40px;
 				cursor: pointer;

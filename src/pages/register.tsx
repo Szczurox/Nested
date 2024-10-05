@@ -17,7 +17,7 @@ import {
 } from "firebase/auth";
 import * as Yup from "yup";
 import { useRouter } from "next/router";
-import { createFirebaseApp } from "../firebase-utils/clientApp";
+import { createFirebaseApp } from "../global-utils/clientApp";
 import { useUser } from "context/userContext";
 import { useSearchParams } from "next/navigation";
 
