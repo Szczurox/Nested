@@ -3,7 +3,7 @@ import styles from "../../../styles/components/chat/popups/UploadFilePopUp.modul
 import ScreenPopUp from "./ScreenPopUp";
 import { useChannel } from "../../../context/channelContext";
 import { TextareaAutosize } from "@mui/material";
-import PopUpButton, { buttonColors } from "./PopUpButton";
+import PopUpButton from "./PopUpButton";
 import { MediaType } from "../UploadFile";
 import Image from "next/image";
 
@@ -36,7 +36,10 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 				((e.ctrlKey && e.code == "KeyA") || !e.ctrlKey)
 			)
 				textAreaRef.current!.focus();
-			if (e.key == "Enter") uploadFile(input);
+			if (e.key == "Enter") {
+				console.log(input);
+				uploadFile(input);
+			}
 		};
 
 		document.addEventListener("keydown", handler, false);
@@ -50,8 +53,11 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 			if (e.clipboardData!.files[0] == undefined && channel.id != "")
 				textAreaRef.current!.focus();
 		};
+
 		document.addEventListener("paste", pasted);
-		return () => document.removeEventListener("paste", pasted);
+		return () => {
+			document.removeEventListener("paste", pasted);
+		};
 	}, [input, channel.id]);
 
 	const uploadFileKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -73,11 +79,8 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 						height={0}
 					/>
 				) : (
-					<video
-						className={styles.upload_file_media}
-						src={fileUrl}
-						controls
-					>
+					<video className={styles.upload_file_media} controls>
+						<source src={fileUrl} />
 						Your browser does not support the video files, {fileUrl}
 						.
 					</video>
