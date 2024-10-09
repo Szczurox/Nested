@@ -1,6 +1,6 @@
 .bookmark {
 	height: 4vh;
-	line-height: 3vh;
+	line-height: 4vh;
 	max-width: 180px;
 	width: 180px;
 	min-width: 10px;
@@ -8,7 +8,6 @@
 	color: white;
 	vertical-align: middle;
 	background-color: #2f3135;
-	padding: 5px;
 	padding-left: 10px;
 	display: flex;
 	flex-direction: row;
@@ -53,7 +52,7 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 		overflow: hidden;
-		flex: 0.9;
+		flex: 0.95;
 	}
 }
 

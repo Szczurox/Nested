@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "../../../styles/components/chat/members/Member.module.scss";
 import { Avatar } from "@mui/material";
 import { doc, getFirestore, onSnapshot } from "firebase/firestore";
@@ -6,6 +6,8 @@ import { createFirebaseApp } from "../../../global-utils/clientApp";
 import moment, { Moment } from "moment";
 import { useUser } from "context/userContext";
 import { useChannel } from "context/channelContext";
+import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
+import MemberMenu from "../contextmenu/MemberMenu";
 
 interface MemberProps {
 	id: string;
@@ -31,6 +33,9 @@ export const Member: React.FC<MemberProps> = ({
 	isVisible,
 	changeActivity,
 }) => {
+	const memberRef = useRef<HTMLDivElement>(null);
+	const menuRef = useRef<ContextMenuHandle>(null);
+
 	const { channel } = useChannel();
 	const { user } = useUser();
 
@@ -101,23 +106,32 @@ export const Member: React.FC<MemberProps> = ({
 	});
 
 	return (
-		<div
-			className={styles.member}
-			id={id}
-			style={{ display: !isVisible ? "none" : undefined }}
-		>
-			<div className={styles.member_avatar}>
-				<Avatar
-					style={{ height: "45px", width: "45px" }}
-					src={trueAvatar ? trueAvatar : "/UserAvatar.png"}
+		<>
+			<div
+				className={styles.member}
+				id={id}
+				style={{ display: !isVisible ? "none" : undefined }}
+				ref={memberRef}
+				onContextMenu={(e) =>
+					menuRef.current?.handleContextMenu(e)
+				}
+			>
+				<div className={styles.member_avatar}>
+					<Avatar
+						style={{ height: "45px", width: "45px" }}
+						src={trueAvatar ? trueAvatar : "/UserAvatar.png"}
+					/>
+				</div>
+				<h4 style={{ color: nameColor ? nameColor : "white" }}>{name}</h4>{" "}
+				<span className={styles.member_activity_background} />
+				<span
+					className={styles.member_activity}
+					style={{ backgroundColor: isActive ? "#00ff40" : "grey" }}
 				/>
 			</div>
-			<h4 style={{ color: nameColor ? nameColor : "white" }}>{name}</h4>{" "}
-			<span className={styles.member_activity_background} />
-			<span
-				className={styles.member_activity}
-				style={{ backgroundColor: isActive ? "#00ff40" : "grey" }}
-			/>
-		</div>
+			<ContextMenu ref={menuRef} parentRef={memberRef}>
+				<MemberMenu uid={id} />
+			</ContextMenu>
+		</>
 	);
 };

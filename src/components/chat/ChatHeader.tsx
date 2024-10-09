@@ -8,7 +8,6 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import MenuIcon from "@mui/icons-material/Menu";
 import MarkunreadMailboxRoundedIcon from "@mui/icons-material/MarkunreadMailboxRounded";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import styles from "../../styles/components/chat/ChatHeader.module.scss";
 import Link from "next/link";
 import { useChannel } from "context/channelContext";
@@ -108,7 +107,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 
 	return (
 		<div className={styles.shadow}>
-			{variant != "dms" && showBookmarks && (
+			{variant != "dms" && showBookmarks && !isMobile && (
 				<motion.div className={styles.bookmarks} animate={controls}>
 					{bookmarks.map((bookmark) => (
 						<Bookmark
