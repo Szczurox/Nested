@@ -25,6 +25,7 @@ import DeleteConfirmPopUp from "./popup/DeleteConfirmPopUp";
 import ContextMenuElement from "./contextmenu/ContextMenuElement";
 import { MediaType } from "./UploadFile";
 import Image from "next/image";
+import MemberMenu from "./contextmenu/MemberMenu";
 
 interface MessageProps {
 	id: string;
@@ -657,12 +658,7 @@ export const Message: React.FC<MessageProps> = ({
 				</ContextMenuElement>
 			</ContextMenu>
 			<ContextMenu ref={userMenuRef} parentRef={profileRef}>
-				<ContextMenuElement
-					onClick={(_) => navigator.clipboard.writeText(userid)}
-				>
-					<ContentCopyIcon />
-					Copy User ID
-				</ContextMenuElement>
+				<MemberMenu uid={userid} />
 			</ContextMenu>
 			{showPopUp ? (
 				<DeleteConfirmPopUp
