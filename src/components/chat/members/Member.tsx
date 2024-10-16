@@ -33,6 +33,9 @@ export const Member: React.FC<MemberProps> = ({
 	isVisible,
 	changeActivity,
 }) => {
+	const memberRef = useRef<HTMLDivElement>(null);
+	const menuRef = useRef<ContextMenuHandle>(null);
+
 	const { channel } = useChannel();
 	const { user } = useUser();
 
@@ -41,9 +44,6 @@ export const Member: React.FC<MemberProps> = ({
 		id == user.uid ? true : false
 	);
 	const [lastActive, setLastActive] = useState<Moment>();
-
-	const memberRef = useRef<HTMLDivElement>(null);
-	const menuRef = useRef<ContextMenuHandle>(null);
 
 	const app = createFirebaseApp();
 	const db = getFirestore(app!);

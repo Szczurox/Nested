@@ -19,6 +19,7 @@ import Members from "components/chat/Members";
 import ChatHeader from "components/chat/ChatHeader";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { NavbarGroups } from "components/chat/NavbarGroups";
+import { motion, useAnimationControls } from "framer-motion";
 
 const Chat = () => {
 	const [showBookmarks, setShowBookmarks] = useState<boolean>(true);
@@ -29,6 +30,8 @@ const Chat = () => {
 
 	const { user, loadingUser, setMemberData } = useUser();
 	const { channel, setGroupData } = useChannel();
+
+	const controls = useAnimationControls();
 
 	const router = useRouter();
 	const { id } = router.query;
@@ -159,6 +162,14 @@ const Chat = () => {
 		setShowNavbar(false);
 	}, [channel.id]);
 
+	function onShowBookmarks(show: boolean) {
+		setShowBookmarks(show);
+		controls.start({
+			minHeight: show ? "87%" : "92%",
+			transition: { duration: 0.3 },
+		});
+	}
+
 	// Render only if user is authenticated
 	return user.uid ? (
 		<div className={styles.app}>
@@ -180,15 +191,16 @@ const Chat = () => {
 			<div className={styles.full_chat_flexbox}>
 				<div className={styles.chat_shadow}>
 					<ChatHeader
+						isMobile={isMobile}
 						onMembers={(q) => onMembers(q)}
 						isMembersOpen={showMembers}
 						isNavbarOpen={showNavbar ? true : false}
 						setShowNavbar={(show) => setShowNavbar(show)}
 						variant={variant}
-						onBookmarks={(show) => setShowBookmarks(show)}
+						onBookmarks={onShowBookmarks}
 					/>
 				</div>
-				<div className={styles.chat_flexbox}>
+				<motion.div className={styles.chat_flexbox} animate={controls}>
 					<ChatMain
 						isNavbarOpen={showNavbar}
 						hideNavbar={() => {
@@ -207,7 +219,7 @@ const Chat = () => {
 							channel.type != "VOICE"
 						}
 					/>
-				</div>
+				</motion.div>
 			</div>
 		</div>
 	) : null;
