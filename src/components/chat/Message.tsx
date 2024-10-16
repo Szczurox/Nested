@@ -25,6 +25,7 @@ import DeleteConfirmPopUp from "./popup/DeleteConfirmPopUp";
 import ContextMenuElement from "./contextmenu/ContextMenuElement";
 import { MediaType } from "./UploadFile";
 import Image from "next/image";
+import MemberMenu from "./contextmenu/MemberMenu";
 
 interface MessageProps {
 	id: string;
@@ -434,7 +435,9 @@ export const Message: React.FC<MessageProps> = ({
 		<div className={styles.message_content} ref={messageContentRef}>
 			<p>
 				{parsedContent.map((el, index) => {
-					if (el[1] == "emoji") {
+					if (el[1] == "text")
+						return <span key={index}>{el[0]}</span>;
+					else if (el[1] == "emoji") {
 						let emoji = mappedEmojiBucket.find(
 							(e) => e[0] == el[0]
 						);
@@ -461,9 +464,7 @@ export const Message: React.FC<MessageProps> = ({
 								/>
 							);
 						else return <span key={index}>{el[0]}</span>;
-					} else if (el[1] == "text")
-						return <span key={index}>{el[0]}</span>;
-					else if (el[1] == "link")
+					} else if (el[1] == "link")
 						return (
 							<a
 								href={el[0]}
@@ -487,16 +488,14 @@ export const Message: React.FC<MessageProps> = ({
 	const fileContent = (inPopUp: boolean) => {
 		return (
 			<>
-				{file ? (
+				{file && (
 					<div className={styles.message_embed_wrapper}>
 						{fileType == "image" ? (
 							<a href={file} target="_blank" rel="noreferrer">
 								<img
 									className={
 										inPopUp
-											? content == ""
-												? styles.message_delete_embed
-												: styles.message_delete_embed_text
+											? styles.message_delete_embed
 											: content != "" || isEditing
 											? styles.message_embed_text
 											: styles.message_embed
@@ -528,14 +527,14 @@ export const Message: React.FC<MessageProps> = ({
 										: null
 								}
 							>
-								Your browser does not support the video files,{" "}
+								Your browser does not support video files
 								{file}.
 							</video>
 						)}
 					</div>
-				) : null}
+				)}
 				{/*  Embeds from links  */}
-				{!inPopUp ? (
+				{!inPopUp && (
 					<>
 						{iframes.map((el, index) => {
 							return (
@@ -579,7 +578,7 @@ export const Message: React.FC<MessageProps> = ({
 							)
 						)}
 					</>
-				) : null}
+				)}
 			</>
 		);
 	};
@@ -657,12 +656,7 @@ export const Message: React.FC<MessageProps> = ({
 				</ContextMenuElement>
 			</ContextMenu>
 			<ContextMenu ref={userMenuRef} parentRef={profileRef}>
-				<ContextMenuElement
-					onClick={(_) => navigator.clipboard.writeText(userid)}
-				>
-					<ContentCopyIcon />
-					Copy User ID
-				</ContextMenuElement>
+				<MemberMenu uid={userid} />
 			</ContextMenu>
 			{showPopUp ? (
 				<DeleteConfirmPopUp

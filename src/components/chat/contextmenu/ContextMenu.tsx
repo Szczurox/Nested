@@ -11,7 +11,7 @@ import styles from "../../../styles/components/chat/contextmenu/ContextMenu.modu
 import { useMediaQuery } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
-interface ContextMenuProps {
+export interface ContextMenuProps {
 	children: ReactNode;
 	parentRef: RefObject<HTMLDivElement> | RefObject<HTMLSpanElement>;
 }

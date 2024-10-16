@@ -116,8 +116,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		setIsDisabled(
 			!user.partPermissions.includes("SEND_MESSAGES") ||
 				channel.id == "" ||
-				channel.idG == "@dms" ||
-				popUp.isOpen
+				channel.idG == "@dms"
 		);
 	}, [
 		channel.id,

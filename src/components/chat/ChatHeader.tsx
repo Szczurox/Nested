@@ -8,14 +8,16 @@ import BookmarkIcon from "@mui/icons-material/Bookmark";
 import MenuIcon from "@mui/icons-material/Menu";
 import MarkunreadMailboxRoundedIcon from "@mui/icons-material/MarkunreadMailboxRounded";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import styles from "../../styles/components/chat/ChatHeader.module.scss";
 import Link from "next/link";
 import { useChannel } from "context/channelContext";
 import { NavbarVariant } from "./Navbar";
 import { Bookmark, BookmarkData } from "./header/Bookmark";
+import { motion, useAnimationControls } from "framer-motion";
+import { wait } from "components/utils/utils";
 
 interface ChatHeaderProps {
+	isMobile: boolean;
 	isNavbarOpen: boolean;
 	isMembersOpen: boolean;
 	variant: NavbarVariant;
@@ -25,6 +27,7 @@ interface ChatHeaderProps {
 }
 
 export const ChatHeader: React.FC<ChatHeaderProps> = ({
+	isMobile,
 	isNavbarOpen,
 	isMembersOpen,
 	variant,
@@ -32,13 +35,18 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 	setShowNavbar,
 	onBookmarks,
 }) => {
+	const [showBookmarks, setShowBookmarks] = useState<boolean>(false);
 	const [bookmarks, setBookmarks] = useState<BookmarkData[]>([]);
 
 	const { channel, setBookmark } = useChannel();
 
-	const isMobile = useMediaQuery("(pointer: none), (pointer: coarse)");
+	const controls = useAnimationControls();
 
-	const onBookmark = (add: boolean, id: string = "") => {
+	const onBookmark = async (add: boolean, id: string = "") => {
+		if (bookmarks.length == 0) {
+			setShowBookmarks(true);
+			await wait(200);
+		}
 		if (id == channel.id || !id) setBookmark(add);
 		if (add) {
 			if (!bookmarks) onBookmark(true);
@@ -52,17 +60,35 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 				...bookmarks,
 			]);
 		}
-		if (!add)
+		if (!add) {
 			setBookmarks((bookmarks) => [
 				...bookmarks.filter((el) =>
 					id ? el.id !== id : el.id !== channel.id
 				),
 			]);
+			if (bookmarks.length == 1) {
+				onBookmarks(false);
+				controls.start({
+					maxHeight: "0vh",
+					minHeight: "0vh",
+					transition: { duration: 0.2 },
+				});
+				await wait(200);
+				setShowBookmarks(false);
+			}
+		}
 	};
 
 	useEffect(() => {
-		onBookmarks(bookmarks.length > 0);
-	}, [bookmarks]);
+		if (showBookmarks) {
+			controls.start({
+				maxHeight: bookmarks.length > 0 ? "0vh" : "5vh",
+				minHeight: bookmarks.length > 0 ? "0vh" : "5vh",
+				transition: { duration: 0.2 },
+			});
+			onBookmarks(!bookmarks.length);
+		}
+	}, [showBookmarks]);
 
 	useEffect(() => {
 		if (channel.type == "TEXT") {
@@ -81,8 +107,8 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 
 	return (
 		<div className={styles.shadow}>
-			{bookmarks.length > 0 && variant != "dms" && (
-				<div className={styles.bookmarks}>
+			{variant != "dms" && showBookmarks && !isMobile && (
+				<motion.div className={styles.bookmarks} animate={controls}>
 					{bookmarks.map((bookmark) => (
 						<Bookmark
 							id={bookmark.id}
@@ -93,7 +119,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 							onClose={(id) => onBookmark(false, id)}
 						/>
 					))}
-				</div>
+				</motion.div>
 			)}
 			<div
 				className={
@@ -104,13 +130,13 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 						: styles.chat_header
 				}
 			>
-				{isMobile ? (
+				{isMobile && (
 					<div className={styles.chat_header_menu_icon}>
 						<MenuIcon
 							onClick={(_) => setShowNavbar(!isNavbarOpen)}
 						/>
 					</div>
-				) : null}
+				)}
 				<div className={styles.chat_header_left}>
 					<h3>
 						<span className={styles.chat_header_hash}>#</span>
