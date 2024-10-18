@@ -169,46 +169,51 @@ export const Message: React.FC<MessageProps> = ({
 				);
 		}
 
-		function checkForEmoji(text: string) {
-			// Check if there are <: and :> characters (special content element open and close)
+		function checkForEmoji(el: string) {
+			// If emoji already addded to mapped bucket
+			if (mappedEmojiBucket.find((e) => e[0] == el))
+				setParsedContent((parsedContent) => [
+					...parsedContent!,
+					[el, "emoji"],
+				]);
+			else {
+				// Get emoji content and file link
+				let bucket = emojiBucket!.find((e) => e.startsWith(el));
+				// If emoji exists in the bucket then add it to mapped bucket
+				if (bucket) {
+					setMappedEmojiBucket((mappedEmojiBucket) => [
+						...mappedEmojiBucket,
+						[el, bucket!.slice(bucket!.indexOf("|") + 1)],
+					]);
+					setParsedContent((parsedContent) => [
+						...parsedContent!,
+						[el, "emoji"],
+					]);
+				} else
+					setParsedContent((parsedContent) => [
+						...parsedContent!,
+						[el, "text"],
+					]);
+			}
+		}
+
+		function checkForMention(text: string) {
+			console.log(text);
+		}
+
+		function checkForSpecialContent(text: string) {
+			// Check if there are < and > characters (special content element open and close)
 			if (emojiBucket) {
-				const emojiSplit = content.split(/(<:.*?:>+)/g);
+				const emojiSplit = content.split(/(<.*?>+)/g);
 				emojiSplit.forEach((el) => {
 					if (
 						el.startsWith("<:") &&
 						el.endsWith(":>") &&
 						el.includes("?")
 					) {
-						// If emoji already addded to mapped bucket
-						if (mappedEmojiBucket.find((e) => e[0] == el))
-							setParsedContent((parsedContent) => [
-								...parsedContent!,
-								[el, "emoji"],
-							]);
-						else {
-							// Get emoji content and file link
-							let bucket = emojiBucket.find((e) =>
-								e.startsWith(el)
-							);
-							// If emoji exists in the bucket then add it to mapped bucket
-							if (bucket) {
-								setMappedEmojiBucket((mappedEmojiBucket) => [
-									...mappedEmojiBucket,
-									[
-										el,
-										bucket!.slice(bucket!.indexOf("|") + 1),
-									],
-								]);
-								setParsedContent((parsedContent) => [
-									...parsedContent!,
-									[el, "emoji"],
-								]);
-							} else
-								setParsedContent((parsedContent) => [
-									...parsedContent!,
-									[el, "text"],
-								]);
-						}
+						checkForEmoji(el);
+					} else if (el.startsWith("<@") && el.endsWith(">")) {
+						checkForMention(el.substring(2, el.length - 1));
 					} else
 						setParsedContent((parsedContent) => [
 							...parsedContent!,
@@ -297,11 +302,11 @@ export const Message: React.FC<MessageProps> = ({
 								[el, "link"],
 							]);
 						}
-						// Check for emojis
+						// Check for special elements
 						else if (el.replace(/^\s+|\s+$/g, "").length)
-							checkForEmoji(el);
+							checkForSpecialContent(el);
 					});
-			} else checkForEmoji(content); // Do next check
+			} else checkForSpecialContent(content); // Do next check
 		}
 
 		setParsedContent([]);
