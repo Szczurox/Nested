@@ -56,6 +56,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 	const [isLoading, setIsLoading] = useState<boolean>(false); // Are new messages loading
 	const [isTyping, setIsTyping] = useState<boolean>(false);
 	const [autoScroll, setAutoScroll] = useState<boolean>(true); // Can autoscroll (used when new messages appear)
+	const [input, setInput] = useState<string>("");
 
 	const listInnerRef = useRef<HTMLHeadingElement>(null);
 
@@ -238,7 +239,6 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 			} else return () => {};
 		}
 
-		// TODO: Can't afford this for now (limiting usage)
 		function getTypingUsers() {
 			if (
 				channel.id != "" &&
@@ -339,6 +339,12 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 		if (typingUsers.length == 1) return `${typingUsers[0][2]} is typing...`;
 	};
 
+	const updateInput = async (newInp: string) => {
+		setInput("");
+		await wait(10);
+		setInput(newInp);
+	};
+
 	return (
 		<div
 			className={
@@ -378,6 +384,7 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 							userid={uid}
 							file={file}
 							onImageLoad={onImageLoadComplete}
+							updateInput={updateInput}
 							edited={edited}
 							fileType={fileType}
 							emojiBucket={emojiBucket}
@@ -418,6 +425,8 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 			<ChatInput
 				isMobile={isMobile}
 				isTyping={isTyping}
+				isBookmarked={isBookmarked}
+				inputUpdate={input}
 				fileUploading={fileUploading}
 				scrollToBottom={scrollToBottom}
 				setIsTyping={(typing: boolean) => setIsTyping(typing)}

@@ -3,11 +3,15 @@ import { Avatar, TextareaAutosize } from "@mui/material";
 import styles from "../../styles/components/chat/Message.module.scss";
 import moment from "moment";
 import {
+	collection,
 	deleteDoc,
 	doc,
 	getDoc,
+	getDocs,
 	getFirestore,
+	query,
 	updateDoc,
+	where,
 } from "firebase/firestore";
 import { createFirebaseApp } from "../../global-utils/clientApp";
 import ContextMenu, { ContextMenuHandle } from "./contextmenu/ContextMenu";
@@ -17,6 +21,7 @@ import SendIcon from "@mui/icons-material/Send";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import LinkIcon from "@mui/icons-material/Link";
+import ReplyIcon from "@mui/icons-material/Reply";
 import CopyAllIcon from "@mui/icons-material/CopyAll";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
@@ -34,11 +39,12 @@ interface MessageProps {
 	file?: string;
 	fileType?: MediaType;
 	time?: number;
+	isMobile: boolean;
 	edited?: boolean;
 	children?: ReactNode;
-	onImageLoad?: () => void;
 	emojiBucket?: string[];
-	isMobile: boolean;
+	onImageLoad?: () => void;
+	updateInput?: (input: string) => void;
 }
 
 export interface MessageData {
@@ -52,7 +58,7 @@ export interface MessageData {
 	emojiBucket?: string[];
 }
 
-type ContentType = "text" | "link" | "emoji" | "mention";
+type ContentType = "text" | "link" | "emoji" | "mention" | "quote";
 
 export const Message: React.FC<MessageProps> = ({
 	id,
@@ -62,10 +68,11 @@ export const Message: React.FC<MessageProps> = ({
 	fileType,
 	userid = "uid",
 	children,
-	onImageLoad,
 	edited,
 	emojiBucket,
 	isMobile,
+	onImageLoad,
+	updateInput,
 }) => {
 	const [nickname, setNickname] = useState<string>("");
 	const [nickColor, setNickColor] = useState<string>("white");
@@ -171,41 +178,30 @@ export const Message: React.FC<MessageProps> = ({
 				);
 		}
 
-		function checkForEmoji(el: string) {
+		function checkForEmoji(el: string): [string, ContentType] {
+			const parsed: [string, ContentType][] = [];
 			// If emoji already addded to mapped bucket
-			if (mappedEmojiBucket.find((e) => e[0] == el))
-				setParsedContent((parsedContent) => [
-					...parsedContent!,
-					[el, "emoji"],
+			if (mappedEmojiBucket.find((e) => e[0] == el)) return [el, "emoji"];
+			// Get emoji content and file link
+			let bucket = emojiBucket!.find((e) => e.startsWith(el));
+			// If emoji exists in the bucket then add it to mapped bucket
+			if (bucket) {
+				setMappedEmojiBucket((mappedEmojiBucket) => [
+					...mappedEmojiBucket,
+					[el, bucket!.slice(bucket!.indexOf("|") + 1)],
 				]);
-			else {
-				// Get emoji content and file link
-				let bucket = emojiBucket!.find((e) => e.startsWith(el));
-				// If emoji exists in the bucket then add it to mapped bucket
-				if (bucket) {
-					setMappedEmojiBucket((mappedEmojiBucket) => [
-						...mappedEmojiBucket,
-						[el, bucket!.slice(bucket!.indexOf("|") + 1)],
-					]);
-					setParsedContent((parsedContent) => [
-						...parsedContent!,
-						[el, "emoji"],
-					]);
-				} else
-					setParsedContent((parsedContent) => [
-						...parsedContent!,
-						[el, "text"],
-					]);
+				return [el, "emoji"];
 			}
+			return [el, "text"];
 		}
 
-		async function checkForMention(uid: string) {
+		async function checkForMention(
+			uid: string
+		): Promise<[string, ContentType][]> {
+			const parsed: [string, ContentType][] = [];
 			if (mentionBucket.find((el) => el[0] == uid)) {
-				setParsedContent((parsedContent) => [
-					...parsedContent!,
-					[uid, "mention"],
-				]);
-				return;
+				parsed.push([uid, "mention"]);
+				return parsed;
 			}
 
 			const docSnap = await getDoc(
@@ -224,113 +220,111 @@ export const Message: React.FC<MessageProps> = ({
 						[uid, docSnap.data().nick],
 					]);
 			}
-			setParsedContent((parsedContent) => [
-				...parsedContent!,
-				[uid, "mention"],
-			]);
+			parsed.push([uid, "mention"]);
+			return parsed;
 		}
 
-		function checkForSpecialContent(text: string) {
-			// Check if there are < and > characters (special content element open and close)
-			const emojiSplit = content.split(/(<.*?>+)/g);
-			emojiSplit.forEach((el) => {
+		function checkForLinks(): [string, ContentType][] {
+			const parsed: [string, ContentType][] = [];
+			// Split content into links and non-links
+			content
+				.split(/([http|https]+:\/\/[\w\S(\.|:|/)]+)/g)
+				.forEach((el) => {
+					// If element is link
+					if (el.startsWith("https://") || el.startsWith("http://")) {
+						// Remove all metadata from possible image/video
+						const parsedLink =
+							el.indexOf("?") == -1
+								? el.toLowerCase()
+								: el
+										.substring(0, el.indexOf("?"))
+										.toLowerCase();
+
+						// If image then add as image, if video then add as video to files
+						if (
+							/\.(jpg|jpeg|png|webp|avif|gif)$/.test(parsedLink)
+						) {
+							setFilesFromLinks((files) => [
+								...files,
+								[el, "image"],
+							]);
+						} else if (
+							/\.(mp4|mov|avi|mkv|flv)$/.test(parsedLink)
+						) {
+							setFilesFromLinks((files) => [
+								...files,
+								[el, "video"],
+							]);
+						}
+						// Check if is a link to one of the supported iframes (only YouTube for now)
+						else if (
+							allowedIFrames.some((element) =>
+								el.startsWith(element)
+							) &&
+							!iframes.includes(el)
+						) {
+							// Parse youtube URL so that it links to embed
+							const elParsed =
+								el
+									.replace(
+										"youtu.be/",
+										"www.youtube.com/embed/"
+									)
+									.replace("watch?v=", "embed/") + "?rel=0";
+
+							// Remove unnecessary link data such as playlist ID and add to iframes
+							setIframes((iframes) => [
+								...iframes.filter((element) => element != el),
+								elParsed.slice(
+									0,
+									el.includes("&")
+										? el.indexOf("&") - 2
+										: elParsed.length
+								),
+							]);
+						}
+						// Add as link
+						parsed.push([el, "link"]);
+					}
+				});
+			return parsed;
+		}
+
+		function checkForQuotes(e: string): [string, ContentType][] {
+			const parsed: [string, ContentType][] = [];
+			const quoted = e.split("\n");
+			quoted.forEach((el) => {
+				if (el.startsWith(">>>"))
+					parsed.push([el.substring(3) + "\n", "quote"]);
+				else parsed.push([el, "text"]);
+			});
+			return parsed;
+		}
+
+		// Check for special content
+		async function checkForSpecial() {
+			let parsed: [string, ContentType][] = [];
+			if (content.includes("https://") || content.includes("http://"))
+				parsed = parsed.concat(checkForLinks());
+			const specialSplit = content.split(/(<.*?>+)/g);
+			for (const el of specialSplit) {
 				if (
 					el.startsWith("<:") &&
 					el.endsWith(":>") &&
 					el.includes("?") &&
 					emojiBucket
-				) {
-					checkForEmoji(el);
-				} else if (el.startsWith("<@") && el.endsWith(">")) {
-					checkForMention(el.substring(2, el.length - 1));
-				} else
-					setParsedContent((parsedContent) => [
-						...parsedContent!,
-						[el, "text"],
-					]);
-			});
-		}
-
-		// Check for special content
-		function checkForSpecial() {
-			// Check if there are any links in the content
-			if (content.includes("https://") || content.includes("http://")) {
-				// Split content into links and non-links
-				content
-					.split(/([http|https]+:\/\/[\w\S(\.|:|/)]+)/g)
-					.forEach((el) => {
-						// If element is link
-						if (
-							el.startsWith("https://") ||
-							el.startsWith("http://")
-						) {
-							// Remove all metadata from possible image/vide
-							const parsedLink =
-								el.indexOf("?") == -1
-									? el.toLowerCase()
-									: el
-											.substring(0, el.indexOf("?"))
-											.toLowerCase();
-
-							// If image then add as image, if video then add as video to files
-							if (
-								/\.(jpg|jpeg|png|webp|avif|gif)$/.test(
-									parsedLink
-								)
-							) {
-								setFilesFromLinks((files) => [
-									...files,
-									[el, "image"],
-								]);
-							} else if (
-								/\.(mp4|mov|avi|mkv|flv)$/.test(parsedLink)
-							) {
-								setFilesFromLinks((files) => [
-									...files,
-									[el, "video"],
-								]);
-							}
-							// Check if is a link to one of the supported iframes (only YouTube for now)
-							else if (
-								allowedIFrames.some((element) =>
-									el.startsWith(element)
-								) &&
-								!iframes.includes(el)
-							) {
-								// Parse youtube URL so that it links to embed
-								const elParsed =
-									el
-										.replace(
-											"youtu.be/",
-											"www.youtube.com/embed/"
-										)
-										.replace("watch?v=", "embed/") +
-									"?rel=0";
-
-								// Remove unnecessary link data such as playlist ID and add to iframes
-								setIframes((iframes) => [
-									...iframes.filter(
-										(element) => element != el
-									),
-									elParsed.slice(
-										0,
-										el.includes("&")
-											? el.indexOf("&") - 2
-											: elParsed.length
-									),
-								]);
-							}
-							// Add as link
-							setParsedContent((parsedContent) => [
-								...parsedContent!,
-								[el, "link"],
-							]);
-						}
-						// Check for special elements
-						else if (el.replace(/^\s+|\s+$/g, "").length)
-							checkForSpecialContent(el);
-					});
-			} else checkForSpecialContent(content); // Do next check
+				)
+					parsed.push(checkForEmoji(el));
+				else if (el.startsWith("<@") && el.endsWith(">"))
+					parsed = parsed.concat(
+						await checkForMention(el.substring(2, el.length - 1))
+					);
+				else {
+					const text = checkForQuotes(el);
+					parsed = parsed.concat(text);
+				}
+			}
+			setParsedContent(parsed);
 		}
 
 		setParsedContent([]);
@@ -460,6 +454,17 @@ export const Message: React.FC<MessageProps> = ({
 		}
 	};
 
+	const replyToMessage = () => {
+		const rep =
+			">>>" +
+			content
+				.split("\n")
+				.filter((el) => !el.startsWith(">>>"))
+				.join("\n>>>") +
+			`\n<@${userid}> `;
+		if (updateInput) updateInput(rep);
+	};
+
 	const messageContent = (
 		<div className={styles.message_content} ref={messageContentRef}>
 			<p>
@@ -467,6 +472,13 @@ export const Message: React.FC<MessageProps> = ({
 					switch (el[1]) {
 						case "text":
 							return <span key={index}>{el[0]}</span>;
+						case "quote":
+							return (
+								<span key={index}>
+									<span className={styles.quote}></span>
+									{el[0]}
+								</span>
+							);
 						case "emoji":
 							let emoji = mappedEmojiBucket.find(
 								(e) => e[0] == el[0]
@@ -489,6 +501,7 @@ export const Message: React.FC<MessageProps> = ({
 												? {
 														width: "24px",
 														height: "auto",
+														marginBottom: "-5px",
 												  }
 												: {
 														width: "48px",
@@ -653,13 +666,16 @@ export const Message: React.FC<MessageProps> = ({
 			<>
 				<ContextMenu ref={menuRef} parentRef={elementRef}>
 					{userid == user.uid && (
-						<>
-							<ContextMenuElement onClick={(_) => editBegin()}>
-								<EditIcon />
-								Edit
-							</ContextMenuElement>
-						</>
+						<ContextMenuElement onClick={(_) => editBegin()}>
+							<EditIcon />
+							Edit
+						</ContextMenuElement>
 					)}
+
+					<ContextMenuElement onClick={(_) => replyToMessage()}>
+						<ReplyIcon />
+						Reply
+					</ContextMenuElement>
 					<ContextMenuElement
 						onClick={() => navigator.clipboard.writeText(content)}
 					>

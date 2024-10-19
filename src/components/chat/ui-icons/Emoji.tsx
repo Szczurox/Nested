@@ -24,10 +24,11 @@ export interface EmojiData {
 
 interface EmojiProps {
 	enabled: boolean;
+	isBookmarked: boolean;
 	emojiAdded: (text: string, file: string) => void;
 }
 
-const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
+const Emoji: React.FC<EmojiProps> = ({ enabled, isBookmarked, emojiAdded }) => {
 	const [emoji, setEmoji] = useState<EmojiData[]>([]); // Array of all emotes currently loaded
 	const [lastKey, setLastKey] = useState<Timestamp>(new Timestamp(0, 0)); // Creation date of the last emoji fetched
 	const [emojiEnd, setEmojiEnd] = useState<boolean>(false); // Are there no more emojis to load
@@ -37,14 +38,15 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
 
 	const menuRef = useRef<FixedMenuHandle>(null);
 	const elementRef = useRef<HTMLSpanElement>(null);
-	const inputRef = useRef<HTMLInputElement>(null);
 
 	const querySizeLimit = 60;
 
 	const app = createFirebaseApp();
 	const db = getFirestore(app!);
 
-	const open = () => {
+	useEffect(() => {
+		console.log(channel.idG);
+		setEmoji([]);
 		const emojiCollection = collection(db, "groups", channel.idG, "emoji");
 		// Emoji query
 		const qEmoji = query(
@@ -91,7 +93,7 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
 		});
 
 		setUnsubs((unsubs) => [...unsubs, unsub]);
-	};
+	}, [channel.idG]);
 
 	useEffect(() => {
 		return () => {
@@ -111,12 +113,11 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, emojiAdded }) => {
 	return (
 		<>
 			<FixedMenu
-				menuPoint={{ x: 20, y: 100 }}
+				menuPoint={{ x: 20, y: isBookmarked ? 240 : 192 }}
 				ref={menuRef}
 				parentRef={elementRef}
-				onOpen={open}
 			>
-				<div className={styles.emoji_menu}>
+				<div className={styles.emoji_menu} style={{ display: "block" }}>
 					<div className={styles.emoji_header}>Emoji</div>
 					<div className={styles.emoji_content}>
 						{emoji.map((emoji) => (

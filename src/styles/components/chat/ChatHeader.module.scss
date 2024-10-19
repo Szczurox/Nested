@@ -91,7 +91,7 @@
 			margin-left: 7.5px;
 			margin-right: 7.5px;
 			cursor: pointer;
-			transform: translate(0%, 20%);
+			transform: translate(0%, 30%);
 
 			@media (pointer: none), (pointer: coarse) {
 				&:not(.chat_header_people) {
@@ -113,7 +113,7 @@
 		border-radius: 3px;
 		padding: 3px;
 		margin-left: 10px;
-		margin-right: 10px;
+		margin-right: 5px;
 
 		@media (pointer: none), (pointer: coarse) {
 			display: none;

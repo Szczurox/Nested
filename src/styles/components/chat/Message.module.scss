@@ -278,4 +278,11 @@
 			background-color: #5f6a6e;
 		}
 	}
+
+	.quote {
+		user-select: none;
+		color: #5f6a6e;
+		padding-right: 9px;
+		border-left: solid #5f6a6e 2px;
+	}
 }

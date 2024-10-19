@@ -70,7 +70,7 @@ export const NavbarHeader: React.FC<NavbarHeaderProps> = ({
 				ref={elementRef}
 			>
 				<FixedMenu
-					menuPoint={{ x: 18, y: 80 }}
+					menuPoint={{ x: 95, y: 62 }}
 					parentRef={elementRef}
 					ref={menuRef}
 					isTop={true}

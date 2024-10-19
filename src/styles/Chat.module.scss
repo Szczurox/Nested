@@ -34,6 +34,8 @@
 		max-height: 100%;
 		min-height: 100%;
 		box-shadow: 0px 0.1em inset #26282c;
+		border: none;
+		outline: 0;
 
 		.chat {
 			display: flex;
@@ -79,6 +81,7 @@
 				background-color: #363a3f;
 				overflow-y: auto;
 				overflow-x: hidden;
+				outline: none;
 
 				@media (pointer: none), (pointer: coarse) {
 					-ms-overflow-style: none;

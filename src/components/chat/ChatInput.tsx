@@ -23,10 +23,13 @@ import InformationPopUp from "./popup/InformationPopUp";
 import { wait } from "components/utils/utils";
 import { TextareaAutosize } from "@mui/material";
 import { Moment } from "moment";
+import moment from "moment";
 
 interface ChatInputProps {
 	isMobile: boolean;
 	isTyping: boolean;
+	isBookmarked: boolean;
+	inputUpdate: string;
 	fileUploading: (fileData: FileUploadingData) => void;
 	setIsTyping: (typing: boolean) => void;
 	scrollToBottom: () => void;
@@ -35,18 +38,21 @@ interface ChatInputProps {
 export const ChatInput: React.FC<ChatInputProps> = ({
 	isMobile,
 	isTyping,
+	isBookmarked,
+	inputUpdate,
 	fileUploading,
 	setIsTyping,
 	scrollToBottom,
 }) => {
-	const [inputOnChannels, setInputOnChannels] = useState<[string, string][]>([
-		["", ""],
-	]);
-	const [input, setInput] = useState<string>(""); // Textarea input
 	const [isDisabled, setIsDisabled] = useState<boolean>(false);
+	const [slowPopUp, setSlowPopUp] = useState<boolean>(false);
+	const [lastMessaged, setLastMessaged] = useState<Moment>(moment());
+	const [input, setInput] = useState<string>(inputUpdate); // Textarea input
 	const [emojiBucket, setEmojiBucket] = useState<string[]>([]); // Array of all the emoji name|link used in the message
 	const [emojis, setEmojis] = useState<string[]>([]); // Array of all saved samojis
-	const [slowPopUp, setSlowPopUp] = useState<boolean>(false);
+	const [inputOnChannels, setInputOnChannels] = useState<[string, string][]>(
+		[]
+	);
 	const [typingTimeout, setTypingTimeout] = useState<NodeJS.Timeout>(
 		setTimeout(() => null, 0)
 	);
@@ -144,6 +150,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	}, [input]);
 
 	useEffect(() => {
+		setInput(inputUpdate);
+		textAreaRef.current?.focus();
+	}, [inputUpdate]);
+
+	useEffect(() => {
 		var element = inputOnChannels.find((el) => el[0] == channel.id);
 		if (element) setInput(element[1]);
 		else setInput("");
@@ -187,6 +198,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	}, [isDisabled]);
 
 	async function sendMessage() {
+		if (moment() < lastMessaged) {
+			setSlowPopUp(true);
+			return;
+		}
 		// Get current input and reset textarea instantly, before message gets fully sent
 		const chatInput = input.replace(/^\s+|\s+$/g, "");
 		if (input.includes(":>") && input.includes("<:"))
@@ -210,6 +225,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 				edited: false,
 				emojiBucket: arrayUnion(...emojiBucket),
 			}).then((_) => scrollToBottom());
+
+			setLastMessaged(moment().add(1, "s"));
 
 			// Update the time at which the last message was sent by the user
 			// Rate limit user
@@ -238,7 +255,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 			clearTimeout(typingTimeout);
 			console.log("typing");
 			setIsTyping(true);
-			// TODO: Can't afford this for now (limiting usage)
 			await updateDoc(doc(participantsCollection, user.uid), {
 				lastTyping: serverTimestamp(),
 			});
@@ -328,6 +344,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 				{/* <GifIcon fontSize="large" className={styles.chat_input_icon} /> */}
 				{!isDisabled && (
 					<Emoji
+						isBookmarked={isBookmarked}
 						enabled={channel.id != "" && channel.idG != "@dms"}
 						emojiAdded={addedEmoji}
 					/>
