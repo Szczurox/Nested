@@ -18,11 +18,12 @@ interface UploadFilePopUpProps {
 const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 	uploadFile,
 	cancelled,
-	fileUrl,
+	fileUrl: initialFileUrl,
 	chatInput,
 	type,
 }) => {
 	const [input, setInput] = useState<string>(chatInput);
+	const [fileUrl, setFileUrl] = useState<string>(initialFileUrl.startsWith('blob:') ? initialFileUrl : '');
 
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -70,7 +71,7 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 	return (
 		<ScreenPopUp>
 			<div>
-				{type === "image" ? (
+				{fileUrl && (type === "image" ? (
 					<Image
 						className={styles.upload_file_media}
 						src={fileUrl}
@@ -84,7 +85,7 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 						Your browser does not support the video files, {fileUrl}
 						.
 					</video>
-				)}
+				))}
 				<p>
 					Upload to <b>#{channel.name}</b>
 				</p>
