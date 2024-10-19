@@ -69,6 +69,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		"messages"
 	);
 
+	const participantsCollection = collection(
+		db,
+		"groups",
+		channel.idG,
+		"channels",
+		channel.id ? channel.id : "None",
+		"participants"
+	);
+
 	const textAreaSizeLimit = 2000;
 
 	const getEmojis = useCallback(
@@ -185,15 +194,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		setInput("");
 		if (chatInput.length) {
 			setInput("");
-			// TODO: Can't afford this for now (limiting usage)
-			/* await updateDoc(
+			await updateDoc(
 				doc(db, "groups", channel.idG, "channels", channel.id),
 				{
 					lastMessageAt: serverTimestamp(),
 				}
 			).catch((err) =>
 				console.log("Update lastMessagedAt Error: " + err)
-			); */
+			);
 
 			await addDoc(messagesCollection, {
 				content: chatInput,
@@ -231,9 +239,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 			console.log("typing");
 			setIsTyping(true);
 			// TODO: Can't afford this for now (limiting usage)
-			/* await updateDoc(doc(participantsCollection, user.uid), {
+			await updateDoc(doc(participantsCollection, user.uid), {
 				lastTyping: serverTimestamp(),
-			}); */
+			});
 
 			setTypingTimeout(
 				setTimeout(async () => {

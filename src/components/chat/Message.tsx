@@ -52,7 +52,7 @@ export interface MessageData {
 	emojiBucket?: string[];
 }
 
-type ContentType = "text" | "link" | "emoji";
+type ContentType = "text" | "link" | "emoji" | "mention";
 
 export const Message: React.FC<MessageProps> = ({
 	id,
@@ -90,6 +90,8 @@ export const Message: React.FC<MessageProps> = ({
 	const [mappedEmojiBucket, setMappedEmojiBucket] = useState<
 		[string, string][]
 	>([]);
+	// Array of all users mentioned in the message
+	const [mentionBucket, setMentionBucket] = useState<[string, string][]>([]);
 
 	const { channel } = useChannel();
 	const { user } = useUser();
@@ -197,34 +199,56 @@ export const Message: React.FC<MessageProps> = ({
 			}
 		}
 
-		function checkForMention(text: string) {
-			console.log(text);
+		async function checkForMention(uid: string) {
+			if (mentionBucket.find((el) => el[0] == uid)) {
+				setParsedContent((parsedContent) => [
+					...parsedContent!,
+					[uid, "mention"],
+				]);
+				return;
+			}
+
+			const docSnap = await getDoc(
+				doc(db, "groups", channel.idG, "members", uid)
+			);
+			if (docSnap.exists())
+				setMentionBucket((bucket) => [
+					...bucket,
+					[uid, docSnap.data().nickname],
+				]);
+			else {
+				const docSnap = await getDoc(doc(db, "profile", uid));
+				if (docSnap.exists())
+					setMentionBucket((bucket) => [
+						...bucket,
+						[uid, docSnap.data().nick],
+					]);
+			}
+			setParsedContent((parsedContent) => [
+				...parsedContent!,
+				[uid, "mention"],
+			]);
 		}
 
 		function checkForSpecialContent(text: string) {
 			// Check if there are < and > characters (special content element open and close)
-			if (emojiBucket) {
-				const emojiSplit = content.split(/(<.*?>+)/g);
-				emojiSplit.forEach((el) => {
-					if (
-						el.startsWith("<:") &&
-						el.endsWith(":>") &&
-						el.includes("?")
-					) {
-						checkForEmoji(el);
-					} else if (el.startsWith("<@") && el.endsWith(">")) {
-						checkForMention(el.substring(2, el.length - 1));
-					} else
-						setParsedContent((parsedContent) => [
-							...parsedContent!,
-							[el, "text"],
-						]);
-				});
-			} else
-				setParsedContent((parsedContent) => [
-					...parsedContent!,
-					[text, "text"],
-				]);
+			const emojiSplit = content.split(/(<.*?>+)/g);
+			emojiSplit.forEach((el) => {
+				if (
+					el.startsWith("<:") &&
+					el.endsWith(":>") &&
+					el.includes("?") &&
+					emojiBucket
+				) {
+					checkForEmoji(el);
+				} else if (el.startsWith("<@") && el.endsWith(">")) {
+					checkForMention(el.substring(2, el.length - 1));
+				} else
+					setParsedContent((parsedContent) => [
+						...parsedContent!,
+						[el, "text"],
+					]);
+			});
 		}
 
 		// Check for special content
@@ -440,46 +464,61 @@ export const Message: React.FC<MessageProps> = ({
 		<div className={styles.message_content} ref={messageContentRef}>
 			<p>
 				{parsedContent.map((el, index) => {
-					if (el[1] == "text")
-						return <span key={index}>{el[0]}</span>;
-					else if (el[1] == "emoji") {
-						let emoji = mappedEmojiBucket.find(
-							(e) => e[0] == el[0]
-						);
-						if (emoji)
-							return (
-								<Image
-									unoptimized
-									width={0}
-									height={0}
-									src={emoji[1]}
-									key={index}
-									className={".emoji"}
-									alt={el[0]}
-									style={
-										parsedContent.find(
-											(e) => e[1] == "text" && e[0] != ""
-										)! || parsedContent.length > 20
-											? {
-													width: "24px",
-													height: "auto",
-											  }
-											: { width: "48px", height: "auto" }
-									}
-								/>
+					switch (el[1]) {
+						case "text":
+							return <span key={index}>{el[0]}</span>;
+						case "emoji":
+							let emoji = mappedEmojiBucket.find(
+								(e) => e[0] == el[0]
 							);
-						else return <span key={index}>{el[0]}</span>;
-					} else if (el[1] == "link")
-						return (
-							<a
-								href={el[0]}
-								target="_blank"
-								rel="noreferrer"
-								key={index}
-							>
-								{el[0]}
-							</a>
-						);
+							if (emoji)
+								return (
+									<Image
+										unoptimized
+										width={0}
+										height={0}
+										src={emoji[1]}
+										key={index}
+										className={".emoji"}
+										alt={el[0]}
+										style={
+											parsedContent.find(
+												(e) =>
+													e[1] == "text" && e[0] != ""
+											)! || parsedContent.length > 20
+												? {
+														width: "24px",
+														height: "auto",
+												  }
+												: {
+														width: "48px",
+														height: "auto",
+												  }
+										}
+									/>
+								);
+							else return <span key={index}>{el[0]}</span>;
+						case "link":
+							return (
+								<a
+									href={el[0]}
+									target="_blank"
+									rel="noreferrer"
+									key={index}
+								>
+									{el[0]}
+								</a>
+							);
+						case "mention":
+							const mention = mentionBucket.find(
+								(e) => e[0] == el[0]
+							);
+							return (
+								<span className={styles.mention} key={index}>
+									@{mention ? mention[1] : "unknown"}
+								</span>
+							);
+					}
 				})}
 				{edited && (
 					<span className={styles.message_edited_indicator}>
@@ -609,169 +648,181 @@ export const Message: React.FC<MessageProps> = ({
 		</div>
 	);
 
-	return nickname ? (
-		<>
-			<ContextMenu ref={menuRef} parentRef={elementRef}>
-				{userid == user.uid && (
-					<>
-						<ContextMenuElement onClick={(_) => editBegin()}>
-							<EditIcon />
-							Edit
-						</ContextMenuElement>
-					</>
-				)}
-				<ContextMenuElement
-					onClick={() => navigator.clipboard.writeText(content)}
-				>
-					<CopyAllIcon style={{ fontSize: "25px" }} />
-					Copy Message Content
-				</ContextMenuElement>
-				{(userid == user.uid ||
-					user.permissions.includes("MODERATE_MESSAGES")) && (
-					<ContextMenuElement type="red" onClick={deleteBegin}>
-						<DeleteIcon />
-						Delete
+	return (
+		nickname && (
+			<>
+				<ContextMenu ref={menuRef} parentRef={elementRef}>
+					{userid == user.uid && (
+						<>
+							<ContextMenuElement onClick={(_) => editBegin()}>
+								<EditIcon />
+								Edit
+							</ContextMenuElement>
+						</>
+					)}
+					<ContextMenuElement
+						onClick={() => navigator.clipboard.writeText(content)}
+					>
+						<CopyAllIcon style={{ fontSize: "25px" }} />
+						Copy Message Content
 					</ContextMenuElement>
-				)}
-				{menuOnLink && (
-					<>
-						<ContextMenuElement
-							onClick={() =>
-								navigator.clipboard.writeText(currentLink)
-							}
-						>
-							<LinkIcon />
-							Copy Link
+					{(userid == user.uid ||
+						user.permissions.includes("MODERATE_MESSAGES")) && (
+						<ContextMenuElement type="red" onClick={deleteBegin}>
+							<DeleteIcon />
+							Delete
 						</ContextMenuElement>
-						<ContextMenuElement
-							onClick={() =>
-								window!.open(currentLink, "_blank")!.focus()
-							}
-						>
-							<OpenInNewIcon />
-							Open Link
-						</ContextMenuElement>
-					</>
-				)}
-				<ContextMenuElement
-					onClick={() => navigator.clipboard.writeText(id)}
-				>
-					<ContentCopyIcon style={{ fontSize: "21px" }} />
-					Copy Message ID
-				</ContextMenuElement>
-			</ContextMenu>
-			<ContextMenu ref={userMenuRef} parentRef={profileRef}>
-				<MemberMenu uid={userid} />
-			</ContextMenu>
-			{showPopUp ? (
-				<DeleteConfirmPopUp
-					onConfirm={() => (showPopUp ? deleteMessage() : null)}
-					onCancel={() => setShowPopUp(false)}
+					)}
+					{menuOnLink && (
+						<>
+							<ContextMenuElement
+								onClick={() =>
+									navigator.clipboard.writeText(currentLink)
+								}
+							>
+								<LinkIcon />
+								Copy Link
+							</ContextMenuElement>
+							<ContextMenuElement
+								onClick={() =>
+									window!.open(currentLink, "_blank")!.focus()
+								}
+							>
+								<OpenInNewIcon />
+								Open Link
+							</ContextMenuElement>
+						</>
+					)}
+					<ContextMenuElement
+						onClick={() => navigator.clipboard.writeText(id)}
+					>
+						<ContentCopyIcon style={{ fontSize: "21px" }} />
+						Copy Message ID
+					</ContextMenuElement>
+				</ContextMenu>
+				<ContextMenu ref={userMenuRef} parentRef={profileRef}>
+					<MemberMenu uid={userid} />
+				</ContextMenu>
+				{showPopUp ? (
+					<DeleteConfirmPopUp
+						onConfirm={() => (showPopUp ? deleteMessage() : null)}
+						onCancel={() => setShowPopUp(false)}
+					>
+						<div className={styles.message_info}>
+							{senderInfo}
+							{content && messageContent}
+							{fileContent(true)}
+						</div>
+					</DeleteConfirmPopUp>
+				) : null}
+				<div
+					className={styles.message}
+					id={id}
+					onContextMenu={(e) =>
+						!isEditing && menuRef.current?.handleContextMenu(e)
+					}
+					ref={elementRef}
+					style={
+						mentionBucket.find((el) => el[0] == user.uid)
+							? {
+									backgroundColor: "#484b4f",
+									borderLeft: "solid 2px orange",
+							  }
+							: undefined
+					}
 				>
 					<div className={styles.message_info}>
 						{senderInfo}
-						{content && messageContent}
-						{fileContent(true)}
-					</div>
-				</DeleteConfirmPopUp>
-			) : null}
-			<div
-				className={styles.message}
-				id={id}
-				onContextMenu={(e) =>
-					!isEditing && menuRef.current?.handleContextMenu(e)
-				}
-				ref={elementRef}
-			>
-				<div className={styles.message_info}>
-					{senderInfo}
-					{!isEditing ? (
-						messageContent
-					) : (
-						<div>
-							<div className={styles.message_edit_input}>
-								<form>
-									<TextareaAutosize
-										value={input}
-										wrap="soft"
-										maxLength={2000}
-										disabled={channel.id == ""}
-										onChange={(e) =>
-											setInput(e.target.value)
-										}
-										onKeyDown={editMessage}
-										placeholder={`Message #${channel.name}`}
-										onFocus={(e) =>
-											e.target.setSelectionRange(
-												e.target.value.length,
-												e.target.value.length
-											)
-										}
-										autoFocus
-									/>
-									<button
-										disabled={channel.id == ""}
-										className={
-											styles.message_edit_input_button
-										}
-										type="submit"
-									>
-										Send Message
-									</button>
-								</form>
-
-								{isMobile && input != "" ? (
-									<div className={styles.message_edit_icon}>
-										<SendIcon
-											className={styles.chat_input_icon}
-											onClick={() => completeEdit()}
+						{!isEditing ? (
+							messageContent
+						) : (
+							<div>
+								<div className={styles.message_edit_input}>
+									<form>
+										<TextareaAutosize
+											value={input}
+											wrap="soft"
+											maxLength={2000}
+											disabled={channel.id == ""}
+											onChange={(e) =>
+												setInput(e.target.value)
+											}
+											onKeyDown={editMessage}
+											placeholder={`Message #${channel.name}`}
+											onFocus={(e) =>
+												e.target.setSelectionRange(
+													e.target.value.length,
+													e.target.value.length
+												)
+											}
+											autoFocus
 										/>
-									</div>
+										<button
+											disabled={channel.id == ""}
+											className={
+												styles.message_edit_input_button
+											}
+											type="submit"
+										>
+											Send Message
+										</button>
+									</form>
+
+									{isMobile && input != "" ? (
+										<div
+											className={styles.message_edit_icon}
+										>
+											<SendIcon
+												className={
+													styles.chat_input_icon
+												}
+												onClick={() => completeEdit()}
+											/>
+										</div>
+									) : null}
+								</div>
+								{!isMobile ? (
+									<p>
+										Press Escape to{" "}
+										<a
+											className={
+												styles.message_edit_text_event
+											}
+											onClick={() => setIsEditing(false)}
+										>
+											Cancel
+										</a>{" "}
+										/ Press Enter to{" "}
+										<a
+											className={
+												styles.message_edit_text_event
+											}
+											onClick={() => updateMessage()}
+										>
+											Save
+										</a>
+									</p>
+								) : null}
+								{isMobile ? (
+									<p>
+										<a
+											className={
+												styles.message_edit_text_event
+											}
+											onClick={() => setIsEditing(false)}
+										>
+											Cancel
+										</a>
+									</p>
 								) : null}
 							</div>
-							{!isMobile ? (
-								<p>
-									Press Escape to{" "}
-									<a
-										className={
-											styles.message_edit_text_event
-										}
-										onClick={() => setIsEditing(false)}
-									>
-										Cancel
-									</a>{" "}
-									/ Press Enter to{" "}
-									<a
-										className={
-											styles.message_edit_text_event
-										}
-										onClick={() => updateMessage()}
-									>
-										Save
-									</a>
-								</p>
-							) : null}
-							{isMobile ? (
-								<p>
-									<a
-										className={
-											styles.message_edit_text_event
-										}
-										onClick={() => setIsEditing(false)}
-									>
-										Cancel
-									</a>
-								</p>
-							) : null}
-						</div>
-					)}
-					{fileContent(false)}
-					{children}
+						)}
+						{fileContent(false)}
+						{children}
+					</div>
 				</div>
-			</div>
-		</>
-	) : (
-		<div></div>
+			</>
+		)
 	);
 };
 

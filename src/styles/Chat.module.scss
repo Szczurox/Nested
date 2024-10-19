@@ -29,9 +29,10 @@
 
 	.chat_flexbox {
 		display: flex;
-		max-height: 92vh;
-		min-height: 92vh;
+		flex: 1;
 		width: 100%;
+		max-height: 100%;
+		min-height: 100%;
 		box-shadow: 0px 0.1em inset #26282c;
 
 		.chat {
@@ -53,9 +54,14 @@
 
 			.chat_typing_users {
 				color: white;
-				min-height: 12px;
-				margin-bottom: 12px;
-				margin-left: 40px;
+				height: 12px;
+				margin-left: 30px;
+				margin-bottom: 58px;
+				margin-top: 2px;
+
+				@media (pointer: none), (pointer: coarse) {
+					margin-left: 25px;
+				}
 
 				.chat_typing_dots {
 					margin-right: 20px;
@@ -65,6 +71,7 @@
 			.chat_no_typing_users {
 				color: white;
 				min-height: 12px;
+				margin-bottom: 60px;
 			}
 
 			.chat_messages {

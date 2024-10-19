@@ -55,27 +55,29 @@ export const Member: React.FC<MemberProps> = ({
 	useEffect(() => {
 		function onMemberLoad() {
 			if (id != user.uid)
-				return onSnapshot(doc(db, "profile", id), (doc) => {
-					if (doc.exists()) {
-						if (avatar == "" && doc.data().avatar)
-							setTrueAvatar(doc.data().avatar);
-						if (doc.data().lastActive) {
-							const active = moment(
-								doc.data().lastActive.toMillis()
-							)
-								.add(3, "m")
-								.isAfter(moment());
-							changeActivity(id, active);
-							setLastActive(
-								moment(doc.data().lastActive.toMillis()).add(
-									3,
-									"m"
+				return onSnapshot(
+					doc(db, "groups", channel.idG, "members", id),
+					(doc) => {
+						if (doc.exists()) {
+							if (avatar == "" && doc.data().avatar)
+								setTrueAvatar(doc.data().avatar);
+							if (doc.data().lastActive) {
+								const active = moment(
+									doc.data().lastActive.toMillis()
 								)
-							);
-							setIsActive(active);
+									.add(3, "m")
+									.isAfter(moment());
+								changeActivity(id, active);
+								setLastActive(
+									moment(
+										doc.data().lastActive.toMillis()
+									).add(3, "m")
+								);
+								setIsActive(active);
+							}
 						}
 					}
-				});
+				);
 			else {
 				changeActivity(id, true);
 				if (!avatar) setTrueAvatar(user.avatar);

@@ -16,7 +16,7 @@
 }
 
 .bookmarks {
-	height: 5%;
+	flex: 0.05;
 	padding: 5px;
 	background-color: #242528;
 	display: flex;
@@ -35,7 +35,7 @@
 	padding: 10px;
 	display: flex;
 	background-color: #363a3f;
-	height: 9%;
+	flex: 0.2;
 
 	a {
 		color: inherit;

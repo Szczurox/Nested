@@ -19,10 +19,9 @@ import Members from "components/chat/Members";
 import ChatHeader from "components/chat/ChatHeader";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { NavbarGroups } from "components/chat/NavbarGroups";
-import { motion, useAnimationControls } from "framer-motion";
 
 const Chat = () => {
-	const [showBookmarks, setShowBookmarks] = useState<boolean>(true);
+	const [showBookmarks, setShowBookmarks] = useState<boolean>(false);
 	const [showNavbar, setShowNavbar] = useState<boolean>(true);
 	const [showMembers, setShowMembers] = useState<boolean>(true);
 	const [membersQuery, setMembersQuery] = useState<string>(""); // Search qury for member search
@@ -30,8 +29,6 @@ const Chat = () => {
 
 	const { user, loadingUser, setMemberData } = useUser();
 	const { channel, setGroupData } = useChannel();
-
-	const controls = useAnimationControls();
 
 	const router = useRouter();
 	const { id } = router.query;
@@ -162,14 +159,6 @@ const Chat = () => {
 		setShowNavbar(false);
 	}, [channel.id]);
 
-	function onShowBookmarks(show: boolean) {
-		setShowBookmarks(show);
-		controls.start({
-			minHeight: show ? "87%" : "92%",
-			transition: { duration: 0.3 },
-		});
-	}
-
 	// Render only if user is authenticated
 	return user.uid ? (
 		<div className={styles.app}>
@@ -197,16 +186,17 @@ const Chat = () => {
 						isNavbarOpen={showNavbar ? true : false}
 						setShowNavbar={(show) => setShowNavbar(show)}
 						variant={variant}
-						onBookmarks={onShowBookmarks}
+						onBookmarks={(show) => setShowBookmarks(show)}
 					/>
 				</div>
-				<motion.div className={styles.chat_flexbox} animate={controls}>
+				<div className={styles.chat_flexbox}>
 					<ChatMain
 						isNavbarOpen={showNavbar}
 						hideNavbar={() => {
 							setShowNavbar(false);
 							if (isMobile) setShowMembers(false);
 						}}
+						isBookmarked={showBookmarks}
 						isMembersOpen={showMembers}
 					/>
 
@@ -219,7 +209,7 @@ const Chat = () => {
 							channel.type != "VOICE"
 						}
 					/>
-				</motion.div>
+				</div>
 			</div>
 		</div>
 	) : null;

@@ -3,9 +3,11 @@
 	flex: 1;
 	align-items: center;
 	padding: 10px;
+	padding-left: 0px;
 	margin: 12px;
 	color: white;
 	background-color: #363a3f;
+	border-radius: 3px;
 
 	@media (pointer: none), (pointer: coarse) {
 		padding-left: 0px;
@@ -260,5 +262,20 @@
 		display: inline-block;
 		align-self: flex-end;
 		margin-bottom: 6px;
+	}
+
+	.mention {
+		color: #808b90;
+		background-color: #52595cbb;
+		border-radius: 3px;
+		padding-left: 2px;
+		padding-right: 2px;
+		padding-bottom: 1px;
+		cursor: pointer;
+
+		&:hover {
+			color: #9dacb3;
+			background-color: #5f6a6e;
+		}
 	}
 }

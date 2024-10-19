@@ -1,6 +1,6 @@
 .bookmark {
-	height: 4vh;
-	line-height: 4vh;
+	height: 37px;
+	line-height: 40px;
 	max-width: 180px;
 	width: 180px;
 	min-width: 10px;
@@ -24,10 +24,10 @@
 		display: flex;
 		flex-direction: row;
 		flex: 1;
-		max-width: 88%;
+		max-width: 80%;
 
 		.avatar {
-			transform: translateY(14%);
+			transform: translateY(32%);
 			margin-right: 8px;
 		}
 	}

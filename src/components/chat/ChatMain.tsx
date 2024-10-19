@@ -32,12 +32,14 @@ import { ChatInput } from "./ChatInput";
 interface ChatMainProps {
 	isNavbarOpen: boolean;
 	isMembersOpen: boolean;
+	isBookmarked: boolean;
 	hideNavbar: () => void;
 }
 
 export const ChatMain: React.FC<ChatMainProps> = ({
 	isNavbarOpen,
 	isMembersOpen,
+	isBookmarked,
 	hideNavbar,
 }) => {
 	const [messages, setMessages] = useState<MessageData[]>([]); // Array of all messages currently loaded
@@ -296,19 +298,17 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 
 		setMessages([]);
 		setTypingUsers([]);
-
 		setAutoScroll(true);
 		setCanScrollToBottom(false);
 		setIsTyping(false);
 		const unsub = getMessagesFirstBatch();
-		// TODO: Can't afford this for now (limiting usage)
-		// const unsub2 = getTypingUsers();
+		const unsub2 = getTypingUsers();
 		scrollToBottom();
 		return () => {
 			if (unsubs.length > 0)
 				for (let i = 0; i < unsubs.length; i++) unsubs[i]();
 			unsub();
-			// unsub2();
+			unsub2();
 		};
 
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -438,6 +438,15 @@ export const ChatMain: React.FC<ChatMainProps> = ({
 					typingUsers.length
 						? styles.chat_typing_users
 						: styles.chat_no_typing_users
+				}
+				style={
+					isBookmarked
+						? {
+								marginBottom: typingUsers.length
+									? "108px"
+									: "110px",
+						  }
+						: undefined
 				}
 			>
 				{typingUsers.length != 0 && (
