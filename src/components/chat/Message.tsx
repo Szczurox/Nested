@@ -3,11 +3,16 @@ import { Avatar, TextareaAutosize } from "@mui/material";
 import styles from "../../styles/components/chat/Message.module.scss";
 import moment from "moment";
 import {
+	arrayUnion,
+	collection,
 	deleteDoc,
 	doc,
 	getDoc,
+	getDocs,
 	getFirestore,
+	query,
 	updateDoc,
+	where,
 } from "firebase/firestore";
 import { createFirebaseApp } from "../../global-utils/clientApp";
 import ContextMenu, { ContextMenuHandle } from "./contextmenu/ContextMenu";
@@ -17,6 +22,7 @@ import SendIcon from "@mui/icons-material/Send";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import LinkIcon from "@mui/icons-material/Link";
+import ReplyIcon from "@mui/icons-material/Reply";
 import CopyAllIcon from "@mui/icons-material/CopyAll";
 import { useChannel } from "context/channelContext";
 import { useUser } from "context/userContext";
@@ -34,11 +40,12 @@ interface MessageProps {
 	file?: string;
 	fileType?: MediaType;
 	time?: number;
+	isMobile: boolean;
 	edited?: boolean;
 	children?: ReactNode;
-	onImageLoad?: () => void;
 	emojiBucket?: string[];
-	isMobile: boolean;
+	onImageLoad?: () => void;
+	updateInput?: (input: string) => void;
 }
 
 export interface MessageData {
@@ -52,7 +59,7 @@ export interface MessageData {
 	emojiBucket?: string[];
 }
 
-type ContentType = "text" | "link" | "emoji";
+type ContentType = "text" | "link" | "emoji" | "mention" | "quote";
 
 export const Message: React.FC<MessageProps> = ({
 	id,
@@ -62,10 +69,11 @@ export const Message: React.FC<MessageProps> = ({
 	fileType,
 	userid = "uid",
 	children,
-	onImageLoad,
 	edited,
 	emojiBucket,
 	isMobile,
+	onImageLoad,
+	updateInput,
 }) => {
 	const [nickname, setNickname] = useState<string>("");
 	const [nickColor, setNickColor] = useState<string>("white");
@@ -90,6 +98,8 @@ export const Message: React.FC<MessageProps> = ({
 	const [mappedEmojiBucket, setMappedEmojiBucket] = useState<
 		[string, string][]
 	>([]);
+	// Array of all users mentioned in the message
+	const [mentionBucket, setMentionBucket] = useState<[string, string][]>([]);
 
 	const { channel } = useChannel();
 	const { user } = useUser();
@@ -169,139 +179,154 @@ export const Message: React.FC<MessageProps> = ({
 				);
 		}
 
-		function checkForEmoji(text: string) {
-			// Check if there are <: and :> characters (special content element open and close)
-			if (emojiBucket) {
-				const emojiSplit = content.split(/(<:.*?:>+)/g);
-				emojiSplit.forEach((el) => {
-					if (
-						el.startsWith("<:") &&
-						el.endsWith(":>") &&
-						el.includes("?")
-					) {
-						// If emoji already addded to mapped bucket
-						if (mappedEmojiBucket.find((e) => e[0] == el))
-							setParsedContent((parsedContent) => [
-								...parsedContent!,
-								[el, "emoji"],
-							]);
-						else {
-							// Get emoji content and file link
-							let bucket = emojiBucket.find((e) =>
-								e.startsWith(el)
-							);
-							// If emoji exists in the bucket then add it to mapped bucket
-							if (bucket) {
-								setMappedEmojiBucket((mappedEmojiBucket) => [
-									...mappedEmojiBucket,
-									[
-										el,
-										bucket!.slice(bucket!.indexOf("|") + 1),
-									],
-								]);
-								setParsedContent((parsedContent) => [
-									...parsedContent!,
-									[el, "emoji"],
-								]);
-							} else
-								setParsedContent((parsedContent) => [
-									...parsedContent!,
-									[el, "text"],
-								]);
-						}
-					} else
-						setParsedContent((parsedContent) => [
-							...parsedContent!,
-							[el, "text"],
-						]);
-				});
-			} else
-				setParsedContent((parsedContent) => [
-					...parsedContent!,
-					[text, "text"],
+		async function checkForEmoji(
+			el: string
+		): Promise<[string, ContentType]> {
+			// If emoji already addded to mapped bucket
+			if (mappedEmojiBucket.find((e) => e[0] == el)) return [el, "emoji"];
+			// Get emoji content and file link
+			let bucket = emojiBucket!.find((e) => e.startsWith(el));
+			// If emoji exists in the bucket then add it to mapped bucket
+			if (bucket) {
+				setMappedEmojiBucket((mappedEmojiBucket) => [
+					...mappedEmojiBucket,
+					[el, bucket!.slice(bucket!.indexOf("|") + 1)],
 				]);
+				return [el, "emoji"];
+			}
+			return [":" + el.substring(2, el.indexOf("?")) + ":", "text"];
+		}
+
+		async function checkForMention(
+			uid: string
+		): Promise<[string, ContentType][]> {
+			const parsed: [string, ContentType][] = [];
+			if (mentionBucket.find((el) => el[0] == uid)) {
+				parsed.push([uid, "mention"]);
+				return parsed;
+			}
+
+			const docSnap = await getDoc(
+				doc(db, "groups", channel.idG, "members", uid)
+			);
+			if (docSnap.exists())
+				setMentionBucket((bucket) => [
+					...bucket,
+					[uid, docSnap.data().nickname],
+				]);
+			else {
+				const docSnap = await getDoc(doc(db, "profile", uid));
+				if (docSnap.exists())
+					setMentionBucket((bucket) => [
+						...bucket,
+						[uid, docSnap.data().nick],
+					]);
+			}
+			parsed.push([uid, "mention"]);
+			return parsed;
+		}
+
+		function checkForLinks(): [string, ContentType][] {
+			const parsed: [string, ContentType][] = [];
+			// Split content into links and non-links
+			content
+				.split(/([http|https]+:\/\/[\w\S(\.|:|/)]+)/g)
+				.forEach((el) => {
+					// If element is link
+					if (el.startsWith("https://") || el.startsWith("http://")) {
+						// Remove all metadata from possible image/video
+						const parsedLink =
+							el.indexOf("?") == -1
+								? el.toLowerCase()
+								: el
+										.substring(0, el.indexOf("?"))
+										.toLowerCase();
+
+						// If image then add as image, if video then add as video to files
+						if (
+							/\.(jpg|jpeg|png|webp|avif|gif)$/.test(parsedLink)
+						) {
+							setFilesFromLinks((files) => [
+								...files,
+								[el, "image"],
+							]);
+						} else if (
+							/\.(mp4|mov|avi|mkv|flv)$/.test(parsedLink)
+						) {
+							setFilesFromLinks((files) => [
+								...files,
+								[el, "video"],
+							]);
+						}
+						// Check if is a link to one of the supported iframes (only YouTube for now)
+						else if (
+							allowedIFrames.some((element) =>
+								el.startsWith(element)
+							) &&
+							!iframes.includes(el)
+						) {
+							// Parse youtube URL so that it links to embed
+							const elParsed =
+								el
+									.replace(
+										"youtu.be/",
+										"www.youtube.com/embed/"
+									)
+									.replace("watch?v=", "embed/") + "?rel=0";
+
+							// Remove unnecessary link data such as playlist ID and add to iframes
+							setIframes((iframes) => [
+								...iframes.filter((element) => element != el),
+								elParsed.slice(
+									0,
+									el.includes("&")
+										? el.indexOf("&") - 2
+										: elParsed.length
+								),
+							]);
+						}
+						// Add as link
+						parsed.push([el, "link"]);
+					}
+				});
+			return parsed;
+		}
+
+		function checkForQuotes(e: string): [string, ContentType][] {
+			const parsed: [string, ContentType][] = [];
+			const quoted = e.split("\n");
+			quoted.forEach((el) => {
+				if (el.startsWith(">>>"))
+					parsed.push([el.substring(3) + "\n", "quote"]);
+				else parsed.push([el, "text"]);
+			});
+			return parsed;
 		}
 
 		// Check for special content
-		function checkForSpecial() {
-			// Check if there are any links in the content
-			if (content.includes("https://") || content.includes("http://")) {
-				// Split content into links and non-links
-				content
-					.split(/([http|https]+:\/\/[\w\S(\.|:|/)]+)/g)
-					.forEach((el) => {
-						// If element is link
-						if (
-							el.startsWith("https://") ||
-							el.startsWith("http://")
-						) {
-							// Remove all metadata from possible image/vide
-							const parsedLink =
-								el.indexOf("?") == -1
-									? el.toLowerCase()
-									: el
-											.substring(0, el.indexOf("?"))
-											.toLowerCase();
-
-							// If image then add as image, if video then add as video to files
-							if (
-								/\.(jpg|jpeg|png|webp|avif|gif)$/.test(
-									parsedLink
-								)
-							) {
-								setFilesFromLinks((files) => [
-									...files,
-									[el, "image"],
-								]);
-							} else if (
-								/\.(mp4|mov|avi|mkv|flv)$/.test(parsedLink)
-							) {
-								setFilesFromLinks((files) => [
-									...files,
-									[el, "video"],
-								]);
-							}
-							// Check if is a link to one of the supported iframes (only YouTube for now)
-							else if (
-								allowedIFrames.some((element) =>
-									el.startsWith(element)
-								) &&
-								!iframes.includes(el)
-							) {
-								// Parse youtube URL so that it links to embed
-								const elParsed =
-									el
-										.replace(
-											"youtu.be/",
-											"www.youtube.com/embed/"
-										)
-										.replace("watch?v=", "embed/") +
-									"?rel=0";
-
-								// Remove unnecessary link data such as playlist ID and add to iframes
-								setIframes((iframes) => [
-									...iframes.filter(
-										(element) => element != el
-									),
-									elParsed.slice(
-										0,
-										el.includes("&")
-											? el.indexOf("&") - 2
-											: elParsed.length
-									),
-								]);
-							}
-							// Add as link
-							setParsedContent((parsedContent) => [
-								...parsedContent!,
-								[el, "link"],
-							]);
-						}
-						// Check for emojis
-						else if (el.replace(/^\s+|\s+$/g, "").length)
-							checkForEmoji(el);
-					});
-			} else checkForEmoji(content); // Do next check
+		async function checkForSpecial() {
+			let parsed: [string, ContentType][] = [];
+			if (content.includes("https://") || content.includes("http://"))
+				parsed = parsed.concat(checkForLinks());
+			const specialSplit = content.split(/(<.*?>+)/g);
+			for (const el of specialSplit) {
+				if (
+					el.startsWith("<:") &&
+					el.endsWith(":>") &&
+					el.includes("?") &&
+					emojiBucket
+				)
+					parsed.push(await checkForEmoji(el));
+				else if (el.startsWith("<@") && el.endsWith(">"))
+					parsed = parsed.concat(
+						await checkForMention(el.substring(2, el.length - 1))
+					);
+				else {
+					const text = checkForQuotes(el);
+					parsed = parsed.concat(text);
+				}
+			}
+			setParsedContent(parsed);
 		}
 
 		setParsedContent([]);
@@ -402,12 +427,51 @@ export const Message: React.FC<MessageProps> = ({
 		setCurrentMessage(id);
 	};
 
+	const getEmoji = async (): Promise<string[]> => {
+		const emojis: string[] = [];
+		if (input.includes(":>") && input.includes("<:")) {
+			const emojiSplit = input.split(/(<:.*?:>+)/g);
+			for (const el of emojiSplit) {
+				if (
+					el.startsWith("<:") &&
+					el.endsWith(":>") &&
+					el.includes("?")
+				) {
+					let element = emojis.find((e) => e.split("|")[0] == el);
+					if (!element) {
+						const name = el.split("?")[0].slice(2);
+						const group = el.substring(
+							el.indexOf("?") + 1,
+							el.indexOf(":>")
+						);
+						console.log(name);
+						const doc = await getDocs(
+							query(
+								collection(db, "groups", group, "emoji"),
+								where("name", "==", name)
+							)
+						);
+						if (!doc.empty)
+							emojis.push(el + "|" + doc.docs[0].data().file);
+					}
+				}
+			}
+		}
+		return emojis;
+	};
+
 	const updateMessage = async () => {
 		setIsEditing(false);
-		await updateDoc(messageDoc, {
-			content: input,
-			edited: true,
-		});
+
+		const emojis = await getEmoji();
+		const trueInput = input.replace(/^\s+|\s+$/g, "");
+
+		if (content != trueInput)
+			await updateDoc(messageDoc, {
+				content: trueInput,
+				emojiBucket: arrayUnion(...emojis),
+				edited: true,
+			});
 	};
 
 	const completeEdit = () => {
@@ -431,50 +495,84 @@ export const Message: React.FC<MessageProps> = ({
 		}
 	};
 
+	const replyToMessage = () => {
+		const rep =
+			">>>" +
+			content
+				.split("\n")
+				.filter((el) => !el.startsWith(">>>"))
+				.join("\n>>>") +
+			`\n<@${userid}> `;
+		if (updateInput) updateInput(rep);
+	};
+
 	const messageContent = (
 		<div className={styles.message_content} ref={messageContentRef}>
 			<p>
 				{parsedContent.map((el, index) => {
-					if (el[1] == "text")
-						return <span key={index}>{el[0]}</span>;
-					else if (el[1] == "emoji") {
-						let emoji = mappedEmojiBucket.find(
-							(e) => e[0] == el[0]
-						);
-						if (emoji)
+					switch (el[1]) {
+						case "text":
+							return <span key={index}>{el[0]}</span>;
+						case "quote":
 							return (
-								<Image
-									unoptimized
-									width={0}
-									height={0}
-									src={emoji[1]}
-									key={index}
-									className={".emoji"}
-									alt={el[0]}
-									style={
-										parsedContent.find(
-											(e) => e[1] == "text" && e[0] != ""
-										)! || parsedContent.length > 20
-											? {
-													width: "24px",
-													height: "auto",
-											  }
-											: { width: "48px", height: "auto" }
-									}
-								/>
+								<span key={index}>
+									<span className={styles.quote}></span>
+									{el[0]}
+								</span>
 							);
-						else return <span key={index}>{el[0]}</span>;
-					} else if (el[1] == "link")
-						return (
-							<a
-								href={el[0]}
-								target="_blank"
-								rel="noreferrer"
-								key={index}
-							>
-								{el[0]}
-							</a>
-						);
+						case "emoji":
+							let emoji = mappedEmojiBucket.find(
+								(e) => e[0] == el[0]
+							);
+							if (emoji)
+								return (
+									<Image
+										unoptimized
+										width={0}
+										height={0}
+										src={emoji[1]}
+										key={index}
+										className={".emoji"}
+										alt={el[0]}
+										style={
+											parsedContent.find(
+												(e) =>
+													e[1] == "text" && e[0] != ""
+											)! || parsedContent.length > 20
+												? {
+														width: "24px",
+														height: "auto",
+														marginBottom: "-5px",
+												  }
+												: {
+														width: "48px",
+														height: "auto",
+												  }
+										}
+									/>
+								);
+							else return <span key={index}>{el[0]}</span>;
+						case "link":
+							return (
+								<a
+									href={el[0]}
+									target="_blank"
+									rel="noreferrer"
+									key={index}
+								>
+									{el[0]}
+								</a>
+							);
+						case "mention":
+							const mention = mentionBucket.find(
+								(e) => e[0] == el[0]
+							);
+							return (
+								<span className={styles.mention} key={index}>
+									@{mention ? mention[1] : "unknown"}
+								</span>
+							);
+					}
 				})}
 				{edited && (
 					<span className={styles.message_edited_indicator}>
@@ -604,169 +702,184 @@ export const Message: React.FC<MessageProps> = ({
 		</div>
 	);
 
-	return nickname ? (
-		<>
-			<ContextMenu ref={menuRef} parentRef={elementRef}>
-				{userid == user.uid && (
-					<>
+	return (
+		nickname && (
+			<>
+				<ContextMenu ref={menuRef} parentRef={elementRef}>
+					{userid == user.uid && (
 						<ContextMenuElement onClick={(_) => editBegin()}>
 							<EditIcon />
 							Edit
 						</ContextMenuElement>
-					</>
-				)}
-				<ContextMenuElement
-					onClick={() => navigator.clipboard.writeText(content)}
-				>
-					<CopyAllIcon style={{ fontSize: "25px" }} />
-					Copy Message Content
-				</ContextMenuElement>
-				{(userid == user.uid ||
-					user.permissions.includes("MODERATE_MESSAGES")) && (
-					<ContextMenuElement type="red" onClick={deleteBegin}>
-						<DeleteIcon />
-						Delete
+					)}
+
+					<ContextMenuElement onClick={(_) => replyToMessage()}>
+						<ReplyIcon />
+						Reply
 					</ContextMenuElement>
-				)}
-				{menuOnLink && (
-					<>
-						<ContextMenuElement
-							onClick={() =>
-								navigator.clipboard.writeText(currentLink)
-							}
-						>
-							<LinkIcon />
-							Copy Link
+					<ContextMenuElement
+						onClick={() => navigator.clipboard.writeText(content)}
+					>
+						<CopyAllIcon style={{ fontSize: "25px" }} />
+						Copy Message Content
+					</ContextMenuElement>
+					{(userid == user.uid ||
+						user.permissions.includes("MODERATE_MESSAGES")) && (
+						<ContextMenuElement type="red" onClick={deleteBegin}>
+							<DeleteIcon />
+							Delete
 						</ContextMenuElement>
-						<ContextMenuElement
-							onClick={() =>
-								window!.open(currentLink, "_blank")!.focus()
-							}
-						>
-							<OpenInNewIcon />
-							Open Link
-						</ContextMenuElement>
-					</>
-				)}
-				<ContextMenuElement
-					onClick={() => navigator.clipboard.writeText(id)}
-				>
-					<ContentCopyIcon style={{ fontSize: "21px" }} />
-					Copy Message ID
-				</ContextMenuElement>
-			</ContextMenu>
-			<ContextMenu ref={userMenuRef} parentRef={profileRef}>
-				<MemberMenu uid={userid} />
-			</ContextMenu>
-			{showPopUp ? (
-				<DeleteConfirmPopUp
-					onConfirm={() => (showPopUp ? deleteMessage() : null)}
-					onCancel={() => setShowPopUp(false)}
+					)}
+					{menuOnLink && (
+						<>
+							<ContextMenuElement
+								onClick={() =>
+									navigator.clipboard.writeText(currentLink)
+								}
+							>
+								<LinkIcon />
+								Copy Link
+							</ContextMenuElement>
+							<ContextMenuElement
+								onClick={() =>
+									window!.open(currentLink, "_blank")!.focus()
+								}
+							>
+								<OpenInNewIcon />
+								Open Link
+							</ContextMenuElement>
+						</>
+					)}
+					<ContextMenuElement
+						onClick={() => navigator.clipboard.writeText(id)}
+					>
+						<ContentCopyIcon style={{ fontSize: "21px" }} />
+						Copy Message ID
+					</ContextMenuElement>
+				</ContextMenu>
+				<ContextMenu ref={userMenuRef} parentRef={profileRef}>
+					<MemberMenu uid={userid} />
+				</ContextMenu>
+				{showPopUp ? (
+					<DeleteConfirmPopUp
+						onConfirm={() => (showPopUp ? deleteMessage() : null)}
+						onCancel={() => setShowPopUp(false)}
+					>
+						<div className={styles.message_info}>
+							{senderInfo}
+							{content && messageContent}
+							{fileContent(true)}
+						</div>
+					</DeleteConfirmPopUp>
+				) : null}
+				<div
+					className={styles.message}
+					id={id}
+					onContextMenu={(e) =>
+						!isEditing && menuRef.current?.handleContextMenu(e)
+					}
+					ref={elementRef}
+					style={
+						mentionBucket.find((el) => el[0] == user.uid)
+							? {
+									backgroundColor: "#484b4f",
+									borderLeft: "solid 2px orange",
+							  }
+							: undefined
+					}
 				>
 					<div className={styles.message_info}>
 						{senderInfo}
-						{content && messageContent}
-						{fileContent(true)}
-					</div>
-				</DeleteConfirmPopUp>
-			) : null}
-			<div
-				className={styles.message}
-				id={id}
-				onContextMenu={(e) =>
-					!isEditing && menuRef.current?.handleContextMenu(e)
-				}
-				ref={elementRef}
-			>
-				<div className={styles.message_info}>
-					{senderInfo}
-					{!isEditing ? (
-						messageContent
-					) : (
-						<div>
-							<div className={styles.message_edit_input}>
-								<form>
-									<TextareaAutosize
-										value={input}
-										wrap="soft"
-										maxLength={2000}
-										disabled={channel.id == ""}
-										onChange={(e) =>
-											setInput(e.target.value)
-										}
-										onKeyDown={editMessage}
-										placeholder={`Message #${channel.name}`}
-										onFocus={(e) =>
-											e.target.setSelectionRange(
-												e.target.value.length,
-												e.target.value.length
-											)
-										}
-										autoFocus
-									/>
-									<button
-										disabled={channel.id == ""}
-										className={
-											styles.message_edit_input_button
-										}
-										type="submit"
-									>
-										Send Message
-									</button>
-								</form>
-
-								{isMobile && input != "" ? (
-									<div className={styles.message_edit_icon}>
-										<SendIcon
-											className={styles.chat_input_icon}
-											onClick={() => completeEdit()}
+						{!isEditing ? (
+							messageContent
+						) : (
+							<div>
+								<div className={styles.message_edit_input}>
+									<form>
+										<TextareaAutosize
+											value={input}
+											wrap="soft"
+											maxLength={2000}
+											disabled={channel.id == ""}
+											onChange={(e) =>
+												setInput(e.target.value)
+											}
+											onKeyDown={editMessage}
+											placeholder={`Message #${channel.name}`}
+											onFocus={(e) =>
+												e.target.setSelectionRange(
+													e.target.value.length,
+													e.target.value.length
+												)
+											}
+											autoFocus
 										/>
-									</div>
+										<button
+											disabled={channel.id == ""}
+											className={
+												styles.message_edit_input_button
+											}
+											type="submit"
+										>
+											Send Message
+										</button>
+									</form>
+
+									{isMobile && input != "" ? (
+										<div
+											className={styles.message_edit_icon}
+										>
+											<SendIcon
+												className={
+													styles.chat_input_icon
+												}
+												onClick={() => completeEdit()}
+											/>
+										</div>
+									) : null}
+								</div>
+								{!isMobile ? (
+									<p>
+										Press Escape to{" "}
+										<a
+											className={
+												styles.message_edit_text_event
+											}
+											onClick={() => setIsEditing(false)}
+										>
+											Cancel
+										</a>{" "}
+										/ Press Enter to{" "}
+										<a
+											className={
+												styles.message_edit_text_event
+											}
+											onClick={() => updateMessage()}
+										>
+											Save
+										</a>
+									</p>
+								) : null}
+								{isMobile ? (
+									<p>
+										<a
+											className={
+												styles.message_edit_text_event
+											}
+											onClick={() => setIsEditing(false)}
+										>
+											Cancel
+										</a>
+									</p>
 								) : null}
 							</div>
-							{!isMobile ? (
-								<p>
-									Press Escape to{" "}
-									<a
-										className={
-											styles.message_edit_text_event
-										}
-										onClick={() => setIsEditing(false)}
-									>
-										Cancel
-									</a>{" "}
-									/ Press Enter to{" "}
-									<a
-										className={
-											styles.message_edit_text_event
-										}
-										onClick={() => updateMessage()}
-									>
-										Save
-									</a>
-								</p>
-							) : null}
-							{isMobile ? (
-								<p>
-									<a
-										className={
-											styles.message_edit_text_event
-										}
-										onClick={() => setIsEditing(false)}
-									>
-										Cancel
-									</a>
-								</p>
-							) : null}
-						</div>
-					)}
-					{fileContent(false)}
-					{children}
+						)}
+						{fileContent(false)}
+						{children}
+					</div>
 				</div>
-			</div>
-		</>
-	) : (
-		<div></div>
+			</>
+		)
 	);
 };
 

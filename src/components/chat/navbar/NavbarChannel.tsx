@@ -29,7 +29,6 @@ import BasicDeletePopUp from "../popup/DeletePopUp";
 import { addChannel } from "components/utils/channelQueries";
 import { ParticipantPermission, useUser } from "context/userContext";
 import { useRouter } from "next/router";
-import moment, { Moment } from "moment";
 import { useVoice } from "context/voiceContext";
 
 interface ChannelCallerData {
@@ -74,7 +73,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	const [callers, setCallers] = useState<ChannelCallerData[]>([]);
 	// 0 - None  /  1 - Delete  /  2 - Change Name  /  3 - Create
 	const [showPopUp, setShowPopUp] = useState<number>(0);
-	const [lastActive, setLastActive] = useState<Moment>();
+	const [lastViewed, setLastViewed] = useState<number>(0);
 
 	const { channel, setChannelData } = useChannel();
 	const { user, addPartPerms } = useUser();
@@ -118,7 +117,6 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	};
 
 	const updateLastViewed = async () => {
-		setLastActive(moment());
 		await updateDoc(doc(db, "groups", channel.idG, "members", user.uid), {
 			lastViewed: id,
 		});
@@ -145,6 +143,12 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [channel.id, id, user.uid, name, channel.name, channel.type]);
 
+	useEffect(() => {
+		if (lastViewed < lastMessageAt! && channel.type != "LOADING")
+			setIsUnread(true);
+		else setIsUnread(false);
+	}, [lastViewed, lastMessageAt]);
+
 	// Participant data
 	useEffect(() => {
 		const participantSnapshot = () => {
@@ -162,9 +166,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 						setEveryPerms(perms);
 						setPartPerms([...doc.data().permissions]);
 					}
-					if (doc.data()!.lastViewed < lastMessageAt!)
-						setIsUnread(true);
-					else setIsUnread(false);
+					setLastViewed(doc.data()!.lastActive.toMillis());
 				}
 			});
 		};
@@ -402,7 +404,9 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 				ref={elementRef}
 			>
 				<h4>
-					{isUnread && <CircleIcon className={styles.unread_dot} />}
+					{isUnread && channelType == "TEXT" && (
+						<CircleIcon className={styles.unread_dot} />
+					)}
 					{channelType == "VOICE" ? (
 						<span className={styles.volume}>
 							<VolumeUpIcon />

@@ -6,8 +6,8 @@ import { createFirebaseApp } from "../../../global-utils/clientApp";
 import moment, { Moment } from "moment";
 import { useUser } from "context/userContext";
 import { useChannel } from "context/channelContext";
-import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
 import MemberMenu from "../contextmenu/MemberMenu";
+import ContextMenu, { ContextMenuHandle } from "../contextmenu/ContextMenu";
 
 interface MemberProps {
 	id: string;
@@ -55,27 +55,29 @@ export const Member: React.FC<MemberProps> = ({
 	useEffect(() => {
 		function onMemberLoad() {
 			if (id != user.uid)
-				return onSnapshot(doc(db, "profile", id), (doc) => {
-					if (doc.exists()) {
-						if (avatar == "" && doc.data().avatar)
-							setTrueAvatar(doc.data().avatar);
-						if (doc.data().lastActive) {
-							const active = moment(
-								doc.data().lastActive.toMillis()
-							)
-								.add(3, "m")
-								.isAfter(moment());
-							changeActivity(id, active);
-							setLastActive(
-								moment(doc.data().lastActive.toMillis()).add(
-									3,
-									"m"
+				return onSnapshot(
+					doc(db, "groups", channel.idG, "members", id),
+					(doc) => {
+						if (doc.exists()) {
+							if (avatar == "" && doc.data().avatar)
+								setTrueAvatar(doc.data().avatar);
+							if (doc.data().lastActive) {
+								const active = moment(
+									doc.data().lastActive.toMillis()
 								)
-							);
-							setIsActive(active);
+									.add(3, "m")
+									.isAfter(moment());
+								changeActivity(id, active);
+								setLastActive(
+									moment(
+										doc.data().lastActive.toMillis()
+									).add(3, "m")
+								);
+								setIsActive(active);
+							}
 						}
 					}
-				});
+				);
 			else {
 				changeActivity(id, true);
 				if (!avatar) setTrueAvatar(user.avatar);
@@ -112,9 +114,7 @@ export const Member: React.FC<MemberProps> = ({
 				id={id}
 				style={{ display: !isVisible ? "none" : undefined }}
 				ref={memberRef}
-				onContextMenu={(e) =>
-					menuRef.current?.handleContextMenu(e)
-				}
+				onContextMenu={(e) => menuRef.current?.handleContextMenu(e)}
 			>
 				<div className={styles.member_avatar}>
 					<Avatar
@@ -122,7 +122,9 @@ export const Member: React.FC<MemberProps> = ({
 						src={trueAvatar ? trueAvatar : "/UserAvatar.png"}
 					/>
 				</div>
-				<h4 style={{ color: nameColor ? nameColor : "white" }}>{name}</h4>{" "}
+				<h4 style={{ color: nameColor ? nameColor : "white" }}>
+					{name}
+				</h4>{" "}
 				<span className={styles.member_activity_background} />
 				<span
 					className={styles.member_activity}

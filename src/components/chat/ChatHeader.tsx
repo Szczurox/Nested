@@ -7,6 +7,7 @@ import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import MenuIcon from "@mui/icons-material/Menu";
 import MarkunreadMailboxRoundedIcon from "@mui/icons-material/MarkunreadMailboxRounded";
+import ArchitectureIcon from "@mui/icons-material/Architecture";
 import HelpRoundedIcon from "@mui/icons-material/HelpRounded";
 import styles from "../../styles/components/chat/ChatHeader.module.scss";
 import Link from "next/link";
@@ -171,7 +172,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 							<SearchRoundedIcon />
 						</div>
 						<Link href="/dev">
-							<MarkunreadMailboxRoundedIcon />
+							<ArchitectureIcon />
 						</Link>
 						<a
 							href="https://github.com/Szczurox/Nested/"

@@ -1,6 +1,7 @@
 .contextmenu_element {
 	display: table-row;
-	min-width: 14.6vw;
+	width: 96%;
+	max-width: 96%;
 	@media (pointer: none), (pointer: coarse) {
 		min-width: 50%;
 	}
