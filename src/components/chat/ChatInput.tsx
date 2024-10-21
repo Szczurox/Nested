@@ -89,12 +89,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 	const getEmojis = useCallback(
 		async (text: string) => {
 			if (text.includes(":>") && text.includes("<:")) {
-				const emojiCollection = collection(
-					db,
-					"groups",
-					channel.idG,
-					"emoji"
-				);
 				const emojiSplit = text.split(/(<:.*?:>+)/g);
 				emojiSplit.forEach(async (el) => {
 					if (
@@ -105,18 +99,25 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 						let element = emojis.find((e) => e.split("|")[0] == el);
 						if (!element) {
 							const name = el.split("?")[0].slice(2);
+							const group = el.substring(
+								el.indexOf("?") + 1,
+								el.indexOf(":>")
+							);
+							console.log(group);
 							const doc = await getDocs(
 								query(
-									emojiCollection,
+									collection(db, "groups", group, "emoji"),
 									where("name", "==", name)
 								)
 							);
-							const file = doc.docs[0].data().file;
-							setEmojis([...emojis, el + "|" + file]);
-							setEmojiBucket((emojiBucket) => [
-								...emojiBucket,
-								el + "|" + file,
-							]);
+							if (!doc.empty) {
+								const file = doc.docs[0].data().file;
+								setEmojis([...emojis, el + "|" + file]);
+								setEmojiBucket((emojiBucket) => [
+									...emojiBucket,
+									el + "|" + file,
+								]);
+							}
 						} else {
 							setEmojiBucket([...emojiBucket, element]);
 						}

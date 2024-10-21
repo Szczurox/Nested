@@ -3,6 +3,7 @@ import { Avatar, TextareaAutosize } from "@mui/material";
 import styles from "../../styles/components/chat/Message.module.scss";
 import moment from "moment";
 import {
+	arrayUnion,
 	collection,
 	deleteDoc,
 	doc,
@@ -178,8 +179,9 @@ export const Message: React.FC<MessageProps> = ({
 				);
 		}
 
-		function checkForEmoji(el: string): [string, ContentType] {
-			const parsed: [string, ContentType][] = [];
+		async function checkForEmoji(
+			el: string
+		): Promise<[string, ContentType]> {
 			// If emoji already addded to mapped bucket
 			if (mappedEmojiBucket.find((e) => e[0] == el)) return [el, "emoji"];
 			// Get emoji content and file link
@@ -192,7 +194,7 @@ export const Message: React.FC<MessageProps> = ({
 				]);
 				return [el, "emoji"];
 			}
-			return [el, "text"];
+			return [":" + el.substring(2, el.indexOf("?")) + ":", "text"];
 		}
 
 		async function checkForMention(
@@ -314,7 +316,7 @@ export const Message: React.FC<MessageProps> = ({
 					el.includes("?") &&
 					emojiBucket
 				)
-					parsed.push(checkForEmoji(el));
+					parsed.push(await checkForEmoji(el));
 				else if (el.startsWith("<@") && el.endsWith(">"))
 					parsed = parsed.concat(
 						await checkForMention(el.substring(2, el.length - 1))
@@ -425,12 +427,51 @@ export const Message: React.FC<MessageProps> = ({
 		setCurrentMessage(id);
 	};
 
+	const getEmoji = async (): Promise<string[]> => {
+		const emojis: string[] = [];
+		if (input.includes(":>") && input.includes("<:")) {
+			const emojiSplit = input.split(/(<:.*?:>+)/g);
+			for (const el of emojiSplit) {
+				if (
+					el.startsWith("<:") &&
+					el.endsWith(":>") &&
+					el.includes("?")
+				) {
+					let element = emojis.find((e) => e.split("|")[0] == el);
+					if (!element) {
+						const name = el.split("?")[0].slice(2);
+						const group = el.substring(
+							el.indexOf("?") + 1,
+							el.indexOf(":>")
+						);
+						console.log(name);
+						const doc = await getDocs(
+							query(
+								collection(db, "groups", group, "emoji"),
+								where("name", "==", name)
+							)
+						);
+						if (!doc.empty)
+							emojis.push(el + "|" + doc.docs[0].data().file);
+					}
+				}
+			}
+		}
+		return emojis;
+	};
+
 	const updateMessage = async () => {
 		setIsEditing(false);
-		await updateDoc(messageDoc, {
-			content: input,
-			edited: true,
-		});
+
+		const emojis = await getEmoji();
+		const trueInput = input.replace(/^\s+|\s+$/g, "");
+
+		if (content != trueInput)
+			await updateDoc(messageDoc, {
+				content: trueInput,
+				emojiBucket: arrayUnion(...emojis),
+				edited: true,
+			});
 	};
 
 	const completeEdit = () => {
