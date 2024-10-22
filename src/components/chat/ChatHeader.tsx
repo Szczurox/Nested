@@ -89,6 +89,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 			});
 			onBookmarks(!bookmarks.length);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [showBookmarks]);
 
 	useEffect(() => {
@@ -104,6 +105,7 @@ export const ChatHeader: React.FC<ChatHeaderProps> = ({
 			)
 				setBookmark(false);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [channel.id, channel.type]);
 
 	return (

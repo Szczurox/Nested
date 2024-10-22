@@ -23,10 +23,9 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 	type,
 }) => {
 	const [input, setInput] = useState<string>(chatInput);
-	const [fileUrl, setFileUrl] = useState<string>(initialFileUrl.startsWith('blob:') ? initialFileUrl : '');
-	if (!fileUrl.startsWith('blob:')) {
-		return null; // or handle the error appropriately
-	}
+	const [fileUrl, setFileUrl] = useState<string>(
+		initialFileUrl.startsWith("blob:") ? initialFileUrl : ""
+	);
 
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -74,21 +73,22 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 	return (
 		<ScreenPopUp>
 			<div>
-				{fileUrl && (type === "image" ? (
-					<Image
-						className={styles.upload_file_media}
-						src={fileUrl}
-						alt=""
-						width={0}
-						height={0}
-					/>
-				) : (
-					<video className={styles.upload_file_media} controls>
-						<source src={fileUrl} />
-						Your browser does not support the video files, {fileUrl}
-						.
-					</video>
-				))}
+				{fileUrl &&
+					(type === "image" ? (
+						<Image
+							className={styles.upload_file_media}
+							src={fileUrl}
+							alt=""
+							width={0}
+							height={0}
+						/>
+					) : (
+						<video className={styles.upload_file_media} controls>
+							<source src={fileUrl} />
+							Your browser does not support the video files,{" "}
+							{fileUrl}.
+						</video>
+					))}
 				<p>
 					Upload to <b>#{channel.name}</b>
 				</p>

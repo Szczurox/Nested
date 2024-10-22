@@ -147,7 +147,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		if (lastViewed < lastMessageAt! && channel.type != "LOADING")
 			setIsUnread(true);
 		else setIsUnread(false);
-	}, [lastViewed, lastMessageAt]);
+	}, [lastViewed, lastMessageAt, channel.type]);
 
 	// Participant data
 	useEffect(() => {
@@ -256,6 +256,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 		}
 
 		connectedSnapshot();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	// Check if user can display channel

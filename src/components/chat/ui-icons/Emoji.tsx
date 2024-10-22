@@ -93,6 +93,7 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, isBookmarked, emojiAdded }) => {
 		});
 
 		setUnsubs((unsubs) => [...unsubs, unsub]);
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [channel.idG]);
 
 	useEffect(() => {

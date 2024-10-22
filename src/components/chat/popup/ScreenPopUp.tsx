@@ -15,6 +15,7 @@ const ScreenPopUp: React.FC<PopUpProps> = ({ children, full }) => {
 		return () => {
 			setCurrentPopUp(false);
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	return (

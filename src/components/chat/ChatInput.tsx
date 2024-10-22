@@ -103,7 +103,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 								el.indexOf("?") + 1,
 								el.indexOf(":>")
 							);
-							console.log(group);
 							const doc = await getDocs(
 								query(
 									collection(db, "groups", group, "emoji"),
@@ -125,7 +124,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 				});
 			}
 		},
-		[channel.idG, db, emojiBucket, emojis]
+		[db, emojiBucket, emojis]
 	);
 
 	useEffect(() => {
@@ -178,7 +177,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 		return () => {
 			document.removeEventListener("paste", pasted);
 		};
-	}, [input, channel.id, getEmojis]);
+	}, [input, channel.id, getEmojis, isDisabled]);
 
 	useEffect(() => {
 		const handleKeyPress = (e: KeyboardEvent) => {

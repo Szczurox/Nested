@@ -143,6 +143,7 @@ export const VoiceChannel: React.FC = ({}) => {
 		};
 
 		newSocket();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [voice.room]);
 
 	useEffect(() => {
