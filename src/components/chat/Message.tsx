@@ -226,91 +226,71 @@ export const Message: React.FC<MessageProps> = ({
 			return parsed;
 		}
 
-		function checkForLinks(): [string, ContentType][] {
-			const parsed: [string, ContentType][] = [];
-			// Split content into links and non-links
-			content
-				.split(/([http|https]+:\/\/[\w\S(\.|:|/)]+)/g)
-				.forEach((el) => {
-					// If element is link
-					if (el.startsWith("https://") || el.startsWith("http://")) {
-						// Remove all metadata from possible image/video
-						const parsedLink =
-							el.indexOf("?") == -1
-								? el.toLowerCase()
-								: el
-										.substring(0, el.indexOf("?"))
-										.toLowerCase();
+		function checkForLinks(el: string): [string, ContentType] {
+			// Remove all metadata from possible image/video
+			const parsedLink =
+				el.indexOf("?") == -1
+					? el.toLowerCase()
+					: el.substring(0, el.indexOf("?")).toLowerCase();
 
-						// If image then add as image, if video then add as video to files
-						if (
-							/\.(jpg|jpeg|png|webp|avif|gif)$/.test(parsedLink)
-						) {
-							setFilesFromLinks((files) => [
-								...files,
-								[el, "image"],
-							]);
-						} else if (
-							/\.(mp4|mov|avi|mkv|flv)$/.test(parsedLink)
-						) {
-							setFilesFromLinks((files) => [
-								...files,
-								[el, "video"],
-							]);
-						}
-						// Check if is a link to one of the supported iframes (only YouTube for now)
-						else if (
-							allowedIFrames.some((element) =>
-								el.startsWith(element)
-							) &&
-							!iframes.includes(el)
-						) {
-							// Parse youtube URL so that it links to embed
-							const elParsed =
-								el
-									.replace(
-										"youtu.be/",
-										"www.youtube.com/embed/"
-									)
-									.replace("watch?v=", "embed/") + "?rel=0";
+			// If image then add as image, if video then add as video to files
+			if (/\.(jpg|jpeg|png|webp|avif|gif)$/.test(parsedLink)) {
+				setFilesFromLinks((files) => [...files, [el, "image"]]);
+			} else if (/\.(mp4|mov|avi|mkv|flv)$/.test(parsedLink)) {
+				setFilesFromLinks((files) => [...files, [el, "video"]]);
+			}
+			// Check if is a link to one of the supported iframes (only YouTube for now)
+			else if (
+				allowedIFrames.some((element) => el.startsWith(element)) &&
+				!iframes.includes(el)
+			) {
+				// Parse youtube URL so that it links to embed
+				const elParsed =
+					el
+						.replace("youtu.be/", "www.youtube.com/embed/")
+						.replace("watch?v=", "embed/") + "?rel=0";
 
-							// Remove unnecessary link data such as playlist ID and add to iframes
-							setIframes((iframes) => [
-								...iframes.filter((element) => element != el),
-								elParsed.slice(
-									0,
-									el.includes("&")
-										? el.indexOf("&") - 2
-										: elParsed.length
-								),
-							]);
-						}
-						// Add as link
-						parsed.push([el, "link"]);
-					}
-				});
-			return parsed;
+				// Remove unnecessary link data such as playlist ID and add to iframes
+				setIframes((iframes) => [
+					...iframes.filter((element) => element != el),
+					elParsed.slice(
+						0,
+						el.includes("&") ? el.indexOf("&") - 2 : elParsed.length
+					),
+				]);
+			}
+			return [el, "link"];
 		}
 
-		function checkForQuotes(e: string): [string, ContentType][] {
-			const parsed: [string, ContentType][] = [];
-			const quoted = e.split("\n");
-			quoted.forEach((el) => {
-				if (el.startsWith(">>>"))
-					parsed.push([el.substring(3) + "\n", "quote"]);
-				else parsed.push([el, "text"]);
-			});
-			return parsed;
+		async function checkContent() {
+			let parsed: [string, ContentType][] = [];
+			const quoted = content.split("\n");
+			for (const el of quoted) {
+				if (el.startsWith(">>>")) {
+					parsed.push(["", "quote"]);
+					parsed = parsed.concat(await checkForSpecial(el.slice(3)));
+				} else parsed = parsed.concat(await checkForSpecial(el));
+				if (parsed.find((el) => el[1] != "emoji"))
+					parsed.push(["\n", "text"]);
+			}
+			console.log(parsed);
+			setParsedContent(parsed);
 		}
 
 		// Check for special content
-		async function checkForSpecial() {
+		async function checkForSpecial(
+			e: string
+		): Promise<[string, ContentType][]> {
 			let parsed: [string, ContentType][] = [];
-			if (content.includes("https://") || content.includes("http://"))
-				parsed = parsed.concat(checkForLinks());
-			const specialSplit = content.split(/(<.*?>+)/g);
+			const specialSplit = e.split(
+				/([http|https]+:\/\/[\w\S(\.|:|/)]+)|(<.*?>+)/g
+			);
+			console.log(specialSplit);
 			for (const el of specialSplit) {
-				if (
+				if (el === undefined || el === "") continue;
+				if (el.startsWith("https://") || el.startsWith("http://"))
+					parsed.push(checkForLinks(el));
+				else if (
 					el.startsWith("<:") &&
 					el.endsWith(":>") &&
 					el.includes("?") &&
@@ -321,18 +301,16 @@ export const Message: React.FC<MessageProps> = ({
 					parsed = parsed.concat(
 						await checkForMention(el.substring(2, el.length - 1))
 					);
-				else {
-					const text = checkForQuotes(el);
-					parsed = parsed.concat(text);
-				}
+				else parsed.push([el, "text"]);
 			}
-			setParsedContent(parsed);
+			console.log(parsed);
+			return parsed;
 		}
 
 		setParsedContent([]);
 		getUserData();
 		setTime();
-		checkForSpecial();
+		checkContent();
 
 		document.addEventListener("copy", handleCopy);
 		document.addEventListener("keydown", handleKeyDown);
