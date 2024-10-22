@@ -62,6 +62,27 @@ Make sure to set up [Firestore Authentication](https://firebase.google.com/docs/
 
 You should also change the action URL in **Templates > Edit template > Customise action URL** to `https://(yourdomain)/verify` after you host the app.
 
+## Voice channels
+
+To make voice channels work visit [Nested Socket](https://github.com/Szczurox/nested-socket) and download socket.io server's code form there
+
+Add following to your `.env.local` file:
+
+```env
+NEXT_PUBLIC_SOCKET_URL=[URL to the socket]
+SOCKET_SECRET_KEY=[Your secret key]
+```
+
+Then create `.env` file in the socket server's files and add the following:
+
+```env
+SECRET_KEY=[Your secret key]
+PORT=[Port]
+ORIGIN=[URL to your site]
+```
+
+Make sure that the keys in `.env` and `.env.local` match
+
 ## Deploy on Vercel
 
 This project uses [Vercel](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) for hosting and some serverless functions.
