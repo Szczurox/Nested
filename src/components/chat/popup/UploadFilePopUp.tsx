@@ -24,6 +24,9 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 }) => {
 	const [input, setInput] = useState<string>(chatInput);
 	const [fileUrl, setFileUrl] = useState<string>(initialFileUrl.startsWith('blob:') ? initialFileUrl : '');
+	if (!fileUrl.startsWith('blob:')) {
+		return null; // or handle the error appropriately
+	}
 
 	const textAreaRef = useRef<HTMLTextAreaElement>(null);
 

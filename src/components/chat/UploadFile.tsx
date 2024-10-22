@@ -96,7 +96,10 @@ export const UploadFile: React.FC<UploadFileProps> = ({
 				setFileType(e.type.substring(0, 5));
 				setFileG(e);
 				setFileName(e.name);
-				setFileUrl(URL.createObjectURL(e));
+				const objectUrl = URL.createObjectURL(e);
+				if (objectUrl.startsWith('blob:')) {
+					setFileUrl(objectUrl);
+				}
 				setIsOpen(true);
 			} else setIsTooLarge(true);
 		} else setIsWrongType(true);
