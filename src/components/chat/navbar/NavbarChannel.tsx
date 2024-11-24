@@ -77,7 +77,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 
 	const { channel, setChannelData } = useChannel();
 	const { user, addPartPerms } = useUser();
-	const { voice, setCurrentRoom, setCurrentVoiceState } = useVoice();
+	const { setCurrentRoom } = useVoice();
 
 	const router = useRouter();
 
@@ -144,8 +144,7 @@ export const NavbarChannel: React.FC<NavbarChannelProps> = ({
 	}, [channel.id, id, user.uid, name, channel.name, channel.type]);
 
 	useEffect(() => {
-		if (lastViewed < lastMessageAt! && channel.type != "LOADING")
-			setIsUnread(true);
+		if (lastViewed > 0 && lastViewed < lastMessageAt!) setIsUnread(true);
 		else setIsUnread(false);
 	}, [lastViewed, lastMessageAt, channel.type]);
 
