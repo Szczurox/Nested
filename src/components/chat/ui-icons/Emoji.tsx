@@ -144,9 +144,9 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, isBookmarked, emojiAdded }) => {
 	async function checkFile(e: File) {
 		console.log(e.type);
 		menuRef.current!.closeMenu();
-		// Allow  emotes below 256KB
+		// Allow  emotes below 1MB
 		if (e.type.substring(0, 5) == "image") {
-			if (e.size / 256 / 1024 < 1) {
+			if (e.size / 1024 / 1024 < 1) {
 				console.log("valid");
 				setFileType(e.type.substring(0, 5));
 				setFileG(e);
@@ -224,7 +224,7 @@ const Emoji: React.FC<EmojiProps> = ({ enabled, isBookmarked, emojiAdded }) => {
 					}}
 				>
 					<h3>Your file too large!</h3>
-					<p>Maximum size for emotes is 256KB.</p>
+					<p>Maximum size for emotes is 1MB.</p>
 				</InformationPopUp>
 			)}
 			{isWrongType && (
