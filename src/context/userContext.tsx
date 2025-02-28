@@ -8,7 +8,8 @@ export type MemberPermission =
 	| "MODERATE_MESSAGES"
 	| "MANAGE_CHANNELS"
 	| "SEND_MESSAGES"
-	| "VIEW_CHANNEL";
+	| "VIEW_CHANNEL"
+	| "MANAGE_EMOTES";
 
 export type ParticipantPermission = "SEND_MESSAGES" | "VIEW_CHANNEL";
 

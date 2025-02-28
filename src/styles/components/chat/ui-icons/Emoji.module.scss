@@ -60,6 +60,7 @@
 		background-color: #2f3135;
 		padding: 10px;
 		padding-top: 0px;
+		padding-bottom: 0px;
 
 		.emoji_frame {
 			padding: 4px;
@@ -77,5 +78,73 @@
 				height: auto;
 			}
 		}
+	}
+
+	.emoji_info {
+		font-size: medium;
+		vertical-align: middle;
+		align-content: center;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		margin-top: 9px;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		background-color: #26282c;
+		border-radius: 10px;
+		border-top-left-radius: 0px;
+		border-top-right-radius: 0px;
+
+		img {
+			margin-left: 12px;
+			margin-right: 12px;
+		}
+	}
+
+	.emoji_add {
+		padding: 4px;
+		cursor: pointer;
+		transform: translate(0%, 40%);
+		font-size: 46px;
+		color: lightgrey;
+		&:hover {
+			color: white;
+		}
+	}
+
+	.upload_file_file {
+		cursor: pointer;
+		position: relative;
+		line-height: 30px;
+		text-align: center;
+		padding-right: 5px;
+		padding-top: 15px;
+
+		&:hover {
+			color: white;
+		}
+	}
+
+	.upload_file_upload_file {
+		opacity: 0;
+		-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+		filter: alpha(opacity=0);
+		-moz-opacity: 0;
+		-khtml-opacity: 0;
+		position: absolute;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		right: 0;
+		width: 100%;
+		height: 100%;
+		cursor: pointer;
+		overflow: hidden;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
 	}
 }

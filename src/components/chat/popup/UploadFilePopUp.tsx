@@ -10,6 +10,8 @@ import Image from "next/image";
 interface UploadFilePopUpProps {
 	fileUrl: string;
 	chatInput: string;
+	placeholder?: string;
+	text?: string;
 	type: MediaType;
 	uploadFile: (input: string) => void;
 	cancelled: () => void;
@@ -21,6 +23,8 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 	fileUrl: initialFileUrl,
 	chatInput,
 	type,
+	placeholder = "",
+	text = "",
 }) => {
 	const [input, setInput] = useState<string>(chatInput);
 	const [fileUrl, setFileUrl] = useState<string>(
@@ -90,7 +94,13 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 						</video>
 					))}
 				<p>
-					Upload to <b>#{channel.name}</b>
+					{text ? (
+						text
+					) : (
+						<>
+							Upload to<b>#{channel.name}</b>
+						</>
+					)}
 				</p>
 				<div className={styles.popup_input}>
 					<form>
@@ -102,7 +112,11 @@ const UploadFilePopUp: React.FC<UploadFilePopUpProps> = ({
 							disabled={channel.id == ""}
 							onChange={(e) => setInput(e.target.value)}
 							onKeyDown={(e) => uploadFileKey(e)}
-							placeholder={`Message #${channel.name}`}
+							placeholder={
+								placeholder
+									? placeholder
+									: `Message #${channel.name}`
+							}
 							ref={textAreaRef}
 							onFocus={(e) =>
 								e.target.setSelectionRange(
