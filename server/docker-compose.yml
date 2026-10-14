@@ -1,0 +1,43 @@
+services:
+    postgres:
+        image: postgres:16-alpine
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: nested
+            POSTGRES_USER: nested
+            POSTGRES_PASSWORD: nested
+        volumes:
+            - nested-postgres-data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U nested -d nested"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    server:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            DATABASE_URL: postgresql://nested:nested@postgres:5432/nested?schema=public
+            HOST: 0.0.0.0
+            PORT: 4000
+            SESSION_COOKIE_NAME: nested_session
+            SESSION_COOKIE_SECURE: "false"
+            SESSION_TTL_DAYS: 30
+            WEB_ORIGIN: ${WEB_ORIGIN:-http://localhost:3000}
+            PUBLIC_URL: ${PUBLIC_URL:-http://localhost:4000}
+            STORAGE_DIR: /app/uploads
+            NODE_ENV: production
+        ports:
+            - "4000:4000"
+        volumes:
+            - nested-upload-data:/app/uploads
+
+volumes:
+    nested-postgres-data:
+    nested-upload-data:

@@ -1,0 +1,51 @@
+services:
+    postgres:
+        image: postgres:16-alpine
+        restart: unless-stopped
+        environment:
+            POSTGRES_DB: nested
+            POSTGRES_USER: nested
+            POSTGRES_PASSWORD: nested
+        ports:
+            - "5432:5432"
+        volumes:
+            - nested-postgres-data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U nested -d nested"]
+            interval: 5s
+            timeout: 5s
+            retries: 10
+
+    server:
+        build:
+            context: ./server
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        depends_on:
+            postgres:
+                condition: service_healthy
+        environment:
+            DATABASE_URL: postgresql://nested:nested@postgres:5432/nested?schema=public
+            HOST: 0.0.0.0
+            PORT: 4000
+            NODE_ENV: production
+        ports:
+            - "4000:4000"
+
+    web:
+        build:
+            context: ./web
+            dockerfile: Dockerfile
+        restart: unless-stopped
+        depends_on:
+            - server
+        ports:
+            - "3000:3000"
+        environment:
+            NODE_ENV: production
+            PORT: 3000
+            HOSTNAME: 0.0.0.0
+
+volumes:
+    nested-postgres-data:
+    nested-upload-data:

@@ -1,0 +1,33 @@
+{
+	"name": "nested-server",
+	"version": "0.1.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"dev": "tsx watch src/server.ts",
+		"start": "node dist/server.js",
+		"test": "vitest run",
+		"prisma:generate": "prisma generate",
+		"prisma:migrate": "prisma migrate dev"
+	},
+	"dependencies": {
+		"@fastify/cookie": "^10.0.0",
+		"@fastify/cors": "^10.0.0",
+		"@fastify/multipart": "^9.0.0",
+		"@fastify/sensible": "^6.0.0",
+		"@prisma/client": "^5.20.0",
+		"argon2": "^0.45.1",
+		"dotenv": "^16.4.5",
+		"fastify": "^5.0.0",
+		"prisma": "^5.20.0",
+		"socket.io": "^4.8.1",
+		"zod": "^3.23.8"
+	},
+	"devDependencies": {
+		"@types/node": "^22.7.4",
+		"tsx": "^4.19.1",
+		"typescript": "^5.6.2",
+		"vitest": "^4.1.11"
+	}
+}

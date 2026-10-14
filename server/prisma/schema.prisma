@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String    @id @default(cuid())
+  username         String
+  normalizedUsername String  @unique
+  passwordHash     String
+  nickname         String
+  avatarUrl        String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  lastActiveAt     DateTime?
+  lastMessagedAt   DateTime?
+  sessions         Session[]
+  memberships      GroupMember[]
+  createdGroups    Group[]   @relation("GroupCreator")
+  channelParticipants ChannelParticipant[]
+  messages         Message[]
+
+  @@index([username])
+}
+
+model Session {
+  id        String   @id
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+enum MemberPermission {
+  MODERATE_MESSAGES
+  MANAGE_CHANNELS
+  SEND_MESSAGES
+  VIEW_CHANNEL
+  MANAGE_EMOTES
+}
+
+enum ParticipantPermission {
+  SEND_MESSAGES
+  VIEW_CHANNEL
+}
+
+enum ChannelType {
+  TEXT
+  VOICE
+}
+
+model Group {
+  id        String        @id @default(cuid())
+  name      String
+  icon      String?
+  creatorId String?
+  createdAt DateTime      @default(now())
+  creator   User?         @relation("GroupCreator", fields: [creatorId], references: [id], onDelete: SetNull)
+  members   GroupMember[]
+  invites   Invite[]
+  categories Category[]
+  channels  Channel[]
+  emojis    Emoji[]
+
+  @@index([creatorId])
+}
+
+model GroupMember {
+  groupId           String
+  userId            String
+  nickname          String
+  avatarUrl         String?
+  nameColor         String @default("")
+  permissions       MemberPermission[]
+  inviteId          String?
+  lastViewedChannelId String?
+  joinedAt          DateTime @default(now())
+  group             Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  user              User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, userId])
+  @@index([userId])
+}
+
+model Invite {
+  id        String    @id @default(cuid())
+  groupId   String
+  createdAt DateTime  @default(now())
+  expiresAt DateTime?
+  revokedAt DateTime?
+  group     Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  groupId   String
+  name      String
+  createdAt DateTime  @default(now())
+  group     Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  channels  Channel[]
+
+  @@index([groupId])
+}
+
+model Channel {
+  id          String        @id @default(cuid())
+  groupId     String
+  categoryId  String?
+  name        String
+  type        ChannelType
+  order       Int           @default(0)
+  lastMessageAt DateTime?
+  createdAt   DateTime      @default(now())
+  group       Group         @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  category    Category?     @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  participants ChannelParticipant[]
+  messages     Message[]
+
+  @@index([groupId, order])
+  @@index([categoryId, order])
+}
+
+model Message {
+  id          String   @id @default(cuid())
+  channelId   String
+  userId      String
+  content     String
+  file        String?
+  fileType    String?
+  edited      Boolean  @default(false)
+  emojiBucket String[] @default([])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  channel     Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([channelId, createdAt])
+  @@index([userId])
+}
+
+model ChannelParticipant {
+  channelId   String
+  userId      String
+  permissions ParticipantPermission[]
+  nickname    String?
+  avatarUrl   String?
+  lastActiveAt DateTime?
+  lastTypingAt DateTime?
+  connected   Boolean @default(false)
+  channel     Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([channelId, userId])
+  @@index([userId])
+}
+
+model Emoji {
+  id        String   @id @default(cuid())
+  groupId   String
+  name      String
+  fileUrl   String
+  createdAt DateTime @default(now())
+  group     Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@index([groupId, createdAt])
+  @@unique([groupId, name])
+}
