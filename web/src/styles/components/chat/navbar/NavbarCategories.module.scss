@@ -1,0 +1,34 @@
+.navbar_channels {
+	padding: 0px;
+	margin: 0px;
+	-ms-overflow-style: none;
+	scrollbar-width: none;
+	flex: 1;
+	overflow-y: none;
+	overflow-x: auto;
+
+	::-webkit-scrollbar {
+		display: none;
+	}
+}
+
+.toggle_container {
+	padding: 10px;
+	padding-left: 1px;
+
+	.toggle {
+		display: inline;
+		padding: none;
+		text-align: center;
+		margin-right: 10px;
+	}
+
+	.toggle_text {
+		display: inline;
+		font-size: large;
+		margin: 10px;
+		text-align: center;
+		vertical-align: middle;
+		margin-left: 0px;
+	}
+}

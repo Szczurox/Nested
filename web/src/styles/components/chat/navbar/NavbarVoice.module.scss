@@ -1,0 +1,66 @@
+$connected: #4fb185;
+$connecting: #ff9d4d;
+
+.voice {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	color: grey;
+	padding: 8px 15px 8px 15px;
+	border-top: 1px solid grey;
+
+	.dots_connecting {
+		padding: 12px;
+		margin-right: 6px;
+		margin-bottom: 2px;
+	}
+
+	.info {
+		flex: 1;
+		padding: 10px;
+		margin-bottom: 5px;
+		.connected {
+			color: $connected;
+		}
+
+		.connecting {
+			color: $connecting;
+		}
+
+		.disc h4 {
+			font-size: large;
+			color: $connected;
+		}
+		p {
+			font-size: smaller;
+		}
+	}
+
+	svg {
+		margin-top: 12px;
+		font-size: x-large;
+	}
+
+	.connection_icon {
+		color: $connected;
+		margin-bottom: 15px;
+	}
+
+	.icons {
+		.icon {
+			margin: 10px;
+			margin-bottom: 12px;
+			cursor: pointer;
+
+			&:hover {
+				color: white;
+				background-color: #3c3f42;
+				border-radius: 8px;
+			}
+
+			svg {
+				font-size: x-large;
+			}
+		}
+	}
+}

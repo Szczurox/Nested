@@ -1,0 +1,63 @@
+.navbar_channels_header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 12px;
+	padding-bottom: 0px;
+	color: gray;
+
+	.navbar_header {
+		cursor: pointer;
+		display: flex;
+		flex: 1;
+		align-items: center;
+		padding-bottom: 10px;
+
+		svg {
+			transform: translate(0%, 10%);
+			margin-right: 3px;
+		}
+
+		&:hover {
+			color: #d4d4d4;
+		}
+
+		h4 {
+			font-size: large;
+			margin-bottom: 0px;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			overflow: hidden;
+		}
+	}
+
+	.navbar_add_channel {
+		cursor: pointer;
+		display: flex;
+		&:hover {
+			color: #d4d4d4;
+		}
+		margin-bottom: 8px;
+	}
+}
+
+.toggle_container {
+	padding: 10px;
+	padding-left: 1px;
+
+	.toggle {
+		display: inline;
+		padding: none;
+		text-align: center;
+		margin-right: 10px;
+	}
+
+	.toggle_text {
+		display: inline;
+		font-size: large;
+		margin: 10px;
+		text-align: center;
+		vertical-align: middle;
+		margin-left: 0px;
+	}
+}

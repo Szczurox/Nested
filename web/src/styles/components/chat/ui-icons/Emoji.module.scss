@@ -1,0 +1,150 @@
+.emoji_icon {
+	svg {
+		transform: translate(0%, 10%);
+	}
+
+	svg:hover {
+		color: white;
+	}
+}
+
+.emoji_menu {
+	min-width: 30vw;
+	min-height: 40vh;
+	max-width: 30vw;
+	max-height: 40vh;
+	background-color: #2f3135;
+	padding-top: 20px;
+	border-width: 2px;
+	border-radius: 10px;
+	cursor: auto;
+
+	@media (pointer: none), (pointer: coarse) {
+		max-width: 100%;
+	}
+
+	.emoji_header {
+		padding-bottom: 16px;
+		padding-left: 20px;
+		padding-right: 10px;
+		box-shadow: 0px 3px 1px #26282c;
+
+		.emoji_search {
+			margin-top: 10px;
+			display: flex;
+			align-items: center;
+			color: gray;
+			background-color: #2f3135;
+			border-radius: 3px;
+			padding: 5px;
+			margin-right: 10px;
+			background-color: #232528;
+			cursor: text;
+
+			input {
+				border: none;
+				color: white;
+				outline-width: 0;
+				background: transparent;
+				width: 100%;
+				padding-left: 5px;
+			}
+		}
+	}
+
+	.emoji_content {
+		height: 27vh;
+		overflow-y: scroll;
+		margin-top: 2px;
+		width: 100%;
+		background-color: #2f3135;
+		padding: 10px;
+		padding-top: 0px;
+		padding-bottom: 0px;
+
+		.emoji_frame {
+			padding: 4px;
+			padding-top: 12px;
+			padding-bottom: 16px;
+			border-radius: 4px;
+
+			&:hover {
+				background-color: rgb(78, 78, 78);
+			}
+
+			img {
+				transform: translate(0%, 40%);
+				width: 46px;
+				height: auto;
+			}
+		}
+	}
+
+	.emoji_info {
+		font-size: medium;
+		vertical-align: middle;
+		align-content: center;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		margin-top: 9px;
+		padding-top: 12px;
+		padding-bottom: 12px;
+		background-color: #26282c;
+		border-radius: 10px;
+		border-top-left-radius: 0px;
+		border-top-right-radius: 0px;
+
+		img {
+			margin-left: 12px;
+			margin-right: 12px;
+		}
+	}
+
+	.emoji_add {
+		padding: 4px;
+		cursor: pointer;
+		transform: translate(0%, 40%);
+		font-size: 46px;
+		color: lightgrey;
+		&:hover {
+			color: white;
+		}
+	}
+
+	.upload_file_file {
+		cursor: pointer;
+		position: relative;
+		line-height: 30px;
+		text-align: center;
+		padding-right: 5px;
+		padding-top: 15px;
+
+		&:hover {
+			color: white;
+		}
+	}
+
+	.upload_file_upload_file {
+		opacity: 0;
+		-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+		filter: alpha(opacity=0);
+		-moz-opacity: 0;
+		-khtml-opacity: 0;
+		position: absolute;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		right: 0;
+		width: 100%;
+		height: 100%;
+		cursor: pointer;
+		overflow: hidden;
+		-webkit-touch-callout: none;
+		-webkit-user-select: none;
+		-khtml-user-select: none;
+		-moz-user-select: none;
+		-ms-user-select: none;
+		user-select: none;
+	}
+}

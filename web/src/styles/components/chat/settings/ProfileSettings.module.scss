@@ -1,0 +1,63 @@
+.profile {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	color: grey;
+	box-shadow: 1px 1px 5px 5px #292d31;
+	background-color: #2f3135;
+	padding: 10px;
+	padding-left: 16px;
+	border-radius: 6px;
+	position: relative;
+
+	.profile_info {
+		padding-left: 16px;
+		padding-bottom: 5px;
+		flex: 1;
+		h2 {
+			color: white;
+		}
+	}
+
+	.edit {
+		transform: translate(200%, 0%);
+		top: 35px;
+		left: -10px;
+		position: absolute;
+		color: white;
+		z-index: 100;
+	}
+
+	.avatar {
+		position: relative;
+		cursor: pointer;
+		font-size: 180px;
+		width: "auto";
+		height: "auto";
+
+		img {
+			filter: brightness(100%);
+			cursor: pointer;
+
+			&:hover {
+				filter: brightness(50%);
+			}
+		}
+		.upload_avatar {
+			opacity: 0;
+			-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+			filter: alpha(opacity=0);
+			-moz-opacity: 0;
+			-khtml-opacity: 0;
+			position: absolute;
+			top: 0;
+			left: 0;
+			bottom: 0;
+			right: 0;
+			width: 100%;
+			height: 100%;
+			cursor: pointer;
+		}
+	}
+}

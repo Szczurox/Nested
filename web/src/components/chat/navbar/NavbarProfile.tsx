@@ -1,0 +1,89 @@
+import React, { useEffect, useState } from "react";
+import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
+import HeadsetIcon from "@mui/icons-material/Headset";
+import HeadsetOffIcon from "@mui/icons-material/HeadsetOff";
+import SettingsIcon from "@mui/icons-material/Settings";
+import styles from "@/styles/components/chat/navbar/NavbarProfile.module.scss";
+import { useUser } from "@/context/userContext";
+import Settings from "@/components/chat/Settings";
+import { Avatar } from "@mui/material";
+import { useVoice } from "@/context/voiceContext";
+
+interface NavbarProfileProps {
+	isMobile: boolean;
+}
+
+export const NavbarProfile: React.FC<NavbarProfileProps> = ({ isMobile }) => {
+	const { user } = useUser();
+	const { voice, setCurrentVoiceState } = useVoice();
+
+	const [avatar, setAvatar] = useState<string>(user.avatar);
+	const [showSettings, setShowSettings] = useState<boolean>(false);
+
+	useEffect(() => {
+		setAvatar(user.avatar);
+	}, [user.avatar]);
+
+	const toggleMute = () => {
+		setCurrentVoiceState(voice.connected, !voice.muted, voice.deafened);
+	};
+
+	const toggleDeaf = () => {
+		setCurrentVoiceState(voice.connected, voice.muted, !voice.deafened);
+	};
+
+	return (
+		<>
+			{showSettings && (
+				<Settings
+					onCancel={() => setShowSettings(false)}
+					isMobile={isMobile}
+				/>
+			)}
+			<div className={styles.navbar_profile}>
+				<div className={styles.navbar_avatar}>
+					<Avatar
+						src={avatar}
+						sx={{
+							width: 40,
+							height: 40,
+							"& img": { width: "100%", height: "100%", objectFit: "cover" },
+						}}
+					/>
+				</div>
+				<div className={styles.navbar_profile_info}>
+					<h3>{user.nick}</h3>
+					<p
+						onClick={(_) =>
+							navigator.clipboard.writeText(user.username)
+						}
+					>
+						@{user.username}
+					</p>
+				</div>
+				<div className={styles.navbar_profile_icons}>
+					<span className={styles.navbar_profile_icon}>
+						{voice.muted ? (
+							<MicOffIcon onClick={(_) => toggleMute()} />
+						) : (
+							<MicIcon onClick={(_) => toggleMute()} />
+						)}
+					</span>
+					{voice.deafened ? (
+						<span className={styles.slighly_off}>
+							<HeadsetOffIcon onClick={(_) => toggleDeaf()} />
+						</span>
+					) : (
+						<span className={styles.navbar_profile_icon}>
+							<HeadsetIcon onClick={(_) => toggleDeaf()} />
+						</span>
+					)}
+					<span className={styles.navbar_profile_icon}>
+						<SettingsIcon onClick={(_) => setShowSettings(true)} />
+					</span>
+				</div>
+			</div>
+		</>
+	);
+};
