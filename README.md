@@ -2,8 +2,6 @@
 
 Nested is a full-stack real-time chat application consisting of a **Next.js frontend (`web`)**, a self-hosted **Fastify API backend (`server`)**, and a **PostgreSQL** database.
 
-You can view the live version at [nested.party](https://nested.party/).
-
 ---
 
 ## Project Structure
